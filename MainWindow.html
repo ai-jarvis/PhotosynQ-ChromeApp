@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/toastr.css" media="all" rel="stylesheet" type="text/css">
+	<script src="backwardscompatibility.js"></script>
+	<script src="logic.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/highcharts.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/math.js"></script>
+	<script src="js/initalvariables.js"></script>
+	<script src="js/toastr.min.js"></script>
+	<script src="graph.js"></script>
+	<script src="location.js"></script>
+	<script src="storage.js"></script>
+	<script src="webconnection.js"></script>
+	<style>
+		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+
+		body > #container {margin-top:-5px; padding:0px 10px 10px 10px;}
+
+		.fa-blink {
+		  -webkit-animation:fa-blink 2s infinite linear;
+		  -moz-animation: fa-blink 2s infinite linear;
+		  -o-animation: fa-blink 2s infinite linear;
+		  animation: fa-blink 2s infinite linear;
+		}
+		@-moz-keyframes fa-blink {
+		  0% {
+			-moz-opacity: 1;
+		  }
+		  50% {
+			-moz-opacity: 0.1;
+		  }
+		  100% {
+			-moz-opacity: 1;
+		  }
+		}
+		@-webkit-keyframes fa-blink {
+		  0% {
+			-webkit-opacity: 1;
+		  }
+		  50% {
+			-webkit-opacity: 0.1;
+		  }
+		  100% {
+			-webkit-opacity: 1;
+		  }
+		}
+		@-o-keyframes fa-blink {
+		  0% {
+			-o-opacity: 1;
+		  }
+		  50% {
+			-o-opacity: 0.1;
+		  }
+		  100% {
+			-o-opacity: 1;
+		  }
+		}
+		@keyframes fa-blink {
+		  0% {
+			-webkit-opacity: 1;
+			opacity: 1;
+		  }
+		  50% {
+			-webkit-opacity: 0.1;
+			opacity: 0.1;
+		  }
+		  100% {
+			-webkit-opacity: 1;
+			opacity: 1;
+		  }
+		}
+	
+	</style>
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">PhotosynQ</a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="PhotosynqNavBar">
+		<ul class="nav navbar-nav">
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Tools <b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><a href="#" id="DataViewBtn"><i class="fa fa-file-text-o"></i> Data Viewer</a></li>
+					<li><a href="#" id="BuiltYourQuickMeasurement"><i class="fa fa-magic"></i> Protocol Assembly</a></li>
+				</ul>
+			</li>
+			<li><a href="#" id="ShowHelpBtn">Help</a></li>
+		</ul>
+		<ul id="StatusBar" class="nav navbar-nav navbar-right">	
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-chain-broken text-muted" id="DeviceConnectionState" title="No device found."></i></a>
+				<div class="dropdown-menu preventClose" style="width:350px;">
+					<div style="padding:5px 10px 5px 10px">
+						<div class="form-horizontal" role="form">
+							<div class="form-group">
+								<label for="port-picker" class="col-sm-3 control-label">Port</label>
+							<div class="col-sm-6">
+								<select id="port-picker" class="form-control input-sm"></select>
+							</div>
+							<div class="col-sm-3">
+								<button id="refetchPorts" value="refetchPorts" class="btn btn-default" title="Update list of serial connected devices."><i class="fa fa-refresh"></i></button>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="status" class="col-sm-3 control-label">Status</label>
+							<div class="col-sm-9" style="padding-top:6px;">
+								<span id="status" class="label label-warning">Not connected</span>
+							</div>
+						</div>						
+					</div>
+				</div>
+			</li>			
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-lock text-muted" id="DatabaseSignInState" title="Not signed in."></i></a>
+				<div class="dropdown-menu preventClose" style="width:350px;">
+					<div style="padding:5px 10px 5px 10px">
+						<form class="form-horizontal" role="form" id="DatabaseSignInForm" onsubmit="return false;">
+							<div class="form-group">
+								<label for="SignInEmail" class="col-sm-3 control-label">Email</label>
+								<div class="col-sm-9">
+									<input type="email" class="form-control" id="SignInEmail" placeholder="Email">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="SignInPassword" class="col-sm-3 control-label">Password</label>
+								<div class="col-sm-9">
+									<input type="password" class="form-control" id="SignInPassword" placeholder="Password">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-offset-3 col-sm-9">
+									<button  type="submit" class="btn btn-default" id="DatabaseSignIn">Sign in</button>
+								</div>
+							</div>
+						</form>
+						<div id="DatabaseSignedIn" style="display:none;">
+							<div class="media">
+							  <div class="pull-left" href="#">
+								<i class="media-object fa fa-user fa-3x text-info"></i>
+							  </div>
+							  <div class="media-body">
+								<h4 class="media-heading" id="DatabaseSignedInUser">User</h4>
+								<small class="text-muted" id="DatabaseSignedInEmail">Email</small>
+							  </div>
+							</div>							
+							<div style="margin-top:5px;" class="text-right"><button class="btn btn-default" id="DatabaseSignOff">Sign off</button></div>
+						</div>
+					</div>
+				</div>
+			</li>
+			<li><a href="#" style="cursor:default"><i class="fa fa-cloud text-muted" id="CurrentInternetConnectionIndicator" title="offline"></i></a></li>
+			<li><a href="#" style="cursor:default"><i class="fa fa-location-arrow text-muted" id="CurrentLocationIndicator" title="unknown"></i></a></li>
+			<li><a href="#" style="cursor:default; font-size:18px"><i class="icon-bat1 text-danger" id="BatteryStatusIndicator" title="Please replace the battery"></i></a></li>
+		</ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+	<div id="container">
+		<div class="row">
+			<!-- Container for Menu -->
+			<div class="col-md-5 col-lg-4" id="Menu">
+				<div class="panel-group" id="accordion">
+				  <div class="panel panel-default">
+					<div class="panel-heading">
+					  <h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+						<i class="fa fa-chevron-down"></i> Select a Project
+						</a>
+					  </h4>
+					</div>
+					<div id="collapseThree" class="panel-collapse collapse in">
+					  <div class="panel-body">
+						  <form class="form" role="form" id="ExperimentSelectionForm">
+							<div class="form-group">
+								<select class="form-control" id="ExperimentSelection"></select>
+								<p class="help-block" id="ExperimentSelectionDescription"></p>
+							</div>
+							<button type="submit" value="" class="btn btn-default" id="ExperimentSelectionButton">Select</button>
+							<button type="submit" value="" class="btn btn-default" id="ExperimentSelectionUpdateButton"><i class="fa fa-refresh"></i></button>
+							<a class="btn btn-link" href="http://photosynq.venturit.net/#ProjectLists" target="_blank">Join a new Project</a>
+						 </form>
+					  </div>
+					</div>
+				  </div>
+				  
+				  <div class="panel panel-default">
+					<div class="panel-heading">
+					  <h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+						<i class="fa fa-chevron-right"></i> Take a Measurement
+						</a>
+					  </h4>
+					</div>
+					<div id="collapseFour" class="panel-collapse collapse">
+					  <div class="panel-body">
+						<div role="form" id="UserAnswers">
+							<div class="alert alert-warning">Select a project first</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div  class="col-md-4">
+								<button id="DatabaseMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
+								</div>
+								<div  class="col-md-8">
+									<label>
+									  <input type="checkbox" id="CheckBoxRememberAnswers" value="KeepAnswers"> Remember my answers
+									</label>
+								</div>
+							</div>
+						</div>
+						<div id="CurrentLocationDisplay" class="text-muted"><small><i class="fa fa-location-arrow"></i> unknown</small></div>
+					  </div>
+					</div>
+				  </div>
+				  
+				  <div class="panel panel-default">
+					<div class="panel-heading">
+					  <h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+							<i class="fa fa-chevron-right"></i> Quick Measurement
+						</a>
+					  </h4>
+					</div>
+					<div id="collapseFive" class="panel-collapse collapse">
+					  <div class="panel-body">
+						<div class="form" role="form">
+							<div class="form-group">
+								<select class="form-control" id="QuickMeasurementProtocol"></select>
+								<p class="help-block" id="QuickMeasurementSelectionDescription">Select a protocol to measure.</p>
+							</div>
+						  <div class="form-group">
+							<button id="QuickMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
+						  </div>
+						</div>
+					  </div>
+					</div>
+				  </div>
+
+				  <div class="panel panel-default">
+					<div class="panel-heading">
+					  <h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+						<i class="fa fa-chevron-right"></i> Console
+						</a>
+					  </h4>
+					</div>
+					<div id="collapseSix" class="panel-collapse collapse">
+					  <div class="panel-body">
+						<div class="form" role="form">
+							<div class="form-group">
+								<textarea id="ConsoleProtocolContent" class="form-control" style="height:150px;"></textarea>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div  class="col-md-4">
+									<button id="ConsoleMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
+									</div>
+									<div  class="col-md-8">
+										<label>
+										  <input type="checkbox" id="ConsoleProtocolRaw"> Raw input
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					  </div>
+					</div>
+				  </div>	
+				</div>
+			</div>
+			
+			<!-- Container for Plots -->
+			<div class="col-md-7 col-lg-8">
+				<div class="panel panel-default" id="MainDisplayContainer" style="height:100%">
+					<div class="panel-body" style="background-image:url('img/containerbackground.png'); background-size:50%; background-repeat:no-repeat; background-position:50% 50%;overflow-y:scroll;">
+						<div id="TransientPlotsContainer" style="min-height:0px"></div>
+						<div id="PlotsContainer" style="word-wrap:break-word;"></div>
+						<div id="TerminateMeasurementMenu" class="text-center" style="margin-top:10px; display:none;">
+							<button class="btn btn-danger btn-sm" id="TerminateMeasurement">Cancel</button> <button class="btn btn-default btn-sm" id="ShowOutputBtn">Output</button>
+							<p><textarea id="RawOutputTextarea" class="form-control" style="display:none;height:200px"></textarea></p>
+						</div>
+						<div id="DatabaseMeasurementMenu" class="well well-sm" style="display:none;">
+							<button id="SaveDatabaseMeasurement" class="btn btn-success"><i class="fa fa-cloud-upload"></i> Keep</button>
+							<button id="DiscardDatabaseMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
+						</div>
+						<div id="QuickMeasurementMenu"  class="well well-sm" style="display:none;">
+							<button id="SaveQuickMeasurementToFile" class="btn btn-success"><i class="fa fa-hdd-o"></i> Save</button>
+							<button id="DiscardQuickMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
+						</div>
+						<div id="ConsoleMeasurementMenu"  class="well well-sm" style="display:none;">
+							<button id="SaveConsoleMeasurementToFile" class="btn btn-success"><i class="fa fa-hdd-o"></i> Save</button>
+							<button id="DiscardConsoleMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		<div style="position:absolute; bottom:0;" class="col-md-5 col-lg-4"><small id="AppVersion" class="text-muted"></small></div>
+		</div>
+	</div>
+	<iframe src="sandbox.html" id="MacroSandbox" style="display:none"></iframe>
+
+	<div class="modal fade" id="ModalDialog" tabindex="-1" role="dialog" aria-labelledby="ModalDialogLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="ModalDialogLabel">Modal title</h4>
+		  </div>
+		  <div class="modal-body">
+			...
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+</body>
+</html>

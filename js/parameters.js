@@ -1,0 +1,192 @@
+var parameters = {
+	'environmental_params': [
+		{
+		'name':'light_intensity',
+		'label':'Light intensity [&mu;mol s<sup>-1</sup> m<sup>2</sup>]',
+		'title':'Measure current light intensity',
+		'type':'int',
+		'group':'',
+		'value':''
+		},
+		{
+		'name':'relative_humidity',
+		'label':'Relative Humidity [%]',
+		'title':'Measure current relative humidity',
+		'type':'array',
+		'group':'int',
+		'value':''
+		},
+		{
+		'name':'temperature',
+		'label':'Temperature [&deg;C]',
+		'title':'Measure current temperature in degrees Celsius',
+		'type':'array',
+		'group':'int',
+		'value':''
+		},
+		{
+		'name':'co2',
+		'label':'CO<sub>2</sub> [ppm]',
+		'title':'Measure Carbon-dioxide concentration in parts per million',
+		'type':'int',
+		'group':'',
+		'value':''
+		}
+	],
+	'measurement_params': [
+		{	
+		'name':'tcs_to_act',
+		'label':'tcs_to_act',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'100'
+		},
+		{	
+		'name':'measurements',
+		'label':'Measurement repeats',
+		'title':'',
+		'type':'int',
+		'group':'measure',
+		'value':'1'
+		},
+		{	
+		'name':'measurements_delay',
+		'label':'Measurement delay&nbsp;[sec]',
+		'title':'',
+		'type':'float',
+		'group':'measure',
+		'value':'1'
+		},
+		{	
+		'name':'protocol_name',
+		'label':'Protocol Name',
+		'title':'',
+		'type':'string',
+		'group':'',
+		'value':'Testprotocol'
+		},
+		{	
+		'name':'protocols_delay',
+		'label':'protocols_delay',
+		'title':'',
+		'type':'float',
+		'group':'',
+		'value':'5'
+		},
+		{
+		'name':'act_background_light',
+		'label':'act_background_light',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'20'
+		},
+		{	
+		'name':'actintensity1',
+		'label':'actintensity1',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'5'
+		},
+		{	
+		'name':'actintensity2',
+		'label':'actintensity2',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'5'
+		},
+		{	
+		'name':'averages',
+		'label':'averages',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'1'
+		},
+		{	
+		'name':'wait',
+		'label':'wait',
+		'title':'',
+		'type':'float',
+		'group':'',
+		'value':'0'
+		},
+		{	
+		'name':'cal_true',
+		'label':'cal_true',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'2'
+		},
+		{	
+		'name':'analog_averages',
+		'label':'analog_averages',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'1'
+		},
+		{	
+		'name':'pulsesize',
+		'label':'pulsesize',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'10'
+		},
+		{	
+		'name':'pulsedistance',
+		'label':'pulsedistance',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'300'
+		},
+		{	
+		'name':'calintensity',
+		'label':'calintensity',
+		'title':'',
+		'type':'int',
+		'group':'',
+		'value':'255'
+		}
+	],
+	'detection_params': [
+		{	
+		'name':'pulses',
+		'label':'Pulses',
+		'title':'',
+		'type':'array',
+		'group':'spec',
+		'value':'400,400'
+		},
+		{	
+		'name':'detectors',
+		'label':'Detector',
+		'title':'',
+		'type':'arrayarray',
+		'group':'spec',
+		'value':'400,100;400,100'
+		},
+		{	
+		'name':'measlights',
+		'label':'Measuring Light',
+		'title':'',
+		'type':'arrayarray',
+		'group':'spec',
+		'value':'400,100;400,100'
+		},
+		{	
+		'name':'act',
+		'label':'Actinic Light',
+		'title':'',
+		'type':'array',
+		'group':'',
+		'value':'100,100'
+		}
+	]
+}

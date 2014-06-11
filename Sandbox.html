@@ -1,0 +1,59 @@
+<script src="js/jquery.min.js"></script>
+<script src="js/math.js"></script>
+<script>
+// Listen to message from main app
+// ===============================================================================================
+window.addEventListener('message', function(event) {
+	var data_return = {};
+	var protocol_id_macro_id = [];
+
+	// Generate macro functions and macro lookup table
+	// ===============================================================================================
+	for(i in event.data.sandbox.macros){
+		var macro_id = event.data.sandbox.macros[i].id;
+		var macro_name = "macro_"+macro_id;
+		var macro_javascriptcode = event.data.sandbox.macros[i].javascript_code;
+		window[macro_name] = Function('json', macro_javascriptcode);
+	}
+
+	// Generate macro functions and macro lookup table
+	// ===============================================================================================
+	for(i in event.data.sandbox.protocols){
+		var protocol_id = event.data.sandbox.protocols[i].id;
+		var macro_id = event.data.sandbox.protocols[i].macro_id;
+		protocol_id_macro_id.push([protocol_id,macro_id]);
+	}
+
+	// Run macros on data
+	// ===============================================================================================
+	for(sampleID in event.data.sandbox.devicedata.sample){
+		for(measurementID in event.data.sandbox.devicedata.sample[sampleID]){
+
+			// Get Protocol_ID from measurement
+			var protocol_id = event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id;
+
+			// Get macro name from protocol_id
+			var macro_name_protocol = 'macro_'+protocol_id_macro_id[measurementID][1]; //macro_id_name[protocol_id_macro_id[protocol_id]];
+
+			// JSON passed on to the macro
+			var protocol_data = event.data.sandbox.devicedata.sample[sampleID][measurementID];
+
+			// Assigning macro function to protocol
+			var fn = window[macro_name_protocol];
+
+			// Run function if exists
+			if (typeof fn === "function"){
+				if(data_return[sampleID] === undefined)
+					data_return[sampleID] = {}
+				data_return[sampleID][measurementID] = fn.apply(null, new Array(protocol_data));
+
+			}
+		}
+	}
+
+	// Return macro output to main app
+	// ===============================================================================================
+	event.source.postMessage({'graph':data_return}, event.origin);
+
+});
+</script>

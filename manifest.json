@@ -1,0 +1,43 @@
+{
+	"name": "PhotosynQ",
+	"short_name": "PQ",
+	"version": "0.1.5",
+	"manifest_version": 2,
+	"minimum_chrome_version": "23",
+	"description": "Control your MultiSpeQ device from your computer and share your measurements on photosynq.net",
+	"author": "Sebastian Kuhlgert",
+	"app": {
+		"background": {
+		"scripts": [ "background.js" ],
+		"transient": true
+		}
+	},
+	"icons": { 
+		"16": "img/PhotosynQ-16.png",
+		"32": "img/PhotosynQ-32.png",
+		"48": "img/PhotosynQ-48.png",
+		"64": "img/PhotosynQ-64.png",
+		"96": "img/PhotosynQ-96.png",
+		"128": "img/PhotosynQ-128.png",
+		"256": "img/PhotosynQ-256.png",
+		"512": "img/PhotosynQ-512.png"
+	},
+	"permissions": [
+		"serial",
+		"storage",
+		"unlimitedStorage",
+		"notifications",
+		{
+			"fileSystem": ["write"]
+		},
+		"http://www.photosynq.venturit.net/*",
+		"http://photosynq.venturit.net/*",
+		"http://s3.amazonaws.com/photosynq/*",
+		"https://freegeoip.net/*",
+		"http://export.highcharts.com/*"
+	],
+	"sandbox": {
+		"pages": ["sandbox.html"]
+	},
+	"update_url": "http://photosynq-update.alderground.de/update.xml"
+}

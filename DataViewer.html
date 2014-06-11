@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
+	<script src="js/jquery.min.js"></script>
+	<script src="js/highcharts.js"></script>
+	<script src="js/exporting.js"></script>
+	<script src="js/export-csv.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/math.js"></script>
+	<script src="js/protocols.js"></script>
+	<script src="js/initalvariables.js"></script>
+	<script src="js/toastr.min.js"></script>
+	<script src="graph.js"></script>
+	<script src="js/data_viewer.js"></script>
+	<style>
+		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+		body > #container {margin:10px;}
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div class="row">
+			<!-- Container for Plots -->
+			<div class="col-md-12 col-lg-12">
+				<div class="panel panel-default" id="MainDisplayContainer">
+					<div class="panel-heading">
+						<h3 class="panel-title" id="FileName"></h3>
+					</div>
+					<div class="panel-body" style="overflow-y:scroll;">
+						<div id="TransientPlotsContainer" style="min-height:0px"></div>
+						<div id="PlotsContainer" style="word-wrap:break-word;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<iframe src="sandbox.html" id="MacroSandbox" style="display:none"></iframe>
+</body>
+</html>

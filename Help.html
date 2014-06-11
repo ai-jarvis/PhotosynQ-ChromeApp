@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/help.js"></script>
+	<style>
+		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+		body > #container {margin:10px;}
+	</style>
+</head>
+<body>
+	<div id="container">
+
+<div class="col-md-12" id="MainDisplayContainer">
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-justified">
+  <li class="active"><a href="#HelpWizard" data-toggle="tab">Getting Started</a></li>
+  <li><a href="#HelpDetailed" data-toggle="tab">Detailed Help</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content" style="background-color:#ffffff;padding:15px;">
+		<div class="tab-pane fade in active" id="HelpWizard">
+			<ul class="nav nav-pills nav-justified">
+				<li class="active"><a href="#HelpWizardStep1" data-toggle="tab">1. Connect your device</a></li>
+				<li><a href="#HelpWizardStep2" data-toggle="tab">2. Sign in to PhotosynQ</a></li>
+				<li><a href="#HelpWizardStep3" data-toggle="tab">3. Select a Project</a></li>
+				<li><a href="#HelpWizardStep4" data-toggle="tab">4. Take a Measurement</a></li>
+			</ul>
+
+			<div class="tab-content" style="overflow:hidden">
+				<div class="tab-pane fade in active" id="HelpWizardStep1">
+					<img src="img/step1.png" class="img-rounded" style="margin:15px auto 5px auto">
+					<span class="help-block">Connect your device to your computer using a micro USB cable.</span>
+				</div>
+				<div class="tab-pane fade" id="HelpWizardStep2" style="margin:15px auto 5px auto"">
+					<img src="img/step2.png" class="img-rounded">
+					<span class="help-block">If you don't have a login in, go to <a href="http://photosynq.venturit.org" target="_blank">PhotosynQ</a> first and sign up.</span>
+				</div>
+				<div class="tab-pane fade" id="HelpWizardStep3" style="margin:15px auto 5px auto">
+					<img src="img/step3.png" class="img-rounded">
+					<span class="help-block">Select an experiment from the dropdown box. If you want to participate, click on the select-button to see the measurement directions.</span>
+				</div>
+				<div class="tab-pane fade" id="HelpWizardStep4" style="margin:15px auto 5px auto">
+					<img src="img/step4.png" class="img-rounded">
+					<span class="help-block">Answer all questions, prepare sample and device according to the directions and click start.</span>
+				</div>
+			</div>
+
+			<ul class="pager" id="HelpWizardPager">
+			  <li class="previous" style="display:none"><a href="#"><i class="fa fa-chevron-left"></i> Back</a></li>
+			  <li class="next"><a href="#">Next <i class="fa fa-chevron-right"></i></a></li>
+			</ul>
+
+	</div>
+	<div class="tab-pane fade" id="HelpDetailed" style="overflow:auto">
+		<ul>
+			<li><a href="#HelpDeviceConnect">Connect your device</a></li>
+			<li><a href="#HelpSignIn">Sign in to PhotosynQ</a></li>
+			<li><a href="#HelpSelectExperiment">Select an experiment</a></li>
+			<li><a href="#HelpTakeMeasurement">Take a measurement</a></li>
+			<li><a href="#HelpQuickMeasurement">Quick measurements</a></li>
+			<li><a href="#HelpConsole">Console</a></li>
+			<li><a href="#HelpTools">Tools</a></li>
+			<li><a href="#HelpDeviceControls">Device controls</a></li>
+		</ul>
+
+		<div id="HelpDeviceConnect">
+			<h4>Connect your device</h4>
+			
+		</div>
+
+		<div id="HelpSignIn">
+			<h4>Sign in to PhotosynQ</h4>
+
+		</div>
+		<div id="HelpSelectExperiment">
+			<h4>Select an experiment</h4>
+
+		</div>
+
+		<div id="HelpTakeMeasurement">
+			<h4>Take a measurement</h4>
+
+		</div>
+
+		<div id="HelpQuickMeasurement">
+			<h4>Quick measurements</h4>
+			Here you can find all the measurement protocols available from the website.
+			The recorded measurements can be saved to your local computer.
+		</div>
+
+		<div id="HelpConsole">
+			<h4>Console</h4>
+			The console allows you to directly communicate with your MultispeQ device.
+			Just copy and paste a protocol into the textbox and click start to run it.
+			Protocols are checked before they are send to the device. Only valid protocols
+			are send.
+			If you check the "Raw input" box, the protocol is not checked and you have full
+			access to the device. Also the data coming back from the device is just
+			displayed as text.
+		</div>
+
+		<div href="HelpTools">
+			<h4>Tools</h4>
+			<h5>Data viewer</h5>
+			This tool allows you to view old measurements that were saved to your hard drive.
+			Only measurements from "Quick Measurements" and the "Console" can be saved to
+			your local computer. To see measurements taken for projects visit the data 
+			viewer on the website. Just select the project and click on the link in the
+			description to get to the website.
+			<h5>Protocol assembly</h5>
+		</div>
+
+		<div id="HelpDeviceControls">
+			<h4>Device controls</h4>
+			
+		</div>
+
+	</div>
+</div>
+
+</div>
+
+	</div>
+</body>
+</html>
