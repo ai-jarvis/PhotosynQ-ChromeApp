@@ -37,7 +37,7 @@
 		"http://export.highcharts.com/*"
 	],
 	"sandbox": {
-		"pages": ["sandbox.html"]
+		"pages": ["Sandbox.html"]
 	},
 	"update_url": "http://photosynq-update.alderground.de/update.xml"
 }
