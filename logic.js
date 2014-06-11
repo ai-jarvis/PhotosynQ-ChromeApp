@@ -118,6 +118,13 @@ function onCharRead(readInfo) {
 		return;
 	}
 
+	if(dataRead.match(/({\"pwr_off":"HIGH\"}\r\n)/gi)){
+		dataRead = '';
+		MeasurementType = 'BackgroundBatteryCheck';
+		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
+		return;
+	}
+
 
 	if(MeasurementType == 'consoleraw'){
 		try{
