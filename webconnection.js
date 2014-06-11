@@ -227,7 +227,7 @@ function GetProtocolsFromDB(token,email){
 							'slug':tmp[i].slug,
 							'macro_id':tmp[i].macro_id,
 							'description':tmp[i].description,
-							'protocol_json':tmp[i].protocol_json
+							'protocol_json':tmp[i].protocol_json2
 						}
 					}					
 				} catch (e) {

@@ -199,7 +199,6 @@ function onCharRead(readInfo) {
 
 	if(str.match(/(\r\n\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null && !_terminate){
 		dataRead = dataRead.trim();
-		
 		try {
 		  dataRead = JSON.parse(dataRead);
 		} catch (e) {
@@ -716,18 +715,19 @@ function DatabaseMeasurement() {
 				var pID = _experiments[SelectedProject].protocols_ids[pIds];
 				if(_protocols[pID].protocol_json !== undefined){
 					if(_protocols[pID].protocol_json !== ''){
-						try {
-							var tmp = JSON.parse(_protocols[pID].protocol_json);
-							protocol.push(tmp[0]);
-						} catch (e) {
-							WriteMessage('Protocol has invalid format.','danger');
-							return;
-						}
+						protocol.push(_protocols[pID].protocol_json);
 					}
 					else
 						protocol.push({});
 				}
 			}
+		}
+
+		try {
+			var protocol_string = JSON.stringify(protocol);
+		} catch (e) {
+			WriteMessage('Protocol has invalid format.','danger');
+			return;
 		}
 
 		if(protocol.length == 0){
@@ -743,7 +743,7 @@ function DatabaseMeasurement() {
 			//ProtocolArray = [3];
 			MacroArray = null;
 			DisableInputs();
-			chrome.serial.send(connectionId, str2ab(JSON.stringify(protocol) + '!'), function(){
+			chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
 				dataRead = '';
 				$('#TransientPlotsContainer').css('min-height','55%');
 			});
@@ -786,16 +786,16 @@ function QuickMeasurement() {
 			WriteMessage('Select a protocol first','info');
 			return;
 		}
-		protocol = false;
+		protocol = [];
 		if(_protocols[QuickMeasurementProtocol.value] !== undefined)
-			protocol = _protocols[QuickMeasurementProtocol.value].protocol_json;
+			protocol.push(_protocols[QuickMeasurementProtocol.value].protocol_json);
 
 		if(protocol == false){
 			WriteMessage('Protocol not found.','danger');
 			return;
 		}
 		try {
-		  protocol = JSON.parse(protocol)
+		  protocol_string = JSON.stringify(protocol);
 		} catch (e) {
 			WriteMessage('Protocol has invalid format.','danger');
 			return;
@@ -810,7 +810,7 @@ function QuickMeasurement() {
 			_used_protocols.push(QuickMeasurementProtocol.value);
 			MacroArray = null;
 			DisableInputs();
-			chrome.serial.send(connectionId, str2ab(JSON.stringify(protocol) + '!'), function(){
+			chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
 				dataRead = '';
 				$('#TransientPlotsContainer').css('min-height','55%');
 			});

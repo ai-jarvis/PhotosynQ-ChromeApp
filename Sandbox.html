@@ -7,7 +7,7 @@ window.addEventListener('message', function(event) {
 	var data_return = {};
 	var protocol_id_macro_id = [];
 
-	// Generate macro functions and macro lookup table
+	// Generate macro functions
 	// ===============================================================================================
 	for(i in event.data.sandbox.macros){
 		var macro_id = event.data.sandbox.macros[i].id;
@@ -16,14 +16,10 @@ window.addEventListener('message', function(event) {
 		window[macro_name] = Function('json', macro_javascriptcode);
 	}
 
-	// Generate macro functions and macro lookup table
+	// Get macro lookup table
 	// ===============================================================================================
-	for(i in event.data.sandbox.protocols){
-		var protocol_id = event.data.sandbox.protocols[i].id;
-		var macro_id = event.data.sandbox.protocols[i].macro_id;
-		protocol_id_macro_id.push([protocol_id,macro_id]);
-	}
-
+	protocol_lookup = event.data.sandbox.protocols;
+	
 	// Run macros on data
 	// ===============================================================================================
 	for(sampleID in event.data.sandbox.devicedata.sample){
@@ -31,15 +27,15 @@ window.addEventListener('message', function(event) {
 
 			// Get Protocol_ID from measurement
 			var protocol_id = event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id;
-
+			
 			// Get macro name from protocol_id
-			var macro_name_protocol = 'macro_'+protocol_id_macro_id[measurementID][1]; //macro_id_name[protocol_id_macro_id[protocol_id]];
+			var macro_name = 'macro_'+protocol_lookup[protocol_id].macro_id;
 
 			// JSON passed on to the macro
 			var protocol_data = event.data.sandbox.devicedata.sample[sampleID][measurementID];
 
 			// Assigning macro function to protocol
-			var fn = window[macro_name_protocol];
+			var fn = window[macro_name];
 
 			// Run function if exists
 			if (typeof fn === "function"){

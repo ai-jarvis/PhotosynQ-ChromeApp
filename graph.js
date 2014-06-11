@@ -10,9 +10,9 @@ function plot(data){
 	postData['macros'] = [];
 	postData['devicedata'] = data;
 	postData['protocols'] = [];
-	
+
 	for(i in _used_protocols){
-		postData['protocols'].push({'id':_used_protocols[i],'macro_id':_protocols[_used_protocols[i]].macro_id});
+		postData['protocols'][_used_protocols[i]] = {'macro_id': _protocols[_used_protocols[i]].macro_id};
 		if(_protocols[_used_protocols[i]].macro_id !== '' && _macros[_protocols[_used_protocols[i]].macro_id] !== undefined)
 			postData['macros'][_protocols[_used_protocols[i]].macro_id] = _macros[_protocols[_used_protocols[i]].macro_id];
 	}
@@ -29,14 +29,13 @@ function plot(data){
 
 		for(protocolID in data[repeat]){
 
-		// initial variables in loop
+			// initial variables in loop
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
-			var protocolname = "";
-			if( postData['protocols'].length > 0){
-				protocolname = _protocols[postData['protocols'][protocolID].id].name;
-				if(replacements[protocolname] !== undefined)
-					protocolname = replacements[protocolname];
-			}
+			var protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
+			
+			// replace protocol names here
+			if(replacements[protocolname] !== undefined)
+				protocolname = replacements[protocolname];
 			
 			var HTML = macro.HTML;
 			
