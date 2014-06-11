@@ -98,6 +98,12 @@ function onCharRead(readInfo) {
 						$('#ModalDialog .modal-body').append(info[key]+'<br>');
 					else if (key == 'batt_level')
 						BatteryLevel(info[key]);
+					else if(key == 'pwr_off'){
+						$('#ModalDialog .modal-body').append('<div class="text-primary text-center">Device powered off</div>');
+						dataRead = '';
+						MeasurementType = 'BackgroundBatteryCheck';
+						chrome.serial.send(connectionId, str2ab('1004+'), function(){});
+					}
 					else
 						$('#ModalDialog .modal-body').append('<span class="text-muted">'+key.replace('_',' ')+':</span> '+info[key]+'<br>');
 				}
