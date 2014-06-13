@@ -632,6 +632,23 @@ function ab2str(buf) {
 	return String.fromCharCode.apply(null, new Uint8Array(buf));
 };
 
+// ===============================================================================================
+// 						Split longer strings into chunks before send
+// ===============================================================================================
+function SendLongStrings(string){
+	var SendDataInChunks = function(chunks) {
+		chrome.serial.send(connectionId, str2ab(chunks[x]), function(){
+			x++;
+			if(x < chunks.length)
+				SendDataInChunks(chunks);
+			else if(x == chunks.length)
+				return false;
+		});	
+	}
+	var str_to_chunks = string.match(/.{1,120}/g);
+	var x=0;
+	SendDataInChunks(str_to_chunks);
+}	
 
 // ===============================================================================================
 // 						Run functions from the menu bar
@@ -749,10 +766,19 @@ function DatabaseMeasurement() {
 			//ProtocolArray = [3];
 			MacroArray = null;
 			DisableInputs();
-			chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
-				dataRead = '';
-				$('#TransientPlotsContainer').css('min-height','55%');
-			});
+			
+			// Send data in chunks to overcome serial issues on a mac
+			//--------------------------------------------------------------------------------------------------
+			protocol_string +='!';
+			SendLongStrings(protocol_string);
+			dataRead = '';
+			$('#TransientPlotsContainer').css('min-height','55%');
+
+
+			//chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
+			//	dataRead = '';
+			//	$('#TransientPlotsContainer').css('min-height','55%');
+			//});
 			var protocol_total = 0;
 			ShowTansientgraph = true;
 			for(m in protocol){
@@ -816,10 +842,19 @@ function QuickMeasurement() {
 			_used_protocols.push(QuickMeasurementProtocol.value);
 			MacroArray = null;
 			DisableInputs();
-			chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
-				dataRead = '';
-				$('#TransientPlotsContainer').css('min-height','55%');
-			});
+			
+			// Send data in chunks to overcome serial issues on a mac
+			//--------------------------------------------------------------------------------------------------
+			protocol_string +='!';
+			SendLongStrings(protocol_string);
+			dataRead = '';
+			$('#TransientPlotsContainer').css('min-height','55%');
+			
+			//chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
+//			dataRead = '';
+//			$('#TransientPlotsContainer').css('min-height','55%');
+
+//			});
 			var protocol_total = 0;
 			ShowTansientgraph = true;
 			for(m in protocol){
@@ -861,7 +896,8 @@ function ConsoleMeasurement() {
 		}
 		if($('#ConsoleProtocolRaw').is(':checked')){
 			MeasurementType = 'consoleraw';
-			chrome.serial.send(connectionId, str2ab(ConsoleProtocol.value), function(){dataRead = '';});
+			SendLongStrings(ConsoleProtocol.value);
+			dataRead = '';
 			return;
 		}
 		try {
@@ -877,10 +913,8 @@ function ConsoleMeasurement() {
 			ResultString = null;
 			MacroArray = null;
 			DisableInputs();
-			chrome.serial.send(connectionId, str2ab(ConsoleProtocol.value.trim()), function(){
-				dataRead = '';
-				$('#TransientPlotsContainer').css('min-height','55%');
-			});
+			SendLongStrings(ConsoleProtocol.value.trim());
+			$('#TransientPlotsContainer').css('min-height','55%');
 			var protocol_total = 0;
 			ShowTansientgraph = true;
 			for(m in protocol){
