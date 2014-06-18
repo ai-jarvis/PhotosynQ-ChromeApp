@@ -1,7 +1,6 @@
 // ===============================================================================================
 // 					Initial Parameters
 // ===============================================================================================
-var connectionId = -1;
 var deviceConnected = false;
 var port_os;
 var port_path;
@@ -562,7 +561,6 @@ onload = function() {
 			minHeight: 650,
 			minWidth: 1000
 		}, function (ProtocolWindow){
-
 		});
 	});
 

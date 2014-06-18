@@ -1,3 +1,11 @@
+// ===============================================================================================
+// 					Initial Parameters
+// ===============================================================================================
+var connectionId = -1;
+
+// ===============================================================================================
+// 					Main Window Parameters and events
+// ===============================================================================================
 chrome.app.runtime.onLaunched.addListener(function() {
 	chrome.app.window.create('MainWindow.html', {
 		id: "mainwindow",
@@ -11,7 +19,18 @@ chrome.app.runtime.onLaunched.addListener(function() {
 		minWidth: 1000
 	}, function (Mainwindow){
 		Mainwindow.onClosed.addListener(function() {
-			chrome.serial.close(connectionId, function(){});
+
+			/* close serial connection */
+			if(connectionId !== -1)
+				chrome.serial.close(connectionId, function(){});
+			
+			/* close all open windows */
+			var allWindows = chrome.app.window.getAll();
+			for(windowID in allWindows){
+				if(allWindows[windowID].id != "mainwindow")
+					allWindows[windowID].close();	
+			}
+			
 		});
 	});
 });
