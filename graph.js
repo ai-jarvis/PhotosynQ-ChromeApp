@@ -31,7 +31,13 @@ function plot(data){
 
 			// initial variables in loop
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
-			var protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
+			var protocolname = '';
+			if(data[repeat][protocolID].protocol_id !== undefined){
+				try{
+					protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
+				}
+				catch(e){}
+			}
 			
 			// replace protocol names here
 			if(replacements[protocolname] !== undefined)

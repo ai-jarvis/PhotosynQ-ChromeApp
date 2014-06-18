@@ -314,7 +314,7 @@ function SaveDataToFile(){
 // ===============================================================================================
 //						Save graph to file
 // ===============================================================================================
-function SaveDataToFile(data, type, name){
+function SaveGraphToFile(data, type, name){
 	chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [type]}] }, function(writableFileEntry) {
 		writableFileEntry.createWriter(function(writer) {
 		  writer.onerror = errorHandler;
