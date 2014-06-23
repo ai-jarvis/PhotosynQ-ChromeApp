@@ -7,18 +7,26 @@ onload = function() {
 		_presets = event.data;
 		_event = event;
 	});
-	GenerateScriptPlot([]);
-	
+	GenerateAndValidateScript();
 
 	// Collapsable Icon Toggle
 	// =====================================================================  
-	$('#environmental_params_list').on('show.bs.tab', function (e) {
-		$('#environmental').show();
-		$('#spectroscopic').hide();
-	});
-	$('#spectroscopic_params_list').on('show.bs.tab', function (e) {
-		$('#environmental').hide();
-		$('#spectroscopic').show();
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		if($(e.target).attr('href') == '#environmental_params_list'){
+			$('#environmental').parent().show();
+			$('#spectroscopic').parent().hide();
+			$('#presets_info').hide();
+		}
+		if($(e.target).attr('href') == '#spectroscopic_params_list'){
+			$('#environmental').parent().hide();
+			$('#spectroscopic').parent().show();
+			$('#presets_info').hide();
+		}
+		if($(e.target).attr('href') == '#presets_list'){
+			$('#environmental').parent().hide();
+			$('#spectroscopic').parent().hide();
+			$('#presets_info').show();
+		}
 	});
 
 	// Connection Lists Environmental Parameters
@@ -76,6 +84,15 @@ onload = function() {
 			$('#spectroscopic_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 		}
 	}).disableSelection();
+	
+	
+	
+    $( "#preset_sort" ).sortable({
+    	stop: function( event, ui ) {
+    		GenerateMultiScriptPlot();
+    	}
+    });
+    $( "#preset_sort" ).disableSelection();
 
 	// JSON building triggers
 	// =====================================================================
@@ -395,9 +412,14 @@ onload = function() {
 	// Add presets
 	// =====================================================================
 	function GeneratePresetList(json){
-		console.log(json);
 		for(param_id in json){
-			$('#presets,#presets_second').append('<li class="list-group-item" data-link="'+param_id+'" style="cursor:pointer" title="'+json[param_id].description+'">'+json[param_id].name+'</li>')
+			var html = '<a class="list-group-item" '
+			html += 'data-link="'+param_id+'" '
+			html += 'style="cursor:pointer" '
+			html += 'title="'+json[param_id].description+'">'
+			html += '<i class="fa fa-file-text"></i> '
+			html += json[param_id].name+'</a>'
+			$('#presets,#presets_second').append(html)
 		}
 	}
 
@@ -420,78 +442,79 @@ onload = function() {
 			return
 		}
 		else{
-			json = json[0]
+			protocols_json = json;
 			var time = 0
-			for(i in json.pulses){
+			
+			for(prot in protocols_json){
+				json = protocols_json[prot];
+			
+				for(i in json.pulses){
 	
-				if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
+					if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
 					
-					var act_lights = [];
-					if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
-						act_lights.push(json.act1_lights[i]);
-					if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
-						act_lights.push(json.act2_lights[i]);					
+						var act_lights = [];
+						if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
+							act_lights.push(json.act1_lights[i]);
+						if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
+							act_lights.push(json.act2_lights[i]);					
 					
-					for(act_light in act_lights){
-						if(act_lights[act_light] == 0)
-							continue;
-						if(series[act_lights[act_light]] === undefined){
-							series[act_lights[act_light]] ={}
-							series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
-							series[act_lights[act_light]]['type'] =  'scatter'
-							series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
-							series[act_lights[act_light]]['data'] = []								
-						}				
-						series[act_lights[act_light]]['data'].push([time,0]);
-						series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
-					}
-				}
-
-				
-				for(j=0;j< json.pulses[i]; j++){
-
-					if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
-						var lights = json.meas_lights[i];
-						for(light in lights){
-							if(lights[light] == 0)
+						for(act_light in act_lights){
+							if(act_lights[act_light] == 0)
 								continue;
-							if(series[lights[light]] === undefined){
-								series[lights[light]] ={}
-								series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
-								series[lights[light]]['type'] =  'scatter'
-								series[lights[light]]['color'] = light_colors[lights[light]].hex
-								series[lights[light]]['data'] = []								
-							}
-							series[lights[light]]['data'].push([time,0]);
-							series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
-							time += json.pulsesize;	
-							series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
-							series[lights[light]]['data'].push([time,0]);
-							time += json.pulsedistance;			
+							if(series[act_lights[act_light]] === undefined){
+								series[act_lights[act_light]] ={}
+								series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
+								series[act_lights[act_light]]['type'] =  'scatter'
+								series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
+								series[act_lights[act_light]]['data'] = []								
+							}				
+							series[act_lights[act_light]]['data'].push([time,0]);
+							series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
 						}
 					}
-				}
 
-				if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
-					for(act_light in act_lights){
-						if(act_lights[act_light] == 0)
-							continue;
-						series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
-						series[act_lights[act_light]]['data'].push([time,0]);
+				
+					for(j=0;j< json.pulses[i]; j++){
+
+						if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
+							var lights = json.meas_lights[i];
+							for(light in lights){
+								if(lights[light] == 0)
+									continue;
+								if(series[lights[light]] === undefined){
+									series[lights[light]] ={}
+									series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
+									series[lights[light]]['type'] =  'scatter'
+									series[lights[light]]['color'] = light_colors[lights[light]].hex
+									series[lights[light]]['data'] = []								
+								}
+								series[lights[light]]['data'].push([time,0]);
+								series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+								time += json.pulsesize;	
+								series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+								series[lights[light]]['data'].push([time,0]);
+								time += json.pulsedistance;
+							}
+						}
 					}
-				}
 
-		
+					if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
+						for(act_light in act_lights){
+							if(act_lights[act_light] == 0)
+								continue;
+							series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+							series[act_lights[act_light]]['data'].push([time,0]);
+						}
+					}
+
+				}
+			
 			}
 		}
 
-		
-		console.log(series)
-		
 		var series_final = [];
 		for(i in series)
 			series_final.push(series[i])
-
 		
 		$('#SingleScriptGraph').highcharts({
 			chart: {
@@ -536,7 +559,6 @@ onload = function() {
 				enabled: false
 			}
 		});
-		//TransientChart.redraw()
 	}
 
 	// Resort parameters
@@ -599,23 +621,73 @@ onload = function() {
 		}
 	}
 
-	// Initial call for empty JSON
+	// Visualize multiple protocols
 	// =====================================================================
-	GenerateAndValidateScript();
-	SortParameterList();
+	function GenerateMultiScriptPlot(){
+		var MultiProtocol = []
+		$('#preset_sort li ').each(function(k,v){
+			var link = $(v).attr('data-link');
+			MultiProtocol.push(_presets[link].protocol_json)
+		});
+		$('#RawProtocol').html(JSON.stringify(MultiProtocol, null, 3));
+		GenerateScriptPlot(MultiProtocol);
+	};
 
-	$('body').on('click', '#presets li',function(){
+
+	// Build click / hover events
+	// =====================================================================
+	$('body').on('click', '#presets a',function(){
+		$('a[href="#spectroscopic_params_list"]').tab('show');
 		var link = $(this).attr('data-link');
 		ImportScriptFromJSON(_presets[link].protocol_json)
 		GenerateAndValidateScript();
 	});
+
+	$('body').on('hover', '#presets a',function(){
+		var link = $(this).attr('data-link');
+		$('#presets_info').empty();
+		$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
+		$('#presets_info').append(_presets[link].description);
+	});	
 	
 	$('#ProtocoltoConsoleBtn').on('click', function(){
+		console.log($('#RawProtocol').text())
 		_event.source.postMessage({'protocol_to_console':$('#RawProtocol').text()}, _event.origin);
+		chrome.app.window.get('mainwindow').focus();
 	});
 
 	$('#ProtocoltoConsoleRunBtn').on('click', function(){
 		_event.source.postMessage({'protocol_run':$('#RawProtocol').text()}, _event.origin);
+		chrome.app.window.get('mainwindow').focus();
 	});
 	
+	$('body').on('click', '.dismiss-preset',function(){
+		$(this).parent().remove();
+		GenerateMultiScriptPlot();
+	});
+
+	$('body').on('click', '#presets_second a',function(){
+		var html = '<li class="list-group-item" '
+		html += 'data-link="'+$(this).attr('data-link')+'">'
+		html += '<i class="fa fa-file-text"></i> '
+		html += $(this).text()
+		html += '<button type="button" class="close dismiss-preset">&times;</button>'
+		html += '</li>'
+		$('#preset_sort').append(html)
+		GenerateMultiScriptPlot();
+	});
+
+	// Window resize events
+	// =====================================================================
+	var bodyheight =$(window).height()-52
+	$("#MainDisplayContainer").height(bodyheight);
+	$("#environmental_params,#presets,#spectroscopic_params,#environmental,#spectroscopic,#presets_second").height(bodyheight-400);
+	$("#RawProtocol,#preset_sort").height(bodyheight-369);
+	$(window).resize(function() {
+		bodyheight = $(window).height()-52;
+		$("#MainDisplayContainer").height(bodyheight);
+		$("#environmental_params,#presets,#spectroscopic_params,#environmental,#spectroscopic,#presets_second").height(bodyheight-400);
+		$("#RawProtocol,#preset_sort").height(bodyheight-369);
+	});
+
 }
