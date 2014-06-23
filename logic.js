@@ -203,7 +203,7 @@ function onCharRead(readInfo) {
 		
 	}
 
-	if(str.match(/(\r\n\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null && !_terminate){
+	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null && !_terminate){
 		dataRead = dataRead.trim();
 		try {
 		  dataRead = JSON.parse(dataRead);
