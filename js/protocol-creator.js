@@ -34,13 +34,11 @@ onload = function() {
 	$( "#environmental_params" ).sortable({
 		connectWith: "#environmental",
  		revert: 200,
- 		tolerance: "pointer" ,
+ 		tolerance: "pointer",
 		start: function( event, ui ) {
-			$( "#spectroscopic" ).parent().css('opacity',0.4)
 			$( "#environmental" ).addClass('bg-warning')
 		},
 		stop: function( event, ui ) {
-			$( "#spectroscopic" ).parent().css('opacity',1)
 			$('#environmental li .form-group div').show()
 			$('#environmental li .control-label').removeClass('col-sm-12').addClass('col-sm-5')
 			$( "#environmental" ).removeClass('bg-warning')
@@ -64,11 +62,9 @@ onload = function() {
 		revert: 200,
 		tolerance: "pointer" ,
 		start: function( event, ui ) {
-			$( "#environmental" ).parent().css('opacity',0.4)
 			$( "#spectroscopic" ).addClass('bg-warning')
 		},
 		stop: function( event, ui ) {
-			$( "#environmental" ).parent().css('opacity',1)
 			$('#spectroscopic li .form-group div').show()
 			$('#spectroscopic li .control-label').removeClass('col-sm-12').addClass('col-sm-5')
 			$( "#spectroscopic" ).removeClass('bg-warning')
@@ -85,8 +81,6 @@ onload = function() {
 		}
 	}).disableSelection();
 	
-	
-	
     $( "#preset_sort" ).sortable({
     	stop: function( event, ui ) {
     		GenerateMultiScriptPlot();
@@ -102,16 +96,15 @@ onload = function() {
 				$(value).appendTo('#'+ui.item.parent().attr('id'));
 		});
 		GenerateAndValidateScript();
-		SortParameterList();
 	});
 	
-	$('input, select').on('change',function(){
+	$('input, select').on('input',function(){
 		GenerateAndValidateScript();
 	});
-
-	$('body').on('keyup',function(){
+	
+	$('input[type="radio"]').on('change',function(){
 		GenerateAndValidateScript();
-	});
+	});	
 
 	// Clear Protocol Fields 
 	// =====================================================================
@@ -331,9 +324,15 @@ onload = function() {
 						else
 							html += '<div class="col-sm-7">'
 						if(json[param_id][param].type == 'int'){
-							html +=  '<input type="number" class="form-control"'
-							html +=  'min="'+json[param_id][param].range[0]+'"'
-							html +=  'max="'+json[param_id][param].range[1]+'"'
+							html +=  '<input type="number" class="form-control" '
+							html +=  'min="'+json[param_id][param].range[0]+'" '
+							html +=  'max="'+json[param_id][param].range[1]+'" '
+						}
+						if(json[param_id][param].type == 'float'){
+							html +=  '<input type="number" class="form-control" '
+							html +=  'min="'+json[param_id][param].range[0]+'" '
+							html +=  'max="'+json[param_id][param].range[1]+'" '
+							html +=  'step=".1" '
 						}
 						else
 							html +=  '<input type="text" class="form-control"'
@@ -409,7 +408,7 @@ onload = function() {
 		}
 	}
 
-	// Add presets
+	// Build presets list
 	// =====================================================================
 	function GeneratePresetList(json){
 		for(param_id in json){
@@ -438,103 +437,194 @@ onload = function() {
 		**/
 		
 		var series = []
-		if(json.length == 0 || json[0].pulses === undefined){
-			return
-		}
-		else{
+		var series_environment =[];
+		if(json.length > 0){
 			protocols_json = json;
 			var time = 0
+			var measurements = 1
+			var measurements_delay = 0
 			
 			for(prot in protocols_json){
-				json = protocols_json[prot];
+				if(protocols_json[prot].measurements !== undefined && protocols_json[prot].measurements_delay !== undefined){
+					if(protocols_json[prot].measurements > measurements)
+						measurements = protocols_json[prot].measurements;
+					if(protocols_json[prot].measurements_delay > measurements_delay)
+						measurements_delay = protocols_json[prot].measurements_delay * 1000000;
+				}
+			}
 			
-				for(i in json.pulses){
-	
-					if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
+			for(m=0;m<measurements;m++){
+				for(prot in protocols_json){
+					json = protocols_json[prot];
 					
-						var act_lights = [];
-						if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
-							act_lights.push(json.act1_lights[i]);
-						if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
-							act_lights.push(json.act2_lights[i]);					
-					
-						for(act_light in act_lights){
-							if(act_lights[act_light] == 0)
-								continue;
-							if(series[act_lights[act_light]] === undefined){
-								series[act_lights[act_light]] ={}
-								series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
-								series[act_lights[act_light]]['type'] =  'scatter'
-								series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
-								series[act_lights[act_light]]['data'] = []								
-							}				
-							series[act_lights[act_light]]['data'].push([time,0]);
-							series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+					if(json.environmental !== undefined && json.environmental){
+						var env_str = []
+						for(env in json.environmental){
+							if(json.environmental[env][1] == 0)
+								env_str.push(json.environmental[env][0])
+							
+						}
+						if(env_str.length > 0){
+							series_environment.push({
+								value : time,
+								color : 'grey',
+								dashStyle : 'shortdash',
+								width : 1,
+								label : {
+									text : env_str.join('<br>'),
+									rotation: 0,
+									align:'center',
+									style: {
+										fontSize:10
+									}
+								}
+							});
 						}
 					}
-
-				
-					for(j=0;j< json.pulses[i]; j++){
-
-						if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
-							var lights = json.meas_lights[i];
-							for(light in lights){
-								if(lights[light] == 0)
+					
+					for(i in json.pulses){
+	
+						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
+					
+							var act_lights = [];
+							if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
+								act_lights.push(json.act1_lights[i]);
+							if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
+								act_lights.push(json.act2_lights[i]);					
+					
+							for(act_light in act_lights){
+								if(act_lights[act_light] == 0)
 									continue;
-								if(series[lights[light]] === undefined){
-									series[lights[light]] ={}
-									series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
-									series[lights[light]]['type'] =  'scatter'
-									series[lights[light]]['color'] = light_colors[lights[light]].hex
-									series[lights[light]]['data'] = []								
-								}
-								series[lights[light]]['data'].push([time,0]);
-								series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
-								time += json.pulsesize;	
-								series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
-								series[lights[light]]['data'].push([time,0]);
-								time += json.pulsedistance;
+								if(series[act_lights[act_light]] === undefined){
+									series[act_lights[act_light]] ={}
+									series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
+									series[act_lights[act_light]]['type'] =  'scatter'
+									series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
+									series[act_lights[act_light]]['data'] = []								
+								}				
+								series[act_lights[act_light]]['data'].push([time,0]);
+								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
 							}
 						}
-					}
 
-					if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
-						for(act_light in act_lights){
-							if(act_lights[act_light] == 0)
-								continue;
-							series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
-							series[act_lights[act_light]]['data'].push([time,0]);
+				
+						for(j=0;j< json.pulses[i]; j++){
+
+							if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
+								var lights = json.meas_lights[i];
+								for(light in lights){
+									if(lights[light] == 0)
+										continue;
+									if(series[lights[light]] === undefined){
+										series[lights[light]] ={}
+										series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
+										series[lights[light]]['type'] =  'scatter'
+										series[lights[light]]['color'] = light_colors[lights[light]].hex
+										series[lights[light]]['data'] = []								
+									}
+									series[lights[light]]['data'].push([time,0]);
+									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									time += json.pulsesize;	
+									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									series[lights[light]]['data'].push([time,0]);
+									time += json.pulsedistance;
+								}
+							}
+						}
+
+						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
+							for(act_light in act_lights){
+								if(act_lights[act_light] == 0)
+									continue;
+								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+								series[act_lights[act_light]]['data'].push([time,0]);
+							}
+						}
+
+					}
+					
+					if(json.environmental !== undefined && json.environmental){
+						var env_str = []
+						for(env in json.environmental){
+							if(json.environmental[env][1] == 1)
+								env_str.push(json.environmental[env][0])
+							
+						}
+						if(env_str.length > 0){
+							series_environment.push({
+								value : time,
+								color : 'grey',
+								dashStyle : 'shortdash',
+								width : 1,
+								label : {
+									text : env_str.join('<br>'),
+									rotation: 0,
+									align:'center',
+									style: {
+										fontSize:10
+									}
+								}
+							});
 						}
 					}
-
+					
+					
 				}
-			
+				time += measurements_delay;
 			}
 		}
 
 		var series_final = [];
 		for(i in series)
 			series_final.push(series[i])
-		
+
+		if(series_environment.length > 0 && series_final.length == 0){
+			series = []
+			series['name'] =  series_environment[0].label.text.replace(/<br>/g,', ')
+			series['type'] =  'scatter'
+			series['data'] = [];
+			for(i in series_environment)
+				series['data'].push([series_environment[i].value,1])
+			series_environment = [];
+			series['marker'] = {}
+			series['marker']['enabled'] = true;
+			series_final.push(series);
+		}
+			
 		$('#SingleScriptGraph').highcharts({
 			chart: {
-				zoomType: 'xy',
-				animation: false
+				zoomType: 'x',
+				animation: true
 			},
 			title: {
 				text: false
 			},
 			xAxis: [{
-				//type: 'datetime' //ensures that xAxis is treated as datetime values
+				labels: {
+					formatter: function() {
+						if(this.value <= 1000)
+							return this.value + ' us';
+						if(this.value <= 1e+6)
+							return MathROUND((this.value / 1000),2) + ' ms';
+						if(this.value <= 6e+7)
+							return MathROUND((this.value / 1e+6),2) + ' s';
+						if(this.value <= 3.6e+9)
+							return MathROUND((this.value / 6e+7),2) + ' min';
+						if(this.value <= 8.64e+10)
+							return MathROUND((this.value / 3.6+9),2) + ' h';
+					}
+				},
 				title: {
-					text: 'time [us]'
-				}
+					text: false
+				},
+				plotLines : series_environment
 			}],
 			yAxis: [{
 				id:"inital",
 				title: {
 					text: false
-				}
+				},
+				min:0
 			}],
 			tooltip: {
 				shared: true,
@@ -560,21 +650,6 @@ onload = function() {
 			}
 		});
 	}
-
-	// Resort parameters
-	// =====================================================================
-	function SortParameterList(){
-		/*$( "#environmental_params,#environmental,#measurement,#measurement_params,#detection,#detection_params" ).each(function(i,k){
-			var listitems = $('li', $(k));
-			listitems.sort(function (a, b) {
-				if($(a).parent().attr('id') == 'environmental' || $(a).parent().attr('id') == 'environmental_params')
-					return ($(a).text().toUpperCase() > $(b).text().toUpperCase())
-				else
-					return ($(a).children('div').children('label').text().toUpperCase() > $(b).children('div').children('label').text().toUpperCase())
-			});
-			$(this).append(listitems);
-    	});*/
-	};
 
 	// JSON import function
 	// =====================================================================
@@ -651,7 +726,6 @@ onload = function() {
 	});	
 	
 	$('#ProtocoltoConsoleBtn').on('click', function(){
-		console.log($('#RawProtocol').text())
 		_event.source.postMessage({'protocol_to_console':$('#RawProtocol').text()}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
@@ -662,18 +736,42 @@ onload = function() {
 	});
 	
 	$('body').on('click', '.dismiss-preset',function(){
+		var link = $(this).parent().attr('data-link');
+		if($('#presets_second a[data-link="'+link+'"] > span').length == 1){
+			var count = parseInt($('#presets_second a[data-link="'+link+'"] > span').text()) - 1
+			if(count == 0){
+				$('#presets_second a[data-link="'+link+'"] > span').remove();
+				$('#presets_second a[data-link="'+link+'"]').removeClass('active')
+			}
+			else
+				$('#presets_second a[data-link="'+link+'"] > span').text(count);
+		}
 		$(this).parent().remove();
+		if($('#preset_sort li').length == 0)
+			$('#preset_sort').next('div').show();
 		GenerateMultiScriptPlot();
 	});
 
 	$('body').on('click', '#presets_second a',function(){
+		$('#ScriptGraphContainer').removeClass('panel-danger panel-success').addClass('panel-success');
+		var link = $(this).attr('data-link');
 		var html = '<li class="list-group-item" '
-		html += 'data-link="'+$(this).attr('data-link')+'">'
+		html += 'data-link="'+link+'">'
 		html += '<i class="fa fa-file-text"></i> '
-		html += $(this).text()
+		html += $(this).contents(':not(span)').text()
 		html += '<button type="button" class="close dismiss-preset">&times;</button>'
 		html += '</li>'
 		$('#preset_sort').append(html)
+		if($('#presets_second a[data-link="'+link+'"] > span').length == 0){
+			$('#presets_second a[data-link="'+link+'"]').append('<span class="badge">1</span>')
+			$('#presets_second a[data-link="'+link+'"]').addClass('active')
+		}
+		else if($('#presets_second a[data-link="'+link+'"] > span').length == 1){
+			var count = parseInt($('#presets_second a[data-link="'+link+'"] > span').text()) + 1
+			$('#presets_second a[data-link="'+link+'"] > span').text(count);
+		}
+		if($('#preset_sort li').length > 0)
+			$('#preset_sort').next('div').hide();
 		GenerateMultiScriptPlot();
 	});
 
