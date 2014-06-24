@@ -113,14 +113,6 @@ function SelectProject(id) {
 				/** Add project title **/
 				var html = '<legend>'+experiments[id].name+'</legend>';
 				
-				/** Adding project directions **/
-				html += '<div class="panel panel-primary">'
-					+'<div class="panel-heading">'
-					+'<h3 class="panel-title">What <u>you</u> have to do...</h3>'
-					+'</div>'
-					+'<div class="panel-body">'+experiments[id].directions_to_collaborators+'</div>'
-					+'</div>';
-
 				/** Add project lead and link to website **/
 				html += '<div class="row">'
 					+'<div class="col-md-8">'
@@ -134,6 +126,15 @@ function SelectProject(id) {
 					+'</div>'
 					+'<div class="col-md-4">'
 					+'<a class="btn btn-default btn-sm" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project on website</a>'
+					+'</div>'
+					+'</div>';
+
+				/** Adding project directions **/
+				html += '<hr>'
+					+'<div class="row">'
+					+'<div class="col-md-12">'
+					+'<h4>Measurement directions</h4>'
+					+'<p class="bg-warning">'+experiments[id].directions_to_collaborators+'</p>'
 					+'</div>'
 					+'</div>';
 
