@@ -57,6 +57,7 @@ function onCharRead(readInfo) {
 		dataRead = '';
 		MeasurementType = 'BackgroundBatteryCheck';
 		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
+		$('#ConnectBtn').button('complete');
 		return;
 	}
 
@@ -264,13 +265,14 @@ function onConnect(connectionInfo) {
   if (!connectionInfo) {
     setStatus('Could not open port','danger');
     $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Could not open port');
+    $('#ConnectBtn').button('reset');
     return;
   }
   connectionId = connectionInfo.connectionId;
-  console.log(connectionInfo);
   setStatus('Unknown Device','warning');
   $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Unknown Device');
   chrome.serial.send(connectionId, str2ab("1000+"), function(e){ });	// send 1000+ to get the answer 'MultiSpeQ Ready'
+  $('#ConnectBtn').button('complete');
 };
 
 // ===============================================================================================
@@ -309,31 +311,39 @@ function buildPortPicker(ports) {
   var portPicker = document.getElementById('port-picker');
   removeOptions(portPicker);
 
-  ports.forEach(function(port) {
-    var portOption = document.createElement('option');
-    portOption.value = portOption.innerText = port.path;
-    portPicker.appendChild(portOption);
-  });
+	ports.forEach(function(port) {
+		var portOption = document.createElement('option');
+		if(!port.path.match(/(\/dev\/cu\.)/g)){
+			portOption.value = port.path;
+			portOption.innerText = port.path.replace(/(\/dev\/tty\.?)/g,'');
+			portPicker.appendChild(portOption);
+		}
+	});
   
   portPicker.onchange = function() {
     if (connectionId != -1) {
-      chrome.serial.disconnect(connectionId, openSelectedPort);
-      return;
+      chrome.serial.disconnect(connectionId, function(){
+		$('#ConnectBtn').button('reset');
+      });
     }
-    openSelectedPort();
+    $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+    setStatus('Not connected','info');
+    deviceConnected = false;
   };
+  
+  
 }
 
 // ===============================================================================================
 // 					Serial connection error handling
 // ===============================================================================================
 chrome.serial.onReceiveError.addListener(function(e){
-	console.log(e);
-	if(e.error == 'device_lost'){ //{connectionId: 602, error: "device_lost"} 
+	if(e.error == 'device_lost'){
 		connectionId = -1;
 		deviceConnected = false;
-     	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Unknown Device');
-		setStatus('Unknown Device','warning');
+     	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+		setStatus('Not connected','info');
+		$('#ConnectBtn').button('reset');
 	}
 });
 
@@ -349,6 +359,15 @@ function openSelectedPort() {
 }
 
 // ===============================================================================================
+// 						Fetch available Ports and built list
+// ===============================================================================================
+function fetchPorts(){
+	chrome.serial.getDevices(function(devices) {
+		buildPortPicker(devices);
+	});
+}
+
+// ===============================================================================================
 // 					Initialized, when app is loaded
 // ===============================================================================================
 onload = function() {
@@ -358,14 +377,38 @@ onload = function() {
 	document.getElementById('QuickMeasurement').addEventListener('click', QuickMeasurement);
 	document.getElementById('ConsoleMeasurement').addEventListener('click', ConsoleMeasurement);
 	document.getElementById('TerminateMeasurement').addEventListener('click', TerminateMeasurement);
-	document.getElementById('ShowOutputBtn').addEventListener('click', function(e){ $('#ShowOutputBtn').blur(); $('#RawOutputTextarea').toggle(); });
+	document.getElementById('ShowOutputBtn').addEventListener('click', function(e){ 
+		$('#ShowOutputBtn').blur();
+		$('#RawOutputTextarea').toggle(); 
+	});
 
 	// Events when port is changed
 	// ===============================================================================================
-	document.getElementById('refetchPorts').addEventListener('click', fetchPorts);
 	$('.preventClose').click(function(event){
 		 event.stopPropagation();
 	 });
+	document.getElementById('refetchPorts').addEventListener('click', fetchPorts);
+	document.getElementById('ConnectBtn').addEventListener('click', function(e){
+		if($('#ConnectBtn').text() == "Connect"){
+			$('#ConnectBtn').blur().button('loading');
+			if (connectionId != -1) {
+				chrome.serial.disconnect(connectionId, openSelectedPort);
+				return;
+			}
+			openSelectedPort();
+		}
+		if($('#ConnectBtn').text() == "Disconnect"){
+			if (connectionId != -1) {
+				chrome.serial.disconnect(connectionId, function(){
+			    	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+					setStatus('Not connected','info');
+					$('#ConnectBtn').blur().button('reset');
+					deviceConnected = false;
+				});
+				return;
+			}
+		}
+	});
 
 	// Events for sign in/off
 	// ===============================================================================================
@@ -600,17 +643,6 @@ onload = function() {
 	});
 
 };
-
-// ===============================================================================================
-// 						Fetch available Ports and built list
-// ===============================================================================================
-function fetchPorts(){
-	chrome.serial.getDevices(function(devices) {
-		buildPortPicker(devices);
-		openSelectedPort();
-	});
-}
-
 
 // ===============================================================================================
 // 						Convert string to ArrayBuffer

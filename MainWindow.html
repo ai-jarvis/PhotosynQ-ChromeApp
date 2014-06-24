@@ -112,17 +112,20 @@
 						<div class="form-horizontal" role="form">
 							<div class="form-group">
 								<label for="port-picker" class="col-sm-3 control-label">Port</label>
-							<div class="col-sm-6">
+							<div class="col-sm-7">
 								<select id="port-picker" class="form-control input-sm"></select>
 							</div>
-							<div class="col-sm-3">
-								<button id="refetchPorts" value="refetchPorts" class="btn btn-default" title="Update list of serial connected devices."><i class="fa fa-refresh"></i></button>
+							<div class="col-sm-2">
+								<button id="refetchPorts" value="refetchPorts" class="btn btn-default pull-right" title="Update list of serial connected devices."><i class="fa fa-refresh"></i></button>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="status" class="col-sm-3 control-label">Status</label>
-							<div class="col-sm-9" style="padding-top:6px;">
+							<div class="col-sm-6" style="padding-top:6px;">
 								<span id="status" class="label label-warning">Not connected</span>
+							</div>
+							<div class="col-sm-3">
+								<button id="ConnectBtn" value="ConnectBtn" data-inital-text="Connect" data-loading-text="Connecting..." data-complete-text="Disconnect" class="btn btn-default pull-right" title="Connect to port">Connect</button>
 							</div>
 						</div>						
 					</div>
