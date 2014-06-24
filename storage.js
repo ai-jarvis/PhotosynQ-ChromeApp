@@ -86,7 +86,9 @@ function LoadPortNameFromStorage() {
 			port_path = port_request['path'];
 			$('#port-picker option').filter(function() {
 				return $(this).text() == port_path; 
-			}).prop('selected', true).change();
+			}).prop('selected', true).change( function(){
+				$('#ConnectBtn').click();
+			});
 		}
 	});	
 	
