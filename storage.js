@@ -82,13 +82,10 @@ function LoadPortNameFromStorage() {
 				RemoveFromStorage('com_port');
 				WriteMessage('Stored com port has wrong format.','danger');
 				return;
-			}			
+			}
 			port_path = port_request['path'];
-			$('#port-picker option').filter(function() {
-				return $(this).text() == port_path; 
-			}).prop('selected', true).change( function(){
-				$('#ConnectBtn').click();
-			});
+			$('#port-picker option[value="'+port_path+'"]').prop('selected', true);
+			$('#ConnectBtn').click();
 		}
 	});	
 	

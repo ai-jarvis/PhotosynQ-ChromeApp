@@ -323,12 +323,12 @@ function buildPortPicker(ports) {
   portPicker.onchange = function() {
     if (connectionId != -1) {
       chrome.serial.disconnect(connectionId, function(){
-		setStatus('Not connected','warning');
 		$('#ConnectBtn').button('reset');
       });
-      return;
     }
-    setStatus('Not connected','warning');
+    $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+    setStatus('Not connected','info');
+    deviceConnected = false;
   };
   
   
@@ -341,7 +341,7 @@ chrome.serial.onReceiveError.addListener(function(e){
 	if(e.error == 'device_lost'){
 		connectionId = -1;
 		deviceConnected = false;
-     	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Unknown Device');
+     	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
 		setStatus('Not connected','info');
 		$('#ConnectBtn').button('reset');
 	}
@@ -356,6 +356,15 @@ function openSelectedPort() {
 	var selectedPort = portPicker.options[portPicker.selectedIndex].value;
 	port_path = selectedPort;
 	chrome.serial.connect(selectedPort, {bitrate: 115200}, onConnect);
+}
+
+// ===============================================================================================
+// 						Fetch available Ports and built list
+// ===============================================================================================
+function fetchPorts(){
+	chrome.serial.getDevices(function(devices) {
+		buildPortPicker(devices);
+	});
 }
 
 // ===============================================================================================
@@ -391,8 +400,10 @@ onload = function() {
 		if($('#ConnectBtn').text() == "Disconnect"){
 			if (connectionId != -1) {
 				chrome.serial.disconnect(connectionId, function(){
-					setStatus('Not connected','warning');
+			    	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+					setStatus('Not connected','info');
 					$('#ConnectBtn').blur().button('reset');
+					deviceConnected = false;
 				});
 				return;
 			}
@@ -632,17 +643,6 @@ onload = function() {
 	});
 
 };
-
-// ===============================================================================================
-// 						Fetch available Ports and built list
-// ===============================================================================================
-function fetchPorts(){
-	chrome.serial.getDevices(function(devices) {
-		buildPortPicker(devices);
-		//openSelectedPort();
-	});
-}
-
 
 // ===============================================================================================
 // 						Convert string to ArrayBuffer

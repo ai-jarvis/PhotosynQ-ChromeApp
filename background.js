@@ -1,9 +1,4 @@
 // ===============================================================================================
-// 					Initial Parameters
-// ===============================================================================================
-var connectionId = -1;
-
-// ===============================================================================================
 // 					Main Window Parameters and events
 // ===============================================================================================
 chrome.app.runtime.onLaunched.addListener(function() {
@@ -20,9 +15,11 @@ chrome.app.runtime.onLaunched.addListener(function() {
 	}, function (Mainwindow){
 		Mainwindow.onClosed.addListener(function() {
 
-			/* close serial connection */
-			if(connectionId !== -1)
-				chrome.serial.close(connectionId, function(){});
+			/* close serial connection(s) */
+			chrome.serial.getConnections(function(connections){
+				for(i in connections)
+					chrome.serial.disconnect(connections[i].connectionId, function(){});
+			});
 			
 			/* close all open windows */
 			var allWindows = chrome.app.window.getAll();
