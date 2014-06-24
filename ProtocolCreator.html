@@ -10,133 +10,157 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/highcharts.js"></script>
 	<script src="js/parameters.js"></script>
+	<script src="js/math.js"></script>
 	<script src="js/initalvariables.js"></script>
 	<script src="js/protocol-creator.js"></script>
 	<style>
-	body {background-image:url('img/papar_texture.jpg'); margin:10px; padding:0px;}
-	#measurement_params li , #measurement li ,#detection_params li, #detection li { padding:3px; }
-	#measurement_params li .form-group, #measurement li .form-group,#detection_params li .form-group, #detection li .form-group {margin-bottom:0px;}
-	li, li > label, li .form-group > label {cursor:move}
-	html, body {height:97%;}
+	body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+	#ConstructionTab li {min-height:40px;}
+	#ConstructionTab li .form-group {margin-bottom:0px;}
+	#ConstructionTab li, li > label, li .form-group > label {cursor:move}
 	</style>
 </head>
 <body>
-<div class="container" style="margin: 0 auto; width: 100%; height:100%">
-	<ul class="nav nav-tabs">
-	  <li class="active"><a href="#ConstructionTab" data-toggle="tab">Single Script Construction</a></li>
-	  <li><a href="#AssemblyTab" data-toggle="tab">Multiple Script Assembly</a></li>
-	</ul>
-	<div class="tab-content" style="background-color:#FFF; height:100%">
-		<div class="tab-pane fade in active" id="ConstructionTab" style="padding:10px 10px 10px 10px">
+<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="ProtocolAssemblyNavBar">
+		<ul class="nav navbar-nav">
+			<li class="active"><a href="#ConstructionTab" data-toggle="tab">Single Script Construction</a></li>
+			<li><a href="#AssemblyTab" data-toggle="tab">Multiple Script Assembly</a></li>
+			<li><a href="#CodeTab" data-toggle="tab">Script Code</a></li>
+		</ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="container" style="margin: 0 auto; width: 100%;" id="MainDisplayContainer">
+
+	<div class="panel panel-success" id="ScriptGraphContainer">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<i class="fa fa-terminal"></i> Script
+		
+			<div class="btn-group pull-right">
+			  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+				Action <span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu" role="menu">
+				<li><a href="#" id="ProtocoltoConsoleBtn"><i class="fa fa-clipboard"></i> Copy to Console</a></li>
+				<li><a href="#" id="ProtocoltoConsoleRunBtn"><i class="fa fa-play"></i> Run</a></li>
+				<li class="divider"></li>
+				<li><a href="#" id="ProtocolSaveBtn" data-toggle="modal" data-target="#saveModal"><i class="fa fa-save"></i> Save</a></li>
+			  </ul>
+			</div>
+			</h4>
+		</div>
+		<div style="height:220px; width:100%; padding:4px" id="SingleScriptGraph" class="panel-body"></div>
+	</div>
+
+	<div class="tab-content panel panel-default">
+		<div class="tab-pane fade in active" id="ConstructionTab" style="padding:10px">
 			<div class="row">
-				<div class="col-md-4 col-sm-6">
-				<legend>Parameters</legend>
-				<div class="panel-group" id="accordion">
-				  <div class="panel panel-primary">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#environmental_params">
-						   <i class="fa fa-chevron-down"></i> Environmental
-						</a>
-					  </h4>
-					</div>
-						<ul id="environmental_params" class="list-group panel-collapse collapse in" style="min-height:40px;"></ul>
-				  </div>
-				  <div class="panel panel-success">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#measurement_params">
-						  <i class="fa fa-chevron-right"></i> Measurement
-						</a>
-					  </h4>
-					</div>
-						<ul  id="measurement_params" class="list-group panel-collapse collapse form-horizontal" style="min-height:40px;"></ul>
-				  </div>
-				  <div class="panel panel-warning">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#detection_params">
-						  <i class="fa fa-chevron-right"></i> Detection
-						</a>
-					  </h4>
-					</div>
-						<ul  id="detection_params" class="list-group panel-collapse collapse form-horizontal" style="min-height:40px;"></ul>
-				  </div>
-				  <div class="panel panel-default">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#presets">
-						  <i class="fa fa-chevron-right"></i> Quick Measurement Protocols 
-						</a>
-					  </h4>
-					</div>
-						<ul id="presets" class="list-group panel-collapse collapse" style="min-height:40px; max-height: 300px; overflow-y:scroll;"></ul>
-				  </div>
-				</div>
-				
-				</div>
-				<div class="col-md-4  col-sm-6">
-					<legend>Your Script</legend>
-					<div class="panel panel-primary">
-						<div class="panel-heading"><h3 class="panel-title">Environmental <button class="btn btn-default btn-xs pull-right" id="environmental_clear">clear</button></h3></div>
-						<span class="img-thumbnail text-muted" style="border-style:dashed; position:absolute; left:40%;margin-top:5px">drop here</span>
-						<ul id="environmental" class="list-group" style="min-height:40px;"></ul>
-					</div>
-					<div class="panel panel-success">
-						<div class="panel-heading"><h3 class="panel-title">Measurement <button class="btn btn-default btn-xs pull-right" id="measurement_clear">clear</button></h3></div>
-							<span class="img-thumbnail text-muted" style="border-style:dashed; position:absolute; left:40%;margin-top:5px">drop here</span>
-							<ul id="measurement" class="list-group form-horizontal" style="min-height:40px;"></ul>
+				<div class="col-md-5 col-sm-4">
+					<ul class="nav nav-tabs">
+					  <li class="active"><a href="#presets_list" data-toggle="tab"><i class="fa fa-file-text-o"></i> Protocols</a></li>
+					  <li><a href="#environmental_params_list" data-toggle="tab"><i class="fa fa-cog"></i> Environmental</a></li>
+					  <li><a href="#spectroscopic_params_list" data-toggle="tab"><i class="fa fa-cog"></i> Spectroscopic</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane fade in active" id="presets_list">
+							<div id="presets" class="list-group" style="min-height:40px; overflow-y:auto;"></div>
 						</div>
-					<div class="panel panel-warning">
-						<div class="panel-heading"><h3 class="panel-title">Detection <button class="btn btn-default btn-xs pull-right" id="detection_clear">clear</button></h3></div>
-							<span class="img-thumbnail text-muted" style="border-style:dashed; position:absolute; left:40%;margin-top:5px">drop here</span>						
-							<ul id="detection" class="list-group form-horizontal" style="min-height:40px;"></ul>
+						<div class="tab-pane fade" id="environmental_params_list">
+							<div class="panel panel-default">
+								<ul id="environmental_params" class="list-group form-horizontal" style="min-height:40px; overflow-y:auto;"></ul>
+							</div>
 						</div>
+						<div class="tab-pane fade" id="spectroscopic_params_list">
+							<div class="panel panel-default">
+								<ul id="spectroscopic_params" class="list-group form-horizontal" style="min-height:40px; overflow-y:auto;"></ul>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div class="col-md-4">
-					<legend>Graph and Code <span class="label label-danger pull-right" id="valid_label"><small>invalid</small></span></legend>
-					<div style="height:260px; width:100%;" id="SingleScriptGraph"></div>
-					<div id="ScriptAsGraph"></div>
-					<pre id="RawProtocol" class="pre-scrollable"></pre>
-					<button id="ProtocoltoConsoleBtn" class="btn btn-primary">To Console</button>
-					<button id="ProtocoltoConsoleRunBtn" class="btn btn-success">Run</button>
-					<button id="ProtocolSaveBtn" class="btn btn-info">Save</button>
+				<div class="col-md-7 col-sm-8">
+					<div class="panel panel-default" style="display:none">
+						<div class="panel-heading"><h3 class="panel-title">Spectroscopic <button class="btn btn-default btn-xs pull-right" id="spectroscopic_clear">clear</button></h3></div>
+							<div class="img-thumbnail text-muted center-block text-center" style="border-style:dashed; margin:10px 10px 10px 10px">drag &#39;n drop parameters here</div>
+							<ul id="spectroscopic" class="list-group form-horizontal" style="margin-top:-51px;min-height:40px;overflow-y:auto;"></ul>
+						</div>
+						<div class="panel panel-default" style="display:none">
+							<div class="panel-heading">
+								<h3 class="panel-title">Environmental 
+									<button class="btn btn-default btn-xs pull-right" id="environmental_clear">clear</button>
+								</h3>
+							</div>
+							<div class="img-thumbnail text-muted center-block text-center" style="border-style:dashed; margin:10px 10px 10px 10px">drag &#39;n drop parameters here</div>
+							<ul id="environmental" class="list-group  form-horizontal " style="margin-top:-51px;min-height:40px;overflow-y:auto; "></ul>
+						</div>
+						<div id="presets_info"></div>
 				</div>
 			</div>
 		</div>
-		<div class="tab-pane fade" id="AssemblyTab" style="padding:10px 10px 10px 10px">
+		
+		<div class="tab-pane fade" id="AssemblyTab" style="padding:10px">
 			<div class="row">
-				<div class="col-md-4 col-sm-6">
-					<legend>Available Protocols</legend>
-					<div class="panel-group" id="accordion_second">
-						<div class="panel panel-default">
-							<div class="panel-heading">
-							  <h4 class="panel-title">
-								<a data-toggle="collapse" data-parent="#accordion_second" href="#myscripts_second">
-								  <i class="fa fa-chevron-right"></i> My Protocols
-								</a>
-							  </h4>
-							</div>
-								<ul id="myscripts_second" class="list-group panel-collapse collapse" style="min-height:40px; max-height: 300px; overflow-y:scroll;"></ul>
+				<div class="col-md-5 col-sm-6">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+						  <h4 class="panel-title">
+							  <i class="fa fa-file-text-o"></i> Protocols 
+						  </h4>
 						</div>
-						<div class="panel panel-default">
-							<div class="panel-heading">
-							  <h4 class="panel-title">
-								<a data-toggle="collapse" data-parent="#accordion_second" href="#presets_second">
-								  <i class="fa fa-chevron-right"></i> Quick Measurement Protocols 
-								</a>
-							  </h4>
-							</div>
-								<ul id="presets_second" class="list-group panel-collapse collapse" style="min-height:40px; max-height: 300px; overflow-y:scroll;"></ul>
-						</div>
+							<div id="presets_second" class="list-group" style="min-height:40px; overflow-y:auto;"></div>
 					</div>
 				</div>
-				<div class="col-md-8 col-sm-6">
-
+				<div class="col-md-7 col-sm-6">
+					<ul id="preset_sort" class="list-group" style="min-height:40px; overflow-y:auto;"></ul>
+					<div class="img-thumbnail text-muted center-block text-center" style="margin:-200px 10px 10px 10px;border-style:dashed;">click on protocols to add</div>
 				</div>
 			</div>
+		</div>
+		
+		<div class="tab-pane fade" id="CodeTab" style="padding:10px;">
+			<pre id="RawProtocol" style="overflow-y:scroll;"></pre>
 		</div>
 	</div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="saveModalLabel">Save current protocol</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<input type="text" class="form-control" placeholder="Protocol name">
+			<p  class="help-block">Enter same name to replace</p>
+		</div>
+		<div class="form-group">
+			<textarea class="form-control" placeholder="Protocol description"></textarea>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
