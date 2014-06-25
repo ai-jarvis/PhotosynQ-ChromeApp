@@ -482,10 +482,10 @@ onload = function() {
 
 	// Menu toggle events
 	// ===============================================================================================
-	$('#accordion').on('show.bs.collapse', function (e) {
+	$('#accordion,#PlotsContainer').on('show.bs.collapse', function (e) {
 		$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
 	});
-	$('#accordion').on('hide.bs.collapse', function (e) {
+	$('#accordion,#PlotsContainer').on('hide.bs.collapse', function (e) {
 	  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
 	});
 

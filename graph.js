@@ -31,7 +31,7 @@ function plot(data){
 
 			// initial variables in loop
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
-			var protocolname = '';
+			var protocolname = 'Unknown protocol';
 			if(data[repeat][protocolID].protocol_id !== undefined){
 				try{
 					protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
@@ -43,36 +43,60 @@ function plot(data){
 			if(replacements[protocolname] !== undefined)
 				protocolname = replacements[protocolname];
 			
-			var HTML = macro.HTML;
+			var HTML = '<tr class="warning"><td colspan="2">'+macro.HTML+'</td></tr>';
 			
 			// Build graph with container
-			var container = '<div class="panel panel-info">';
+			var container = '<div class="panel panel-default">';
+			
 			if(protocolname !== ""){
 				container += '<div class="panel-heading">';
-				container += '<h3 class="panel-title">'+protocolname+'</h3>';
+				container += '<h3 class="panel-title">'
+				container += protocolname
+				container += '<a type="button" href="#plotRawDatabody'+repeat+''+protocolID+'" title="Show/hide graph" class="btn btn-default btn-xs pull-right" data-toggle="collapse" data-parent="#PlotsContainer"><i class="fa fa-chevron-up"></i></a>'
+				container += '</h3>';
 				container += '</div>';
 			}
+
+			// add graph
 			if(data[repeat][protocolID].data_raw.length > 0){
-				container += '<div class="panel-body">';
-				container += '<div id="plotRawData'+repeat+''+protocolID+'"></div>';
+				container += '<div class="panel-body collapse" id="plotRawDatabody'+repeat+''+protocolID+'">';
+				container += '<div id="plotRawData'+repeat+''+protocolID+'" style="padding:0px;"></div>';
 				container += '</div>';
 			}
-			
-			MacroArray[protocolID] = macro;
 
 			// add environmental data
+			var col = 1;
+			HTML += '<tr>';
 			for(values in data[repeat][protocolID]){
 				if($.inArray(values, variablehidephone) == -1){
+					HTML += '<td style="white-space: nowrap; width:50%">';
+					HTML += '<em class="text-muted">';
 					if(replacements[values] != undefined)
-						HTML += ' | <b>'+replacements[values]+':</b> <i>'+data[repeat][protocolID][values]+'</i>';
+						HTML += replacements[values]
 					else
-						HTML += ' | <b>'+values+':</b> <i>'+data[repeat][protocolID][values]+'</i>';
+						HTML += values
+					
+					HTML += ':</em> ';
+					HTML += '<span style="margin-left:10px">'+data[repeat][protocolID][values]+'</span>';
+					HTML += '</td>';
+					
+					col++;
+					if(col % 2)
+						HTML += '</tr><tr>';
 				}
 			}
+			col++;
+			if(col % 2)
+				HTML += '<td></td>'
+			HTML += '</tr>'
+				
+			container += '<table class="table table-condensed table-bordered table-striped">'+HTML+'</table>';
 
-			container += '<ul class="list-group"><li class="list-group-item list-group-item-success">'+HTML+'</li></ul>';
+			//close panel container
 			container += '</div>';
+
 		
+			MacroArray[protocolID] = macro;
 
 			// Add container
 			$('#PlotsContainer').append(container);
