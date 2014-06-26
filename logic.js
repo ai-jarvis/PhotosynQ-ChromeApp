@@ -91,8 +91,12 @@ function onCharRead(readInfo) {
 		if(passedValue !== undefined){
 			if($('#ModalDialogSparkline span').attr('values') == "")
 				$('#ModalDialogSparkline span').attr('values', passedValue);
-			else
-				$('#ModalDialogSparkline span').attr('values', $('#ModalDialogSparkline span').attr('values')+','+passedValue);
+			else{
+				var values = $('#ModalDialogSparkline span').attr('values').split(',');
+				if(values.length == 30)
+					values = values.slice(1,30).join(',');
+				$('#ModalDialogSparkline span').attr('values', values+','+passedValue);
+			}
 			$('#ModalDialogSparkline span').sparkline('html', { 
 				width: 258,
 				height: 30,
@@ -130,14 +134,14 @@ function onCharRead(readInfo) {
 		return;
 	}
 
-	if(MeasurementType == 'MenuBarTest'){
-		if ($('#ModalDialog .modal-body').is(':empty')){
-		  	$('#ModalDialog .modal-body').append('<div class="text-primary text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>');
-			$('#ModalDialog .modal-footer').hide();
-		}
-		if(str.match(/(^5\r\n)/gim) && !str.match(/(5\r\n0)/gi)){
-			$('#ModalDialog').modal('hide');
-			$('#ModalDialog .modal-footer').show();
+	if(MeasurementType == 'MenuBarRead'){
+		if(dataRead.match(/\,/g)){
+			$('#ModalDialogMsg').hide();
+			var passedValue = dataRead.replace(/(\d*\.?\d*\]})|(\,)/g, '');
+			$('#ModalDialogMsg').html('<p><span class="text-muted">Last read:</span> '+ passedValue+'</p>').fadeIn();
+			chrome.serial.send(connectionId, str2ab('-1+'), function(){
+				dataRead = '';
+			});
 		}
 		return;
 	}
@@ -572,11 +576,8 @@ onload = function() {
 			for(btn in MenuItems[fn]){
 				if(MenuItems[fn][btn].type == 'button'){
 					html += '<li><a href="#" id="' + MenuItems[fn][btn].id + '" '
-					if(MenuItems[fn][btn].dialog == 'prompt')
-						html += 'data-command="' + JSON.stringify(MenuItems[fn][btn].command).replace(/\"/g, '\'') + '" '
-					else
-						html += 'data-command="' + MenuItems[fn][btn].command + '" '
-					html += 'data-dialog="' + MenuItems[fn][btn].dialog + '">'
+					html += 'data-item="' + fn + '" '
+					html += 'data-itemID="' + btn + '" >'
 					html += '<i class="' + MenuItems[fn][btn].icon + '"></i> '
 					html += MenuItems[fn][btn].title + '</a></li>'
 				}
@@ -598,7 +599,7 @@ onload = function() {
 		for(btn in MenuItems[fn]){
 			if(MenuItems[fn][btn].type == 'button'){
 				document.getElementById(MenuItems[fn][btn].id).addEventListener('click', function(e){
-					MenubarFunction($(this).attr('data-command'), $(this).attr('id'), $(this).html(), $(this).attr('data-dialog'));
+					MenubarFunction($(this).attr('data-item'), $(this).attr('data-itemID'));
 				});			
 			}
 		}
@@ -710,7 +711,7 @@ function SendLongStrings(string){
 // ===============================================================================================
 // 						Run functions from the menu bar
 // ===============================================================================================
-function MenubarFunction(command,text,title,dialog) {
+function MenubarFunction(item,itemid) {
 	DiscardMeasurement();
 
 	$('#ModalDialog').modal({
@@ -718,6 +719,10 @@ function MenubarFunction(command,text,title,dialog) {
 		keyboard: false,
 		show:false
 	});	
+
+	var title = MenuItems[item][itemid].title;
+	var dialog = MenuItems[item][itemid].dialog;
+	var command = MenuItems[item][itemid].command;
 
 	$('#ModalDialogLabel').html(title);
 	$('#ModalDialogValue, #ModalDialogMsg, #ModalDialogSparkline,#ModalDialogForm').empty().hide();
@@ -731,50 +736,61 @@ function MenubarFunction(command,text,title,dialog) {
 	
 	
 	if(dialog == 'prompt'){
+
 		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 		html = '<div class="form-group">'
 		html += '<select class="form-control" id="MenuPromtDialogSelect">'
-		command = JSON.parse(command.replace(/\'/g, '"'));
 		for(i in command)
 			html += '<option value="'+command[i].command+'">'+command[i].title+'</option>'
 		html += '</select>'
 		html += '</div>'
 		
 		html += '<div class="form-group">'
-		html += '<label class="control-label">Intensity</label>'
+		html += '<label class="control-label">'+MenuItems[item][itemid].prompt_label+'</label>'
 		html += '<div class="input-group">'
 		html += '<input type="number" class="form-control" id="MenuPromtDialogInput" placeholder="20">'
 		html += '<span class="input-group-btn">'
-		html += '<button type="button" class="btn btn-default" data-toggle="button" id="MenuPromtDialogOn">On</button>'
+		if(MenuItems[item][itemid].button_behavior == 'toggle')
+			html += '<button type="button" class="btn btn-default" data-toggle="button" id="MenuPromtDialogBtn">'+MenuItems[item][itemid].button_label+'</button>'
+		if(MenuItems[item][itemid].button_behavior == 'click')
+			html += '<button type="button" class="btn btn-default" id="MenuPromtDialogBtn">'+MenuItems[item][itemid].button_label+'</button>'		
 		html += '</span>'
 		html += '</div>'
-		html += '<p class="help-block">Set light intensity (0-4095)</p>'
+		html += '<p class="help-block">'+MenuItems[item][itemid].prompt_help+'</p>'
 		html += '</div>'
 		
 		$('#ModalDialogForm').append(html).show();
 	
-		$('#MenuPromtDialogOn').on('click', function(){
-			$('#MenuPromtDialogOn').blur();
-			if($(this).hasClass('active')){
-				console.log('a')
-				chrome.serial.send(connectionId, str2ab('-1+'), function(){});
+		$('#MenuPromtDialogBtn').on('click', function(){
+			$('#MenuPromtDialogBtn').blur();
+			if(MenuItems[item][itemid].button_behavior == 'toggle'){
+				if($(this).hasClass('active')){
+					chrome.serial.send(connectionId, str2ab('-1+'), function(){});
+				}
+				if(!$(this).hasClass('active')){
+					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogSelect').val()+'+'), function(){
+						chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){});	
+					});	
+				}
 			}
-			if(!$(this).hasClass('active')){
-				console.log('b');
+			if(MenuItems[item][itemid].button_behavior == 'click'){
+				MeasurementType = "MenuBarRead";
 				chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogSelect').val()+'+'), function(){
-					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){});	
-				});	
+					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){
+						chrome.serial.send(connectionId, str2ab($('-1+')), function(){});	
+					});	
+				});
 			}
 		});
 		
 		$('#MenuPromtDialogSelect').on('change', function(){
-			if($('#MenuPromtDialogOn').hasClass('active'))
-				$('#MenuPromtDialogOn').click();
+			if($('#MenuPromtDialogBtn').hasClass('active'))
+				$('#MenuPromtDialogBtn').click();
 		});
 		
 		var idle;
 		$('#MenuPromtDialogInput').on('change keyup', function(){
-			if($('#MenuPromtDialogOn').hasClass('active')){
+			if($('#MenuPromtDialogBtn').hasClass('active')){
 				clearTimeout(idle);
 				idle = setTimeout(function() {
 					console.log($('#MenuPromtDialogInput').val());

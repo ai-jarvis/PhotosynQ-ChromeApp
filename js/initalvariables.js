@@ -208,6 +208,13 @@ var MenuItems = {
 		'id': 'TempBtn',
 		'command': '103+',
 		'dialog': 'close'
+		},{
+		'type': 'button',
+		'title': 'Contactless temperature [&deg;C]',
+		'icon': 'fa fa-sun-o',
+		'id': 'CLessTempBtn',
+		'command': '106+',
+		'dialog': 'close'
 		},
 		{
 		'type': 'button',
@@ -222,11 +229,11 @@ var MenuItems = {
 		},
 		{
 		'type': 'spacer',
-		'title': 'Lights'
+		'title': 'Lights & Detectors'
 		},
 		{
 		'type': 'button',
-		'title': 'Switch on/off',
+		'title': 'Switch lights on/off',
 		'icon': 'fa fa-lightbulb-o',
 		'id': 'ManualLights',
 		'command': [
@@ -263,18 +270,15 @@ var MenuItems = {
 				'command': '10+'
 				}
 			],
+		'prompt_label': 'Intensity',
+		'prompt_help': 'Set light intensity from 0-4095',
+		'button_label': 'On',
+		'button_behavior': 'toggle',
 		'dialog': 'prompt'
 		},
 		{
-		'type': 'spacer'
-		},
-		{
-		'type': 'spacer',
-		'title': 'Detectors'
-		},
-		{
 		'type': 'button',
-		'title': 'Get read',
+		'title': 'Get detector read',
 		'icon': 'fa fa-square',
 		'id': 'ManualDetectors',
 		'command': [{
@@ -285,6 +289,10 @@ var MenuItems = {
 			'title': 'Detector 2 (add on bord)',
 			'command': '35+'
 			}],
+		'prompt_label': 'Detection duration',
+		'prompt_help': 'Set detection duration 5-500 us',
+		'button_label': 'Read',
+		'button_behavior': 'click',
 		'dialog': 'prompt'
 		}
 	]
