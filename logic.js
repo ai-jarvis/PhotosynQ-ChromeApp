@@ -85,9 +85,30 @@ function onCharRead(readInfo) {
 		else if(dataRead.match(/(\,)/g)){
 			var passedValue = dataRead.replace(/\,/g, '');
 			dataRead = '';
-		}	
-		$('#ModalDialog .modal-body').html('<div class="text-primary text-center" style="display:none"><strong style="font-size:30px">'+ passedValue +'<strong></div>');
-		$('#ModalDialog .modal-body div').fadeIn();
+		}
+		$('#ModalDialogValue').hide().text(passedValue);
+		$('#ModalDialogValue').fadeIn();
+		if(passedValue !== undefined){
+			if($('#ModalDialogSparkline span').attr('values') == "")
+				$('#ModalDialogSparkline span').attr('values', passedValue);
+			else{
+				var values = $('#ModalDialogSparkline span').attr('values').split(',');
+				if(values.length == 30)
+					values = values.slice(1,30).join(',');
+				$('#ModalDialogSparkline span').attr('values', values+','+passedValue);
+			}
+			$('#ModalDialogSparkline span').sparkline('html', { 
+				width: 258,
+				height: 30,
+				lineColor:'#a1a1a1',
+				fillColor:'#f1f1f1',
+				minSpotColor: false,
+				maxSpotColor:false,
+				spotColor:'#aaaaaa',
+				disableTooltips: true,
+				disableHighlight: true
+			});
+		}
 		return;
 	}
 
@@ -96,31 +117,31 @@ function onCharRead(readInfo) {
 				var info = JSON.parse(dataRead);
 				for(key in info){
 					if(key == 'response')
-						$('#ModalDialog .modal-body').append(info[key]+'<br>');
+						$('#ModalDialogMsg').show().append(info[key]+'<br>');
 					else if (key == 'batt_level')
 						BatteryLevel(info[key]);
 					else if(key == 'pwr_off'){
-						$('#ModalDialog .modal-body').append('<div class="text-primary text-center">Device powered off</div>');
+						$('#ModalDialogMsg').show().append('<span class="text-primary">Device powered off</span>');
 						dataRead = '';
 						MeasurementType = 'BackgroundBatteryCheck';
 						chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 					}
 					else
-						$('#ModalDialog .modal-body').append('<span class="text-muted">'+key.replace('_',' ')+':</span> '+info[key]+'<br>');
+						$('#ModalDialogMsg').show().append('<span class="text-muted">'+key.replace('_',' ')+':</span> '+info[key]+'<br>');
 				}
 			}
 			catch(e){}
 		return;
 	}
 
-	if(MeasurementType == 'MenuBarTest'){
-		if ($('#ModalDialog .modal-body').is(':empty')){
-		  	$('#ModalDialog .modal-body').append('<div class="text-primary text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>');
-			$('#ModalDialog .modal-footer').hide();
-		}
-		if(str.match(/(^5\r\n)/gim) && !str.match(/(5\r\n0)/gi)){
-			$('#ModalDialog').modal('hide');
-			$('#ModalDialog .modal-footer').show();
+	if(MeasurementType == 'MenuBarRead'){
+		if(dataRead.match(/\,/g)){
+			$('#ModalDialogMsg').hide();
+			var passedValue = dataRead.replace(/(\d*\.?\d*\]})|(\,)/g, '');
+			$('#ModalDialogMsg').html('<p><span class="text-muted">Last read:</span> '+ passedValue+'</p>').fadeIn();
+			chrome.serial.send(connectionId, str2ab('-1+'), function(){
+				dataRead = '';
+			});
 		}
 		return;
 	}
@@ -579,10 +600,18 @@ onload = function() {
 			+ '<ul class="dropdown-menu">'
 			for(btn in MenuItems[fn]){
 				if(MenuItems[fn][btn].type == 'button'){
-					html += '<li><a href="#" id="' + MenuItems[fn][btn].id + '" data-command="' + MenuItems[fn][btn].command + '" data-dialog="' + MenuItems[fn][btn].dialog + '"><i class="' + MenuItems[fn][btn].icon + '"></i> ' + MenuItems[fn][btn].title + '</a></li>'
+					html += '<li><a href="#" id="' + MenuItems[fn][btn].id + '" '
+					html += 'data-item="' + fn + '" '
+					html += 'data-itemID="' + btn + '" >'
+					html += '<i class="' + MenuItems[fn][btn].icon + '"></i> '
+					html += MenuItems[fn][btn].title + '</a></li>'
 				}
-				else if(MenuItems[fn][btn].type == 'spacer')
-					html += '<li class="divider"></li>'
+				else if(MenuItems[fn][btn].type == 'spacer'){
+					if(MenuItems[fn][btn].title !== undefined)
+						html += '<li class="dropdown-header">'+MenuItems[fn][btn].title+'</li>'
+					else
+						html += '<li class="divider"></li>'
+				}
 			}
 			html += '</ul>'
 			+ '</li>'
@@ -595,13 +624,11 @@ onload = function() {
 		for(btn in MenuItems[fn]){
 			if(MenuItems[fn][btn].type == 'button'){
 				document.getElementById(MenuItems[fn][btn].id).addEventListener('click', function(e){
-					MenubarFunction($(this).attr('data-command'), $(this).attr('id'), $(this).html(), $(this).attr('data-dialog'));
+					MenubarFunction($(this).attr('data-item'), $(this).attr('data-itemID'));
 				});			
 			}
 		}
 	}
-
-
 
 	
 	// Get updates from database/file, auto login
@@ -709,7 +736,7 @@ function SendLongStrings(string){
 // ===============================================================================================
 // 						Run functions from the menu bar
 // ===============================================================================================
-function MenubarFunction(command,text,title,dialog) {
+function MenubarFunction(item,itemid) {
 	DiscardMeasurement();
 
 	$('#ModalDialog').modal({
@@ -718,41 +745,114 @@ function MenubarFunction(command,text,title,dialog) {
 		show:false
 	});	
 
+	var title = MenuItems[item][itemid].title;
+	var dialog = MenuItems[item][itemid].dialog;
+	var command = MenuItems[item][itemid].command;
+
+	$('#ModalDialogLabel').html(title);
+	$('#ModalDialogValue, #ModalDialogMsg, #ModalDialogSparkline,#ModalDialogForm').empty().hide();
+	$('#ModalDialog .modal-dialog').removeClass('modal-sm')
+
 	
 	if(dialog == 'static'){
 		MeasurementType = "MenuBarTest";
+		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 	}
 	
 	
 	if(dialog == 'prompt'){
+
+		$('#ModalDialog .modal-dialog').addClass('modal-sm')
+		html = '<div class="form-group">'
+		html += '<select class="form-control" id="MenuPromtDialogSelect">'
+		for(i in command)
+			html += '<option value="'+command[i].command+'">'+command[i].title+'</option>'
+		html += '</select>'
+		html += '</div>'
+		
+		html += '<div class="form-group">'
+		html += '<label class="control-label">'+MenuItems[item][itemid].prompt_label+'</label>'
+		html += '<div class="input-group">'
+		html += '<input type="number" class="form-control" id="MenuPromtDialogInput" placeholder="20">'
+		html += '<span class="input-group-btn">'
+		if(MenuItems[item][itemid].button_behavior == 'toggle')
+			html += '<button type="button" class="btn btn-default" data-toggle="button" id="MenuPromtDialogBtn">'+MenuItems[item][itemid].button_label+'</button>'
+		if(MenuItems[item][itemid].button_behavior == 'click')
+			html += '<button type="button" class="btn btn-default" id="MenuPromtDialogBtn">'+MenuItems[item][itemid].button_label+'</button>'		
+		html += '</span>'
+		html += '</div>'
+		html += '<p class="help-block">'+MenuItems[item][itemid].prompt_help+'</p>'
+		html += '</div>'
+		
+		$('#ModalDialogForm').append(html).show();
+	
+		$('#MenuPromtDialogBtn').on('click', function(){
+			$('#MenuPromtDialogBtn').blur();
+			if(MenuItems[item][itemid].button_behavior == 'toggle'){
+				if($(this).hasClass('active')){
+					chrome.serial.send(connectionId, str2ab('-1+'), function(){});
+				}
+				if(!$(this).hasClass('active')){
+					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogSelect').val()+'+'), function(){
+						chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){});	
+					});	
+				}
+			}
+			if(MenuItems[item][itemid].button_behavior == 'click'){
+				MeasurementType = "MenuBarRead";
+				chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogSelect').val()+'+'), function(){
+					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){
+						chrome.serial.send(connectionId, str2ab($('-1+')), function(){});	
+					});	
+				});
+			}
+		});
+		
+		$('#MenuPromtDialogSelect').on('change', function(){
+			if($('#MenuPromtDialogBtn').hasClass('active'))
+				$('#MenuPromtDialogBtn').click();
+		});
+		
+		var idle;
+		$('#MenuPromtDialogInput').on('change keyup', function(){
+			if($('#MenuPromtDialogBtn').hasClass('active')){
+				clearTimeout(idle);
+				idle = setTimeout(function() {
+					console.log($('#MenuPromtDialogInput').val());
+					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){});
+				}, 1000);
+			}
+		});
+		
 	}
 	
 	
 	if(dialog == 'close'){
 		MeasurementType = "MenuBarMeasurement";
+		$('#ModalDialog .modal-dialog').addClass('modal-sm');
+		$('#ModalDialogSparkline').append('<span values="" style="margin-bottom:-20px;"></span>').show();
 	}
 	
 	
 	if(dialog == 'info'){
 		MeasurementType = "MenuBarInfo";
+		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 	}
 	
-	
-	$('#ModalDialog .modal-dialog').addClass('modal-sm')
-	$('#ModalDialog .modal-body').empty();
-	$('#ModalDialogLabel').html(title);
 
 	if (connectionId != -1 && deviceConnected){
 		$('#DeviceConnectionState').addClass('fa-blink');
 		$('#ModalDialog').modal('show');
-		chrome.serial.send(connectionId, str2ab(command), function(){});
+		if(dialog !== 'prompt'){
+			chrome.serial.send(connectionId, str2ab(command), function(){});
+		}
 	}
 	else
 		WriteMessage('MultispeQ device not connected','danger');
 	
 
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
-		chrome.serial.send(connectionId, str2ab('0'), function(){});
+		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		MeasurementType = false;
 		$('#DeviceConnectionState').removeClass('fa-blink')
 	});
@@ -1146,6 +1246,6 @@ function BatteryLevel(batt_level){
 			$('#BatteryStatusIndicator').addClass('text-success').addClass('icon-bat4').attr('title',state);
 		}
 	}
-	$('#ModalDialog .modal-body').append('<div class="text-primary text-center">'+state+'<br><small class="text-muted">'+batt_level[0]+', '+batt_level[1]+', '+batt_level[2]+'</small></div>');
+	$('#ModalDialogMsg').show().append('<div class="text-primary">'+state+'<br><small class="text-muted">'+batt_level[0]+', '+batt_level[1]+', '+batt_level[2]+'</small></div>');
 }
 

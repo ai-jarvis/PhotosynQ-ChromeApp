@@ -172,10 +172,14 @@ var MenuItems = {
 		'dialog': 'info'
 		}
 	],
-	'Sensors': [
+	'Manual Control': [
+		{
+		'type': 'spacer',
+		'title': 'Sensors'
+		},
 		{
 		'type': 'button',
-		'title': 'Light',
+		'title': 'Light [PAR]',
 		'icon': 'fa fa-lightbulb-o',
 		'id': 'LightBtn',
 		'command': '101+',
@@ -204,6 +208,13 @@ var MenuItems = {
 		'id': 'TempBtn',
 		'command': '103+',
 		'dialog': 'close'
+		},{
+		'type': 'button',
+		'title': 'Contactless temperature [&deg;C]',
+		'icon': 'fa fa-sun-o',
+		'id': 'CLessTempBtn',
+		'command': '106+',
+		'dialog': 'close'
 		},
 		{
 		'type': 'button',
@@ -212,91 +223,77 @@ var MenuItems = {
 		'id': 'RelHumBtn',
 		'command': '104+',
 		'dialog': 'close'
-		}
-	],
-	'Spectroscopy': [
-		{
-		'type': 'button',
-		'title': 'Measuring light 1 (main board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'MeasureLight1Btn',
-		'command': '15+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Measuring light 2 (main board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'MeasureLight2Btn',
-		'command': '16+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Measuring light 3 (add-on board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'MeasureLight3Btn',
-		'command': '11+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Measuring light 4 (add-on board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'MeasureLight4Btn',
-		'command': '12+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Actinic light 1 (main board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'ActLight1Btn',
-		'command': '20+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Actinic light 2 (add-on board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'ActLight2Btn',
-		'command': '2+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Calibrating light 1 (main board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'CalLight1Btn',
-		'command': '14+',
-		'dialog': 'static'
-		},
-		{
-		'type': 'button',
-		'title': 'Calibrating light 2 (add-on board)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'CalLight2Btn',
-		'command': '10+',
-		'dialog': 'static'
 		},
 		{
 		'type': 'spacer'
 		},
 		{
-		'type': 'button',
-		'title': 'Detector 1 (main bord)',
-		'icon': 'fa fa-lightbulb-o',
-		'id': 'SpectroscopyDetector1Btn',
-		'command': '34+',
-		'dialog': 'static'
+		'type': 'spacer',
+		'title': 'Lights & Detectors'
 		},
 		{
 		'type': 'button',
-		'title': 'Detector 2 (add on bord)',
+		'title': 'Switch lights on/off',
 		'icon': 'fa fa-lightbulb-o',
-		'id': 'SpectroscopyDetector2Btn',
-		'command': '35+',
-		'dialog': 'static'
+		'id': 'ManualLights',
+		'command': [
+				{
+				'title': 'Measuring light 1 (main board)',
+				'command': '15+'
+				},
+				{
+				'title': 'Measuring light 2 (main board)',
+				'command': '16+'
+				},
+				{
+				'title': 'Measuring light 3 (add-on board)',
+				'command': '11+'
+				},
+				{
+				'title': 'Measuring light 4 (add-on board)',
+				'command': '12+'
+				},
+				{
+				'title': 'Actinic light 1 (main board)',
+				'command': '20+'
+				},
+				{
+				'title': 'Actinic light 2 (add-on board)',
+				'command': '2+'
+				},
+				{
+				'title': 'Calibrating light 1 (main board)',
+				'command': '14+'
+				},
+				{
+				'title': 'Calibrating light 2 (add-on board)',
+				'command': '10+'
+				}
+			],
+		'prompt_label': 'Intensity',
+		'prompt_help': 'Set light intensity from 0-4095',
+		'button_label': 'On',
+		'button_behavior': 'toggle',
+		'dialog': 'prompt'
+		},
+		{
+		'type': 'button',
+		'title': 'Get detector read',
+		'icon': 'fa fa-square',
+		'id': 'ManualDetectors',
+		'command': [{
+			'title': 'Detector 1 (main bord)',
+			'command': '34+'
+			},
+			{
+			'title': 'Detector 2 (add on bord)',
+			'command': '35+'
+			}],
+		'prompt_label': 'Detection duration',
+		'prompt_help': 'Set detection duration 5-500 us',
+		'button_label': 'Read',
+		'button_behavior': 'click',
+		'dialog': 'prompt'
 		}
 	]
 }
