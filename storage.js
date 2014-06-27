@@ -268,6 +268,7 @@ function SaveDataToFile(){
 						readabledata += '\t'+v;
 				}
 			}
+
 			readabledata +='\n'
 			for(var i in ResultString['sample']){
 				for(var m in ResultString['sample'][i]){
@@ -281,10 +282,11 @@ function SaveDataToFile(){
 					}
 					if(MacroArray[m] !== undefined){
 						for(var v in MacroArray[m]){
-							if(MacroArray[m][v].match(/No macro available/))
+							var macroValue = new String(MacroArray[m][v]);
+							if(macroValue.match(/No macro available/g))
 								readabledata += '\t';
 							else
-								readabledata += '\t'+MacroArray[m][v];
+								readabledata += '\t'+macroValue;
 						}
 					}
 					readabledata += '\n';
@@ -303,6 +305,8 @@ function SaveDataToFile(){
 			readabledata += 'Raw Data Output\n'
 			readabledata += '--------------------------------------------------------------------------\n';
 			readabledata += JSON.stringify(ResultString);
+
+
 
 		  	writer.write(new Blob([readabledata], {type: 'text/plain'}));
 		  }
