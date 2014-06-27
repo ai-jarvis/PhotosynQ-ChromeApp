@@ -122,7 +122,7 @@
 						<div class="form-group">
 							<label for="status" class="col-sm-3 control-label">Status</label>
 							<div class="col-sm-6" style="padding-top:6px;">
-								<span id="status" class="label label-warning">Not connected</span>
+								<span id="status" class="label label-info">Not connected</span>
 							</div>
 							<div class="col-sm-3">
 								<button id="ConnectBtn" value="ConnectBtn" data-inital-text="Connect" data-loading-text="Connecting..." data-complete-text="Disconnect" class="btn btn-default pull-right" title="Connect to port">Connect</button>
@@ -133,8 +133,8 @@
 			</li>			
 			<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-lock text-muted" id="DatabaseSignInState" title="Not signed in."></i></a>
-				<div class="dropdown-menu preventClose" style="width:350px;">
-					<div style="padding:5px 10px 5px 10px">
+				<div class="dropdown-menu preventClose" style="width:300px;">
+					<div style="padding:5px 10px 5px 20px">
 						<form class="form-horizontal" role="form" id="DatabaseSignInForm" onsubmit="return false;">
 							<div class="form-group">
 								<label for="SignInEmail" class="col-sm-3 control-label">Email</label>
@@ -156,9 +156,9 @@
 						</form>
 						<div id="DatabaseSignedIn" style="display:none;">
 							<div class="media">
-							  <div class="pull-left" href="#">
-								<i class="media-object fa fa-user fa-3x text-info"></i>
-							  </div>
+							  <a class="pull-left" id="DatabaseSignedInLink" href="#" target="_blank">
+								<img src="img/thumb_missing.png" class="media-object"></i>
+							  </a>
 							  <div class="media-body">
 								<h4 class="media-heading" id="DatabaseSignedInUser">User</h4>
 								<small class="text-muted" id="DatabaseSignedInEmail">Email</small>
@@ -168,6 +168,13 @@
 						</div>
 					</div>
 				</div>
+			</li>
+			
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i></a>
+				<ul class="dropdown-menu" id="NotificationHistory" style="max-height:250px;width:350px;overflow: hidden; overflow-y: auto;">
+					<li><a href="#" id="DiscardAllNotifications" class="text-center"><small>Discard all notifications</small></a></li>
+				</ul>
 			</li>
 			<li><a href="#" style="cursor:default"><i class="fa fa-cloud text-muted" id="CurrentInternetConnectionIndicator" title="offline"></i></a></li>
 			<li><a href="#" style="cursor:default"><i class="fa fa-location-arrow text-muted" id="CurrentLocationIndicator" title="unknown"></i></a></li>

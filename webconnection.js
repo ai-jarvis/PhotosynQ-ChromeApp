@@ -38,6 +38,7 @@ function DatabaseSignIn(){
 				$('#DatabaseSignedInUser').text(response['name'])
 				$('#DatabaseSignedInEmail').text(response['email'])
 				$('#DatabaseSignInForm').hide();
+				$('#DatabaseSignedInLink').attr('href','http://photosynq.venturit.net/users/'+response['name'].toLowerCase());
 				GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 				GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 				GetMacrosFromDB(_authentication.auth_token,_authentication.email);

@@ -415,6 +415,12 @@ onload = function() {
 	document.getElementById('DatabaseSignIn').addEventListener('click', function(e){DatabaseSignIn(); e.preventDefault();});
 	document.getElementById('DatabaseSignOff').addEventListener('click', function(e){DatabaseSignOff(); e.preventDefault();});
 
+	document.getElementById('DiscardAllNotifications').addEventListener('click', function(e){
+		$('#NotificationHistory li:not(:last)').remove();
+		$('#NotificationHistory').prev().find('.fa-bell').removeClass('fa-inverse');
+	});
+
+
 	// Events saving measurements to db/file
 	// ===============================================================================================
 	document.getElementById('SaveDatabaseMeasurement').addEventListener('click', DatabaseAddDataToProject);
@@ -528,9 +534,28 @@ onload = function() {
 	$('#accordion').on('show.bs.collapse', function (e) {
 		$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
 	});
+	
 	$('#accordion').on('hide.bs.collapse', function (e) {
 	  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
 	});
+
+	$('#NotificationHistory').parent().on('show.bs.dropdown', function () {
+		$('#NotificationHistory').prev().find('.fa-circle').remove();
+	  	$('#NotificationHistory li').each(function(k,v){
+	  		var notetime = $(v).find('small');
+	  		if(notetime.attr('data-timestamp') !== undefined){
+	  			var timediff = Date.now() - notetime.attr('data-timestamp')
+	  			if(timediff < 1000)
+	  				notetime.text('1 sec ago')
+	  			else if(timediff < 60000)
+	  				notetime.text( Math.floor(timediff % 60000 / 1000) +' sec ago')
+	  			else if(timediff < 36e5)
+	  				notetime.text( Math.floor(timediff % 36e5 / 60000) +' min ago')
+	  			else if(timediff >= 36e5)
+	  				notetime.text( Math.floor(timediff % 36e5) +' h ago')
+	  		}
+	  	});
+	})
 
 	// Initial port fetching
 	// ===============================================================================================
@@ -733,7 +758,6 @@ function MenubarFunction(command,text,title,dialog) {
 	});
 
 };
-
 
 
 // ===============================================================================================
@@ -1000,14 +1024,36 @@ function WriteMessage(text,type){
 	  "showMethod": "fadeIn",
 	  "hideMethod": "fadeOut"
 	}
-	if(type == 'info')
+	
+	var notificationbtn = $('#NotificationHistory').prev().find('.fa-bell');
+	if(!notificationbtn.hasClass('fa-inverse'))
+		notificationbtn.addClass('fa-inverse');
+	
+	html = '<li>'
+	html += '<a href="#" style="cursor:default">'
+	if(type == 'info'){
 		toastr.info(text)
-	if(type == 'warning')
+		html += '<i class="fa fa-info-circle text-info" style="margin-right:10px;"></i>'
+	}
+	if(type == 'warning'){
 		toastr.warning(text)
-	if(type == 'danger')
+		html += '<i class="fa fa-exclamation-circle text-warning" style="margin-right:10px;"></i>'
+	}
+	if(type == 'danger'){
 		toastr.error(text)
-	if(type == 'success')
+		html += '<i class="fa fa-exclamation-triangle text-danger" style="margin-right:10px;"></i>'
+		if(!notificationbtn.next().hasClass('fa-circle'))
+			notificationbtn.parent().append('<i class="fa fa-circle text-danger" style="position:absolute; margin-left:-7px; margin-top:-2px"></i>');
+	}
+	if(type == 'success'){
 		toastr.success(text)
+		html += '<i class="fa fa-check-square text-success" style="margin-right:10px;"></i>'
+	}
+	html += '<span class="text-muted">'+text+'</span>'
+	html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
+	html += '</a>'
+	html += '</li>'
+	$('#NotificationHistory').prepend(html);
 }
 
 
