@@ -489,6 +489,12 @@ onload = function() {
 	  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
 	});
 
+	// Graphs toggle events
+	// ===============================================================================================
+	$('#PlotsContainer').on('shown.bs.collapse', function (e) {
+		$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
+	});
+
 	// Initial port fetching
 	// ===============================================================================================
 	fetchPorts();

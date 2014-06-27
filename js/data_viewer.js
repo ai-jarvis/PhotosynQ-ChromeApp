@@ -14,9 +14,10 @@ onload = function() {
 		var filedata = event.data['filedata'];
 		_used_protocols = event.data['used_protocols'];
 		_protocols = event.data['protocols'];
+		_macros = event.data['macros'];
 		$('#FileName,#FileNameMini').append(event.data['file']);
-		if(filedata.time !== undefined){
-			var timestamp = filedata.time
+		if(filedata['time'] !== undefined){
+			var timestamp = filedata['time']
 			if(filedata.time_offset !== undefined)
 				timestamp += filedata.time_offset * 60000;
 			var date = new Date(timestamp);
@@ -26,6 +27,14 @@ onload = function() {
 		if(filedata.sample.length > 5){
 			$('#TransientPlotsContainer').show();
 			plottransientFast(filedata);
-		}		
+		}
+		// ===============================================================================================
+		$('#PlotsContainer').on('shown.bs.collapse', function (e) {
+			$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
+			$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
+		});
+		$('#PlotsContainer').on('hide.bs.collapse', function (e) {
+		  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
+		});	
 	});
 }

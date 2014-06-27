@@ -22,7 +22,6 @@ function plot(data){
 	var cal = data;
 	data = data['sample'];
 
-
 	// Loop through array from data.js
 	// ===============================================================================================
 	for(repeat in data){
@@ -46,7 +45,10 @@ function plot(data){
 			var HTML = '<tr class="warning"><td colspan="2">'+macro.HTML+'</td></tr>';
 			
 			// Build graph with container
-			var container = '<div class="col-sm-6 col-md-6 col-lg-4">';
+			if(_authentication !== undefined)
+				var container = '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">';
+			else
+				var container = '<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">';
 			container += '<div class="panel panel-default">';
 			
 			if(protocolname !== ""){

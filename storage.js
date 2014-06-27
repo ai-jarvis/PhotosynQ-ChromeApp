@@ -408,9 +408,21 @@ function loadFileEntry(_chosenEntry) {
 						ProtocolWindow.contentWindow.addEventListener('load', function(e) {
 							var post = {}
 							post['filedata'] = filedata;
-							post['used_protocols'] = []
-							post['protocols'] = _protocols;
-							post['file'] = chosenEntry.fullPath;	
+							post['used_protocols'] = [];
+							post['protocols'] = [];
+							post['macros'] = [];
+							for(i in filedata.sample){
+								for(ii in filedata.sample[i]){
+									if(filedata.sample[i][ii].protocol_id !== undefined){
+										post['used_protocols'].push(filedata.sample[i][ii].protocol_id)
+										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined)
+											post['protocols'][filedata.sample[i][ii].protocol_id] = _protocols[filedata.sample[i][ii].protocol_id]
+										if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
+											post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+									}
+								}
+							}
+							post['file'] = chosenEntry.fullPath;
 							ProtocolWindow.contentWindow.postMessage(post, '*');
 						});
 					});
