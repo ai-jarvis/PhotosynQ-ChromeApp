@@ -46,7 +46,8 @@ function plot(data){
 			var HTML = '<tr class="warning"><td colspan="2">'+macro.HTML+'</td></tr>';
 			
 			// Build graph with container
-			var container = '<div class="panel panel-default">';
+			var container = '<div class="col-sm-6 col-md-6 col-lg-4">';
+			container += '<div class="panel panel-default">';
 			
 			if(protocolname !== ""){
 				container += '<div class="panel-heading">';
@@ -69,7 +70,7 @@ function plot(data){
 			HTML += '<tr>';
 			for(values in data[repeat][protocolID]){
 				if($.inArray(values, variablehidephone) == -1){
-					HTML += '<td style="white-space: nowrap; width:50%">';
+					HTML += '<td style="width:50%">';
 					HTML += '<em class="text-muted">';
 					if(replacements[values] != undefined)
 						HTML += replacements[values]
@@ -90,9 +91,10 @@ function plot(data){
 				HTML += '<td></td>'
 			HTML += '</tr>'
 				
-			container += '<table class="table table-condensed table-bordered table-striped">'+HTML+'</table>';
+			container += '<table class="table table-condensed table-bordered">'+HTML+'</table>';
 
 			//close panel container
+			container += '</div>';
 			container += '</div>';
 
 		
