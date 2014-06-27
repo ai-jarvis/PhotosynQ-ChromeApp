@@ -416,7 +416,7 @@ onload = function() {
 	document.getElementById('DatabaseSignOff').addEventListener('click', function(e){DatabaseSignOff(); e.preventDefault();});
 
 	document.getElementById('DiscardAllNotifications').addEventListener('click', function(e){
-		$('#NotificationHistory li:not(:last)').remove();
+		$('#NotificationHistory li ul li').remove();
 		$('#NotificationHistory').prev().find('.fa-bell').removeClass('fa-inverse');
 	});
 
@@ -541,7 +541,7 @@ onload = function() {
 
 	$('#NotificationHistory').parent().on('show.bs.dropdown', function () {
 		$('#NotificationHistory').prev().find('.fa-circle').remove();
-	  	$('#NotificationHistory li').each(function(k,v){
+	  	$('#NotificationHistory li ul li').each(function(k,v){
 	  		var notetime = $(v).find('small');
 	  		if(notetime.attr('data-timestamp') !== undefined){
 	  			var timediff = Date.now() - notetime.attr('data-timestamp')
@@ -1029,8 +1029,7 @@ function WriteMessage(text,type){
 	if(!notificationbtn.hasClass('fa-inverse'))
 		notificationbtn.addClass('fa-inverse');
 	
-	html = '<li>'
-	html += '<a href="#" style="cursor:default">'
+	html = '<li style="padding:2px 15px 2px 15px">'
 	if(type == 'info'){
 		toastr.info(text)
 		html += '<i class="fa fa-info-circle text-info" style="margin-right:10px;"></i>'
@@ -1051,9 +1050,8 @@ function WriteMessage(text,type){
 	}
 	html += '<span class="text-muted">'+text+'</span>'
 	html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
-	html += '</a>'
 	html += '</li>'
-	$('#NotificationHistory').prepend(html);
+	$('#NotificationHistory li ul').prepend(html);
 }
 
 
