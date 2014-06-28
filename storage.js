@@ -413,7 +413,7 @@ function loadFileEntry(_chosenEntry) {
 							post['macros'] = [];
 							for(i in filedata.sample){
 								for(ii in filedata.sample[i]){
-									if(filedata.sample[i][ii].protocol_id !== undefined){
+									if(filedata.sample[i][ii].protocol_id !== undefined && filedata.sample[i][ii].protocol_id != ""){									
 										post['used_protocols'].push(filedata.sample[i][ii].protocol_id)
 										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined)
 											post['protocols'][filedata.sample[i][ii].protocol_id] = _protocols[filedata.sample[i][ii].protocol_id]

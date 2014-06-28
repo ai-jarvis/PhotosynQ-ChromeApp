@@ -42,13 +42,14 @@ function plot(data){
 			if(replacements[protocolname] !== undefined)
 				protocolname = replacements[protocolname];
 			
-			var HTML = '<tr class="warning"><td colspan="2">'+macro.HTML+'</td></tr>';
+			var HTML = '';
 			
 			// Build graph with container
-			if(_authentication !== undefined)
-				var container = '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">';
-			else
+			if($('#PlotsContainer').attr('data-source') == "file")
 				var container = '<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">';
+			else
+				var container = '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">';
+			
 			container += '<div class="panel panel-default">';
 			
 			if(protocolname !== ""){
@@ -113,7 +114,7 @@ function plot(data){
 		}
 	}
 
-	// Send data to sandbox
+	// Send data to sandbox or clean up no macro message
 	// ===============================================================================================
 	if( postData['protocols'].length > 0){
 		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
@@ -134,9 +135,8 @@ function plot(data){
 			for(protocolID in event.data.graph[repeat]){
 				
 				if(event.data.graph[repeat][protocolID] !== undefined){
-					
 					// Add macro html output to graph info container
-					$('#MacroOutput'+repeat+''+protocolID).html(event.data.graph[repeat][protocolID].HTML);
+					$('#plotRawDatabody'+repeat+''+protocolID).next('table').children('tbody').prepend('<tr class="warning"><td colspan="2">'+event.data.graph[repeat][protocolID].HTML+'</td></tr>');
 
 					MacroArray[protocolID] = event.data.graph[repeat][protocolID];
 				
