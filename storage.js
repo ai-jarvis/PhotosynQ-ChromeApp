@@ -111,11 +111,10 @@ function SelectProject(id) {
 				$('#MainDisplayContainer .panel-body').css('background-image', 'none');
 				
 				/** Add project title **/
-				var html = '<legend>'+experiments[id].name+'</legend>';
+				var html = '<div class="col-md-12"><legend>'+experiments[id].name+'</legend></div>';
 				
 				/** Add project lead and link to website **/
-				html += '<div class="row">'
-					+'<div class="col-md-8">'
+				html += '<div class="col-md-8">'
 					+'<div class="media">'
 					+'<div class="pull-left" id="LeadAvatar"></div>'
 					+'<div class="media-body">'
@@ -127,31 +126,25 @@ function SelectProject(id) {
 					+'<div class="col-md-4">'
 					+'<a class="btn btn-default btn-sm" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project on website</a>'
 					+'</div>'
-					+'</div>';
 
 				/** Adding project directions **/
-				html += '<hr>'
-					+'<div class="row">'
-					+'<div class="col-md-12">'
+				html += '<div class="col-md-12">'
+					+'<hr>'
 					+'<h4>Measurement directions</h4>'
 					+'<p class="bg-warning">'+experiments[id].directions_to_collaborators+'</p>'
-					+'</div>'
 					+'</div>';
 
 				/** Add project description **/
-				html += '<hr>'
-					+'<div class="row">'
-					+'<div class="col-md-12">'
+				html += '<div class="col-md-12">'
+					+'<hr>'
 					+'<h4>About</h4>'
 					+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
 					+ experiments[id].description
 					+'</div>'
-					+'</div>';
 					
 				/** Add scripts and descriptions **/
-				html += '<hr>'
-					+'<div class="row">'
-					+'<div class="col-md-12">'
+				html += '<div class="col-md-12">'
+					+'<hr>'
 					+'<h4>Protocols</h4>'
 					+'<dl>'
 					for(ii in experiments[id].protocols_ids){
@@ -159,7 +152,6 @@ function SelectProject(id) {
 						html += '<dd class="text-muted">'+_protocols[experiments[id].protocols_ids[ii]].description+'</dd>';
 					}
 					html += '</dl>'
-					+'</div>'
 					+'</div>';
 				
 				$('#PlotsContainer').append(html);
@@ -413,9 +405,21 @@ function loadFileEntry(_chosenEntry) {
 						ProtocolWindow.contentWindow.addEventListener('load', function(e) {
 							var post = {}
 							post['filedata'] = filedata;
-							post['used_protocols'] = []
-							post['protocols'] = _protocols;
-							post['file'] = chosenEntry.fullPath;	
+							post['used_protocols'] = [];
+							post['protocols'] = [];
+							post['macros'] = [];
+							for(i in filedata.sample){
+								for(ii in filedata.sample[i]){
+									if(filedata.sample[i][ii].protocol_id !== undefined && filedata.sample[i][ii].protocol_id != ""){									
+										post['used_protocols'].push(filedata.sample[i][ii].protocol_id)
+										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined)
+											post['protocols'][filedata.sample[i][ii].protocol_id] = _protocols[filedata.sample[i][ii].protocol_id]
+										if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
+											post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+									}
+								}
+							}
+							post['file'] = chosenEntry.fullPath;
 							ProtocolWindow.contentWindow.postMessage(post, '*');
 						});
 					});

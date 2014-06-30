@@ -552,12 +552,18 @@ onload = function() {
 
 	// Menu toggle events
 	// ===============================================================================================
-	$('#accordion').on('show.bs.collapse', function (e) {
+	$('#accordion,#PlotsContainer').on('show.bs.collapse', function (e) {
 		$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
 	});
 	
-	$('#accordion').on('hide.bs.collapse', function (e) {
+	$('#accordion,#PlotsContainer').on('hide.bs.collapse', function (e) {
 	  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
+	});
+
+	// Graphs toggle events
+	// ===============================================================================================
+	$('#PlotsContainer').on('shown.bs.collapse', function (e) {
+		$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
 	});
 
 	$('#NotificationHistory').parent().on('show.bs.dropdown', function () {
@@ -576,7 +582,8 @@ onload = function() {
 	  				notetime.text( Math.floor(timediff % 36e5) +' h ago')
 	  		}
 	  	});
-	})
+	});
+
 
 	// Initial port fetching
 	// ===============================================================================================

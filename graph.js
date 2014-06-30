@@ -22,7 +22,6 @@ function plot(data){
 	var cal = data;
 	data = data['sample'];
 
-
 	// Loop through array from data.js
 	// ===============================================================================================
 	for(repeat in data){
@@ -31,7 +30,7 @@ function plot(data){
 
 			// initial variables in loop
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
-			var protocolname = '';
+			var protocolname = 'Unknown protocol';
 			if(data[repeat][protocolID].protocol_id !== undefined){
 				try{
 					protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
@@ -43,36 +42,62 @@ function plot(data){
 			if(replacements[protocolname] !== undefined)
 				protocolname = replacements[protocolname];
 			
-			var HTML = macro.HTML;
+			var HTML = '';
 			
 			// Build graph with container
-			var container = '<div class="panel panel-info">';
+			if($('#PlotsContainer').attr('data-source') == "file")
+				var container = '<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">';
+			else
+				var container = '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">';
+			
+			container += '<div class="panel panel-default">';
+			
 			if(protocolname !== ""){
 				container += '<div class="panel-heading">';
-				container += '<h3 class="panel-title">'+protocolname+'</h3>';
+				container += '<h3 class="panel-title">'
+				container += protocolname
+				container += '<a type="button" href="#plotRawDatabody'+repeat+''+protocolID+'" title="Show/hide graph" class="btn btn-default btn-xs pull-right" data-toggle="collapse" data-parent="#PlotsContainer"><i class="fa fa-chevron-up"></i></a>'
+				container += '</h3>';
 				container += '</div>';
 			}
+
+			// add graph
 			if(data[repeat][protocolID].data_raw.length > 0){
-				container += '<div class="panel-body">';
-				container += '<div id="plotRawData'+repeat+''+protocolID+'"></div>';
+				container += '<div class="panel-body collapse" id="plotRawDatabody'+repeat+''+protocolID+'">';
+				container += '<div id="plotRawData'+repeat+''+protocolID+'" style="padding:0px;"></div>';
 				container += '</div>';
 			}
-			
-			MacroArray[protocolID] = macro;
 
 			// add environmental data
+			var col = 1;
+			HTML += '<tr>';
 			for(values in data[repeat][protocolID]){
 				if($.inArray(values, variablehidephone) == -1){
+					if(col % 2 && col !== 1)
+						HTML += '</tr><tr>';
+					HTML += '<td style="width:50%">';
+					HTML += '<em class="text-muted">';
 					if(replacements[values] != undefined)
-						HTML += ' | <b>'+replacements[values]+':</b> <i>'+data[repeat][protocolID][values]+'</i>';
+						HTML += replacements[values]
 					else
-						HTML += ' | <b>'+values+':</b> <i>'+data[repeat][protocolID][values]+'</i>';
+						HTML += values
+					
+					HTML += ':</em> ';
+					HTML += '<span style="margin-left:10px">'+data[repeat][protocolID][values]+'</span>';
+					HTML += '</td>';
+					col++;
 				}
 			}
+			HTML += '</tr>'
+				
+			container += '<table class="table table-condensed table-bordered" id="plotRawDataTable'+repeat+''+protocolID+'">'+HTML+'</table>';
 
-			container += '<ul class="list-group"><li class="list-group-item list-group-item-success">'+HTML+'</li></ul>';
+			//close panel container
 			container += '</div>';
+			container += '</div>';
+
 		
+			MacroArray[protocolID] = macro;
 
 			// Add container
 			$('#PlotsContainer').append(container);
@@ -85,7 +110,7 @@ function plot(data){
 		}
 	}
 
-	// Send data to sandbox
+	// Send data to sandbox or clean up no macro message
 	// ===============================================================================================
 	if( postData['protocols'].length > 0){
 		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
@@ -94,67 +119,98 @@ function plot(data){
 	// Reset Measurement Protocols
 	// ===============================================================================================
 	_used_protocols = []
+}
 
-	// Apply changes from macros to plots
-	// ===============================================================================================
-	window.addEventListener('message', function(event) {
-		if(event.data.graph === undefined)
-			return false;
-		
-		for(repeat in event.data.graph){
+// Apply changes from macros to plots
+// ===============================================================================================
+window.addEventListener('message', function(event) {
+	if(event.data.graph === undefined)
+		return false;
 	
-			for(protocolID in event.data.graph[repeat]){
-				
-				if(event.data.graph[repeat][protocolID] !== undefined){
-					
-					// Add macro html output to graph info container
-					$('#MacroOutput'+repeat+''+protocolID).html(event.data.graph[repeat][protocolID].HTML);
+	for(repeat in event.data.graph){
 
-					MacroArray[protocolID] = event.data.graph[repeat][protocolID];
+		for(protocolID in event.data.graph[repeat]){
+			
+			if(event.data.graph[repeat][protocolID] !== undefined){
+				// Add macro html output to graph info container
+
+				var HTML = '<tr class="warning">';
+				var col = 1;
+				for(key in event.data.graph[repeat][protocolID]){
+					if(key == 'GraphType' || key == 'HTML' || key == 'Macro')
+						continue;
+					else{
+						if(col % 2 && col !== 1)
+							HTML += '</tr><tr class="warning">';
+						HTML += '<td style="width:50%">';
+						HTML += '<em class="text-muted">';
+						if(replacements[key] != undefined)
+							HTML += replacements[key]
+						else
+							HTML += key
 				
-					if(event.data.graph[repeat][protocolID].GraphType == 'line'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: false}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 4
-						});
-					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'points'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: true}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 0
-						});
-					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: true}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 4
-						});
+						HTML += ':</em> ';
+						HTML += '<span style="margin-left:10px">'+event.data.graph[repeat][protocolID][key]+'</span>';
+						HTML += '</td>';
+						col++;
 					}
 				}
-			}
-			
-		}
-	});
+				HTML += '</tr>'
+				
+				$('#plotRawDataTable'+repeat+''+protocolID+' tbody').prepend(HTML);
 
-	if(chrome.app.window.current().isMinimized()){
-		chrome.notifications.create("measurement", {
-			type: "basic",
-			title: "PhotosynQ",
-			message: "Measurement done.",
-			iconUrl: "img/PhotosynQ-128.png"
-		}, function(){
-			setTimeout(function() {
-			chrome.notifications.clear("measurement", function(){});
-			}, 3000);
-		});
+				$('#plotRawDataTable'+repeat+''+protocolID+' .warning').each(function(k,v){
+					if($(v).children('td').length == 1)
+						$(v).children('td').attr('colspan','2');
+				});
+				
+				MacroArray[protocolID] = event.data.graph[repeat][protocolID];
+			
+				if(event.data.graph[repeat][protocolID].GraphType == 'line'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: false}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 4
+					});
+				}
+				if(event.data.graph[repeat][protocolID].GraphType == 'points'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: true}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 0
+					});
+				}
+				if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: true}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 4
+					});
+				}
+			}
+		}
+		
 	}
+});
+
+// Show alert, when measurement is done
+// ===============================================================================================
+if(chrome.app.window.current().isMinimized()){
+	chrome.notifications.create("measurement", {
+		type: "basic",
+		title: "PhotosynQ",
+		message: "Measurement done.",
+		iconUrl: "img/PhotosynQ-128.png"
+	}, function(){
+		setTimeout(function() {
+		chrome.notifications.clear("measurement", function(){});
+		}, 3000);
+	});
 }
+
 
 function plottransient(data){
 
