@@ -32,7 +32,7 @@ function DatabaseSignIn(){
 			else if(response['auth_token'] != undefined){
 				WriteMessage('Successfully signed in','info');
 				_authentication = response;
-				SaveToStorage('authentication',response);
+				SaveToStorage('authentication',response,function(){});
 				$('#DatabaseSignedIn').show();
 				$('#DatabaseSignInState').toggleClass('fa-lock fa-unlock-alt').toggleClass('text-muted fa-inverse').attr('title', 'Signed in as '+response['name']);
 				$('#DatabaseSignedInUser').text(response['name'])
@@ -152,17 +152,9 @@ function GetProjectsFromDB(token,email){
 					WriteMessage(''+tmp.error,'danger');
 					return;
 				}
-				SaveToStorage('cached_experiments',_experiments);
-				$('#ExperimentSelection').empty();
-				$('#ExperimentSelectionDescription').text("Select the project you want to collect data for.");
-				for(var i in _experiments){
-					$('#ExperimentSelection').append('<option value="'+_experiments[i].id+'" title="'+_experiments[i].description+'">'+_experiments[i].name+'</option>');
-				}
-
-				var sortedProjects = $("#ExperimentSelection option").sort(sortingAZ)
-				$("#ExperimentSelection").empty().append( sortedProjects );
-				$('#ExperimentSelection').prepend('<option value="" title="Select the protocol you want to run.">Select a Project</option>');
-				
+				SaveToStorage('cached_experiments',_experiments,function(){
+					GetProjectsFromCache();
+				});
 				WriteMessage('Experiment list updated','info');
 				$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-download').addClass('fa-cloud');
 			}
@@ -186,18 +178,15 @@ function GetProtocolsFromCache(){
 			}
 			$('#QuickMeasurementProtocol').empty();
 			
-			//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>Your Protocols</option>');
-			//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>------------------------</option>');
-			// Protocols here
-			//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>------------------------</option>');
+			//$('#QuickMeasurementProtocol').append('<optgroup label="Database Protocols">');
 			for(var i in _protocols){
-				$('#QuickMeasurementProtocol').append('<option value="'+i+'" data-protocol-ids="'+_protocols[i].id+'" title="'+_protocols[i].quick_description+'">'+_protocols[i].name+'</option>');
+				$('#QuickMeasurementProtocol').append('<option value="'+i+'" data-protocol-ids="'+_protocols[i].id+'" title="'+_protocols[i].description+'">'+_protocols[i].name+'</option>');
 			}
+			//$('#QuickMeasurementProtocol').append('</optgroup>');
 			
-			var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
-			$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
+			//var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
+			//$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
 			$('#QuickMeasurementProtocol').prepend('<option value="" title="Select the protocol you want to run.">Select a Protocol</option>');
-			
 		}
 		else{
 			WriteMessage('No Protocols cached. Connect to the internet to update your list.','warning')
@@ -241,24 +230,10 @@ function GetProtocolsFromDB(token,email){
 					WriteMessage(''+tmp.error,'danger');
 					return;
 				}
-				SaveToStorage('cached_protocols',_protocols);
+				SaveToStorage('cached_protocols',_protocols, function(){
+					GetProtocolsFromCache();
+				});
 
-				$('#QuickMeasurementProtocol').empty();
-			
-				//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>Your Protocols</option>');
-				//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>------------------------</option>');
-				// Protocols here
-				//$('#QuickMeasurementProtocol').append('<option value="" title="Select the protocol you want to run." disabled>------------------------</option>');
-						
-				for(var i in _protocols){
-					if(_protocols[i].protocol_json !== '')
-						$('#QuickMeasurementProtocol').append('<option value="'+i+'" data-protocol-ids="'+_protocols[i].id+'" title="'+_protocols[i].description+'">'+_protocols[i].name+'</option>')
-				}
-				
-				var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
-				$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
-				$('#QuickMeasurementProtocol').prepend('<option value="" title="Select the protocol you want to run.">Select a Protocol</option>');
-				
 				WriteMessage('Protocol list updated','info');
 				$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-download').addClass('fa-cloud');
 			}
@@ -277,7 +252,6 @@ function GetMacrosFromCache(){
 				_macros = JSON.parse(response['cached_macros']);
 			} catch (e) {
 				RemoveFromStorage('cached_macros');
-				console.log(response['cached_macros']);
 				WriteMessage('Cached macros have wrong format','danger');
 				return;
 			}
@@ -319,7 +293,7 @@ function GetMacrosFromDB(token,email){
 				WriteMessage(tmp.error,'danger');
 				return;
 			}
-			SaveToStorage('cached_macros', _macros);
+			SaveToStorage('cached_macros', _macros,function(){});
 			WriteMessage('Macro list updated','info');
 			$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-download').addClass('fa-cloud');
 		}
@@ -354,7 +328,7 @@ function DatabaseAddDataToProject(){
 			if(experiment_data[email][project_id] === undefined)
 				experiment_data[email][project_id] = []
 			experiment_data[email][project_id].push(data);
-			SaveToStorage('cached_data',experiment_data);
+			SaveToStorage('cached_data',experiment_data,function(){});
 			WriteMessage('Measurement cached','info');
 		});
 	}
@@ -399,7 +373,7 @@ function DatabaseAddDataToProject(){
 							if(experiment_data[email][project_id] === undefined)
 								experiment_data[email][project_id] = []
 							experiment_data[email][project_id].push(data);
-							SaveToStorage('cached_data',experiment_data);
+							SaveToStorage('cached_data',experiment_data, function(){});
 							WriteMessage('Measurement cached','info');
 						});
 					}
@@ -433,7 +407,7 @@ function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 	}catch(e){
 		WriteMessage('Can\'t send data, wrong format','danger');
 		delete experiment_data[email][cacheProjectID][i];
-		SaveToStorage('cached_data',experiment_data);
+		SaveToStorage('cached_data',experiment_data, function(){});
 		callback(false);
 	}
 	xhr.onreadystatechange = function() {
@@ -443,7 +417,7 @@ function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 				if(response.status == "success"){
 					WriteMessage(response.notice,'success');
 					delete experiment_data[email][cacheProjectID][xhr.loopid];
-					SaveToStorage('cached_data',experiment_data);
+					SaveToStorage('cached_data',experiment_data, function(){});
 					callback(true);
 				}
 				else{
@@ -491,7 +465,7 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 												experiment_data[email][cacheProjectID].splice(ii, 1);
 											}
 										}
-										SaveToStorage('cached_data',experiment_data);
+										SaveToStorage('cached_data',experiment_data, function(){});
 										$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
 										return false;
 									}
@@ -520,17 +494,22 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 //									Get Images from server
 // ===============================================================================================
 function DatabaseGetImage(uri,callback){
-	var xhr = new XMLHttpRequest();
-	xhr.responseType = 'blob';
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4){
-			if(xhr.response !== null && xhr.response !== undefined){
-				callback('<img src="'+window.URL.createObjectURL(xhr.response)+'">');
+	if(_media[uri] !== undefined)
+		callback('<img src="'+_media[uri]+'">');
+	else{
+		var xhr = new XMLHttpRequest();
+		xhr.responseType = 'blob';
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4){
+				if(xhr.response !== null && xhr.response !== undefined){
+					SaveImgToLocalStorage(uri,window.URL.createObjectURL(xhr.response));
+					callback('<img src="'+window.URL.createObjectURL(xhr.response)+'">');
+				}
 			}
 		}
+		xhr.open('GET', uri, true);
+		xhr.send();
 	}
-	xhr.open('GET', uri, true);
-	xhr.send();
 };
 
 

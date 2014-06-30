@@ -20,7 +20,7 @@ function GetLocation(){
 					WriteMessage('Invalid location information.','danger');
 					return;
 				}
-				SaveToStorage('geolocation',_geolocation);
+				SaveToStorage('geolocation',_geolocation,function(){});
 				WriteMessage('Geo Location updated','info');
 				$('#CurrentLocationDisplay').html('<small><i class="fa fa-location-arrow"></i> '+_geolocation.city+', '+_geolocation.region_code+' - '+_geolocation.country_code+' ('+_geolocation.latitude+', '+_geolocation.longitude+')</small>');
 				$('#CurrentLocationIndicator').toggleClass('text-muted fa-inverse').attr('title', _geolocation.city+', '+_geolocation.region_code+' - '+_geolocation.country_code+' ('+_geolocation.latitude+', '+_geolocation.longitude+')');

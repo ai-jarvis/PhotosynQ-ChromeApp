@@ -1,7 +1,7 @@
 // ===============================================================================================
 //						Save data to storage, provide id and data as json
 // ===============================================================================================
-function SaveToStorage(id,data){
+function SaveToStorage(id,data,callback){
     var jsonfile = {};
 	try {
 		jsonfile[id] = JSON.stringify(data);
@@ -9,7 +9,7 @@ function SaveToStorage(id,data){
 		WriteMessage(id+' has wrong format.','danger');
 		return;
 	}	    
-    chrome.storage.local.set(jsonfile);
+    callback(chrome.storage.local.set(jsonfile));
 }
 
 // ===============================================================================================
@@ -70,6 +70,22 @@ function LoadAuthentificationFromStorage() {
 	});
 }
 
+// ===============================================================================================
+//						Load media from storage
+// ===============================================================================================
+function LoadMediaFromStorage() {
+	chrome.storage.local.get('media', function(result){
+		if(result['media'] != undefined){
+			try {
+				_media = JSON.parse(result['media']);
+			} catch (e) {
+				RemoveFromStorage('media');
+				WriteMessage('Stored media has wrong format.','danger');
+				return;
+			}			
+		}
+	});
+}
 
 // ===============================================================================================
 //						Load port name from storage to connect to known device
@@ -116,7 +132,7 @@ function SelectProject(id) {
 				/** Add project lead and link to website **/
 				html += '<div class="col-md-8">'
 					+'<div class="media">'
-					+'<div class="pull-left" id="LeadAvatar"></div>'
+					+'<a href="http://photosynq.venturit.net/users/'+experiments[id].lead.slug+'" class="pull-left" id="LeadAvatar" target="_blank"></a>'
 					+'<div class="media-body">'
 					+'<h4 class="media-heading">'+experiments[id].lead.name+'</h4>'
 					+ experiments[id].lead.email
@@ -220,6 +236,8 @@ function errorHandler(e) {
 function SaveDataToFile(){
 	var timestamp = append_file_time();
 	chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: 'PhotosynQuick'+timestamp, accepts: [{extensions: ['txt']}] }, function(writableFileEntry) {
+		if(!writableFileEntry)
+			return;
 		writableFileEntry.createWriter(function(writer) {
 		  writer.onerror = errorHandler;
 		  writer.onwriteend = function(e) {
@@ -311,19 +329,36 @@ function SaveDataToFile(){
 // ===============================================================================================
 //						Save graph to file
 // ===============================================================================================
-function SaveGraphToFile(data, type, name){
-	chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [type]}] }, function(writableFileEntry) {
-		writableFileEntry.createWriter(function(writer) {
-		  writer.onerror = errorHandler;
-		  writer.onwriteend = function(e) {
-			console.log('File saved.');
-		  };
-		  	writer.write(new Blob([readabledata], {type: 'text/plain'}));
-		}, errorHandler);
-	});
+function SaveImgToLocalStorage(url,urlData){
+	var canvas = document.createElement('CANVAS'),
+        ctx = canvas.getContext('2d'),
+        img = new Image;
+    img.crossOrigin = 'Anonymous';
+    img.onload = function(){
+        canvas.height = img.height;
+        canvas.width = img.width;
+        ctx.drawImage(img, 0, 0);
+        var imgencoded = canvas.toDataURL('image/png');
+		chrome.storage.local.get('media', function(result){
+			if(result['media'] !== undefined){
+				try {
+					_media = JSON.parse(result['media']);
+					_media[url] = imgencoded;
+					SaveToStorage('media',_media, function(){});
+				} catch (e) {
+					RemoveFromStorage('media');
+					WriteMessage('Stored media port has wrong format.','danger');
+					return;
+				}
+			}else{
+				_media[url] = imgencoded;
+				SaveToStorage('media',_media,function(){});
+			}
+		});
+        canvas = null; 
+    };
+    img.src = urlData;
 }
-
-
 
 // ===============================================================================================
 //							Append time to suggested filename

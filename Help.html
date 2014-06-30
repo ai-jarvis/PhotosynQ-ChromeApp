@@ -68,34 +68,36 @@
 			<li><a href="#HelpQuickMeasurement">Quick measurements</a></li>
 			<li><a href="#HelpConsole">Console</a></li>
 			<li><a href="#HelpTools">Tools</a></li>
-			<li><a href="#HelpDeviceControls">Device controls</a></li>
+			<li><a href="#HelpDevice">Device</a></li>
+			<li><a href="#HelpManualControl">Manual Control</a></li>
 		</ul>
-
+		<hr>
 		<div id="HelpDeviceConnect">
 			<h4>Connect your device</h4>
 			
 		</div>
-
+		<hr>
 		<div id="HelpSignIn">
 			<h4>Sign in to PhotosynQ</h4>
 
 		</div>
+		<hr>
 		<div id="HelpSelectExperiment">
 			<h4>Select an experiment</h4>
 
 		</div>
-
+		<hr>
 		<div id="HelpTakeMeasurement">
 			<h4>Take a measurement</h4>
 
 		</div>
-
+		<hr>
 		<div id="HelpQuickMeasurement">
 			<h4>Quick measurements</h4>
 			Here you can find all the measurement protocols available from the website.
 			The recorded measurements can be saved to your local computer.
 		</div>
-
+		<hr>
 		<div id="HelpConsole">
 			<h4>Console</h4>
 			The console allows you to directly communicate with your MultispeQ device.
@@ -106,21 +108,43 @@
 			access to the device. Also the data coming back from the device is just
 			displayed as text.
 		</div>
-
-		<div href="HelpTools">
+		<hr>
+		<div id="HelpTools">
 			<h4>Tools</h4>
 			<h5>Data viewer</h5>
 			This tool allows you to view old measurements that were saved to your hard drive.
-			Only measurements from "Quick Measurements" and the "Console" can be saved to
+			Only measurements from &quot;Quick Measurements&quot; and the &quot;Console&quot; can be saved to
 			your local computer. To see measurements taken for projects visit the data 
 			viewer on the website. Just select the project and click on the link in the
 			description to get to the website.
 			<h5>Protocol assembly</h5>
 		</div>
-
-		<div id="HelpDeviceControls">
-			<h4>Device controls</h4>
+		<hr>
+		<div id="HelpDevice">
+			<h4>Device</h4>
 			
+		</div>
+		<hr>
+		<div id="HelpManualControl">
+			<h4>Manual Control</h4>
+			The manual control allows you to use the devices sensors, lights and detectors
+			without writing a script, using a quick measurement or selecting a project.
+			Make sure your device is connected properly (<a href="#HelpDeviceConnect">Connect
+			your device.</a>). Select the sensor, light or detector you want to use
+			from the drop-down menu.
+			<h5>Sensors</h5>
+			The sensor reads are immediately start outputting data. Roughly every 2 seconds
+			the value is updated. The last 30 reads are plotted underneath the most recent read.
+			<h5>Lights</h5>
+			If you want to control the lights, select a light-source first, then set the
+			intensity and click on &quot;on&quot;. You can change the intensity while the
+			lights are on. It will change with a little delay. To switch of the lights click 
+			on the &quot;on&quot; button again or close the dialog.
+			<h5>Detectors</h5>
+			The detectors work similar to lights. Select a detector from the selection box, enter the 
+			integration time (detector read in ms) and click on read. The displayed number 
+			above the selection box is the current read. The reads are triggered by the button 
+			click, there are no continuos reads.
 		</div>
 
 	</div>

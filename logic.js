@@ -17,6 +17,7 @@ var _geolocation = false;
 var _protocols = [];
 var _experiments = [];
 var _macros = [];
+var _media = {};
 var _given_answers = [];
 var _used_protocols = [];
 var _terminate = false;
@@ -52,7 +53,7 @@ function onCharRead(readInfo) {
 		var SaveConnection = {}
 		SaveConnection["os"] = port_os;
 		SaveConnection["path"] = port_path;
-		SaveToStorage('com_port',SaveConnection);
+		SaveToStorage('com_port',SaveConnection, function(){});
 		deviceConnected = true;
 		dataRead = '';
 		MeasurementType = 'BackgroundBatteryCheck';
@@ -86,8 +87,9 @@ function onCharRead(readInfo) {
 			var passedValue = dataRead.replace(/\,/g, '');
 			dataRead = '';
 		}
-		$('#ModalDialogValue').hide().text(passedValue);
-		$('#ModalDialogValue').fadeIn();
+		$("#ModalDialogValue").fadeOut(100, function() {
+		  $(this).text(passedValue).fadeIn();
+		});
 		if(passedValue !== undefined){
 			if($('#ModalDialogSparkline span').attr('values') == "")
 				$('#ModalDialogSparkline span').attr('values', passedValue);
@@ -640,6 +642,7 @@ onload = function() {
 	
 	// Get updates from database/file, auto login
 	// ===============================================================================================
+	LoadMediaFromStorage();
 	LoadAuthentificationFromStorage();
 	GetMacrosFromCache();
 	GetProtocolsFromCache();
@@ -700,7 +703,6 @@ onload = function() {
 
 		}			
 	});
-
 };
 
 // ===============================================================================================
@@ -859,7 +861,7 @@ function MenubarFunction(item,itemid) {
 	
 
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
-		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
+		//chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		MeasurementType = false;
 		$('#DeviceConnectionState').removeClass('fa-blink')
 	});

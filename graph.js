@@ -105,6 +105,39 @@ function plot(data){
 			// add data to graph and built graph
 			if(data[repeat][protocolID].data_raw.length > 0){
 				plotoptionschromeextension['series'][0]['data'] = data[repeat][protocolID].data_raw;
+				plotoptionschromeextension.exporting = {
+					buttons: {
+						contextButton: {
+							menuItems: [{
+								text: 'Print',
+								onclick: function() {
+									this.print();
+								}
+							}, {
+								text: 'Save as png image',
+								onclick: function() {
+									SaveGraphToFile(this.getSVG(),'png','Photosynq');
+								},
+								separator: false
+							},
+							{
+								text: 'Save as jpeg image',
+								onclick: function() {
+									SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+								},
+								separator: false
+							},
+							{
+								text: 'Save as pdf image',
+								onclick: function() {
+									SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
+								},
+								separator: false
+							}]
+						}
+					}
+				}
+					
 				$('#plotRawData'+repeat+''+protocolID).highcharts(plotoptionschromeextension);
 			}
 		}
@@ -196,6 +229,7 @@ window.addEventListener('message', function(event) {
 	}
 });
 
+/*
 // Show alert, when measurement is done
 // ===============================================================================================
 if(chrome.app.window.current().isMinimized()){
@@ -210,7 +244,7 @@ if(chrome.app.window.current().isMinimized()){
 		}, 3000);
 	});
 }
-
+*/
 
 function plottransient(data){
 
@@ -266,6 +300,38 @@ function plottransient(data){
 				align: 'center',
 				verticalAlign: 'bottom'
 			},
+			exporting: {
+				buttons: {
+					contextButton: {
+						menuItems: [{
+							text: 'Print',
+							onclick: function() {
+								this.print();
+							}
+						}, {
+							text: 'Save as png image',
+							onclick: function() {
+								SaveGraphToFile(this.getSVG(),'png','Photosynq');
+							},
+							separator: false
+						},
+						{
+							text: 'Save as jpeg image',
+							onclick: function() {
+								SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+							},
+							separator: false
+						},
+						{
+							text: 'Save as pdf image',
+							onclick: function() {
+								SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
+							},
+							separator: false
+						}]
+					}
+				}
+			},
 			series: [],
 			credits: {
 				enabled: false
@@ -273,7 +339,7 @@ function plottransient(data){
 		});
 	}
 	
-	var TransientChart = $('#TransientPlotsContainer').highcharts()
+	var TransientChart = $('#TransientPlotsContainer').highcharts();
 
 	// Loop through array from data
 	// ===============================================================================================
@@ -399,9 +465,23 @@ function plottransientFast(data){
 							this.print();
 						}
 					}, {
-						text: 'Save as PNG',
+						text: 'Save as png image',
 						onclick: function() {
-							SaveGraphAs(TransientFastPlotOptions,'png');
+							SaveGraphToFile(this.getSVG(),'png','Photosynq');
+						},
+						separator: false
+					},
+					{
+						text: 'Save as jpeg image',
+						onclick: function() {
+							SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+						},
+						separator: false
+					},
+					{
+						text: 'Save as pdf image',
+						onclick: function() {
+							SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
 						},
 						separator: false
 					}]
@@ -443,7 +523,6 @@ function plottransientFast(data){
 					iii++;
 					}
 				}
-				console.log(TransientFastPlotOptions);
 			}
 			else{
 				var lookupSeries = {}
@@ -462,3 +541,41 @@ function plottransientFast(data){
 	//TransientChart.redraw();
 	$('#TransientPlotsContainer').highcharts(TransientFastPlotOptions);
 }
+
+
+// ===============================================================================================
+//						Save graph to file
+// ===============================================================================================
+function SaveGraphToFile(data, type, name){
+	$.ajax({
+		type: 'POST',
+		data: 'async=true&type='+type+'&width=1024&options=' + data,
+		url: 'http://export.highcharts.com',
+		success: function (data) {
+			var xhr = new XMLHttpRequest();
+			xhr.responseType = 'blob';
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4){
+					if(xhr.response !== null && xhr.response !== undefined){					
+						chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [type]}] }, function(writableFileEntry) {
+							if(!writableFileEntry)
+								return;
+							writableFileEntry.createWriter(function(writer) {
+							  writer.onerror = errorHandler;
+							  writer.onwriteend = function(e) {
+								console.log('File saved.');
+							  };
+								writer.write(xhr.response);
+							}, errorHandler);
+						});
+						
+						
+					}
+				}
+			}
+			xhr.open('GET', 'http://export.highcharts.com/' + data, true);
+			xhr.send();            	
+		  }
+	});
+}
+
