@@ -122,7 +122,7 @@ function SelectProject(id) {
 					+'</div>';
 
 				/** Add project lead and link to website **/
-				html += '<div class="row">'
+				//html += '<div class="row">'
 					+'<div class="col-md-8">'
 					+'<div class="media">'
 					+'<div class="pull-left" id="LeadAvatar"></div>'
@@ -135,21 +135,21 @@ function SelectProject(id) {
 					+'<div class="col-md-4">'
 					+'<a class="btn btn-default btn-sm" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project on website</a>'
 					+'</div>'
-					+'</div>';
+					//+'</div>';
 
 				/** Add project description **/
 				html += '<hr>'
-					+'<div class="row">'
+				//	+'<div class="row">'
 					+'<div class="col-md-12">'
 					+'<h4>About</h4>'
 					+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
 					+ experiments[id].description
 					+'</div>'
-					+'</div>';
+				//	+'</div>';
 					
 				/** Add scripts and descriptions **/
 				html += '<hr>'
-					+'<div class="row">'
+				//	+'<div class="row">'
 					+'<div class="col-md-12">'
 					+'<h4>Protocols</h4>'
 					+'<dl>'
@@ -158,7 +158,7 @@ function SelectProject(id) {
 						html += '<dd class="text-muted">'+_protocols[experiments[id].protocols_ids[ii]].description+'</dd>';
 					}
 					html += '</dl>'
-					+'</div>'
+				//	+'</div>'
 					+'</div>';
 				
 				$('#PlotsContainer').append(html);
