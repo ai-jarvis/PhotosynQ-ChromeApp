@@ -16,7 +16,7 @@ onload = function() {
 		_protocols = event.data['protocols'];
 		_macros = event.data['macros'];
 		$('#FileName,#FileNameMini').append(event.data['file']);
-		if(filedata['time'] !== undefined){
+		if(typeof filedata['time'] !== undefined){
 			var timestamp = filedata['time']
 			if(filedata.time_offset !== undefined)
 				timestamp += filedata.time_offset * 60000;

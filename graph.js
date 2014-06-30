@@ -73,6 +73,8 @@ function plot(data){
 			HTML += '<tr>';
 			for(values in data[repeat][protocolID]){
 				if($.inArray(values, variablehidephone) == -1){
+					if(col % 2 && col !== 1)
+						HTML += '</tr><tr>';
 					HTML += '<td style="width:50%">';
 					HTML += '<em class="text-muted">';
 					if(replacements[values] != undefined)
@@ -83,18 +85,12 @@ function plot(data){
 					HTML += ':</em> ';
 					HTML += '<span style="margin-left:10px">'+data[repeat][protocolID][values]+'</span>';
 					HTML += '</td>';
-					
 					col++;
-					if(col % 2)
-						HTML += '</tr><tr>';
 				}
 			}
-			col++;
-			if(col % 2)
-				HTML += '<td></td>'
 			HTML += '</tr>'
 				
-			container += '<table class="table table-condensed table-bordered">'+HTML+'</table>';
+			container += '<table class="table table-condensed table-bordered" id="plotRawDataTable'+repeat+''+protocolID+'">'+HTML+'</table>';
 
 			//close panel container
 			container += '</div>';
@@ -123,66 +119,98 @@ function plot(data){
 	// Reset Measurement Protocols
 	// ===============================================================================================
 	_used_protocols = []
+}
 
-	// Apply changes from macros to plots
-	// ===============================================================================================
-	window.addEventListener('message', function(event) {
-		if(event.data.graph === undefined)
-			return false;
-		
-		for(repeat in event.data.graph){
+// Apply changes from macros to plots
+// ===============================================================================================
+window.addEventListener('message', function(event) {
+	if(event.data.graph === undefined)
+		return false;
 	
-			for(protocolID in event.data.graph[repeat]){
-				
-				if(event.data.graph[repeat][protocolID] !== undefined){
-					// Add macro html output to graph info container
-					$('#plotRawDatabody'+repeat+''+protocolID).next('table').children('tbody').prepend('<tr class="warning"><td colspan="2">'+event.data.graph[repeat][protocolID].HTML+'</td></tr>');
+	for(repeat in event.data.graph){
 
-					MacroArray[protocolID] = event.data.graph[repeat][protocolID];
+		for(protocolID in event.data.graph[repeat]){
+			
+			if(event.data.graph[repeat][protocolID] !== undefined){
+				// Add macro html output to graph info container
+
+				var HTML = '<tr class="warning">';
+				var col = 1;
+				for(key in event.data.graph[repeat][protocolID]){
+					if(key == 'GraphType' || key == 'HTML' || key == 'Macro')
+						continue;
+					else{
+						if(col % 2 && col !== 1)
+							HTML += '</tr><tr class="warning">';
+						HTML += '<td style="width:50%">';
+						HTML += '<em class="text-muted">';
+						if(replacements[key] != undefined)
+							HTML += replacements[key]
+						else
+							HTML += key
 				
-					if(event.data.graph[repeat][protocolID].GraphType == 'line'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: false}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 4
-						});
-					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'points'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: true}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 0
-						});
-					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							 marker: { enabled: true}
-						});
-						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-							lineWidth: 4
-						});
+						HTML += ':</em> ';
+						HTML += '<span style="margin-left:10px">'+event.data.graph[repeat][protocolID][key]+'</span>';
+						HTML += '</td>';
+						col++;
 					}
 				}
-			}
-			
-		}
-	});
+				HTML += '</tr>'
+				
+				$('#plotRawDataTable'+repeat+''+protocolID+' tbody').prepend(HTML);
 
-	if(chrome.app.window.current().isMinimized()){
-		chrome.notifications.create("measurement", {
-			type: "basic",
-			title: "PhotosynQ",
-			message: "Measurement done.",
-			iconUrl: "img/PhotosynQ-128.png"
-		}, function(){
-			setTimeout(function() {
-			chrome.notifications.clear("measurement", function(){});
-			}, 3000);
-		});
+				$('#plotRawDataTable'+repeat+''+protocolID+' .warning').each(function(k,v){
+					if($(v).children('td').length == 1)
+						$(v).children('td').attr('colspan','2');
+				});
+				
+				MacroArray[protocolID] = event.data.graph[repeat][protocolID];
+			
+				if(event.data.graph[repeat][protocolID].GraphType == 'line'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: false}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 4
+					});
+				}
+				if(event.data.graph[repeat][protocolID].GraphType == 'points'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: true}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 0
+					});
+				}
+				if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						 marker: { enabled: true}
+					});
+					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+						lineWidth: 4
+					});
+				}
+			}
+		}
+		
 	}
+});
+
+// Show alert, when measurement is done
+// ===============================================================================================
+if(chrome.app.window.current().isMinimized()){
+	chrome.notifications.create("measurement", {
+		type: "basic",
+		title: "PhotosynQ",
+		message: "Measurement done.",
+		iconUrl: "img/PhotosynQ-128.png"
+	}, function(){
+		setTimeout(function() {
+		chrome.notifications.clear("measurement", function(){});
+		}, 3000);
+	});
 }
+
 
 function plottransient(data){
 
