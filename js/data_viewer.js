@@ -38,3 +38,7 @@ onload = function() {
 		});	
 	});
 }
+
+function errorHandler(e){
+	console.log(e);
+}
