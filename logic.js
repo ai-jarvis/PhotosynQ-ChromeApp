@@ -1160,6 +1160,7 @@ function WriteMessage(text,type){
 	html += '<span class="text-muted">'+text+'</span>'
 	html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
 	html += '</li>'
+	html += '<li class="divider"></li>'
 	$('#NotificationHistory li ul').prepend(html);
 }
 
