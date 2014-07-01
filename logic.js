@@ -861,7 +861,7 @@ function MenubarFunction(item,itemid) {
 	
 
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
-		//chrome.serial.send(connectionId, str2ab('-1+'), function(){});
+		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		MeasurementType = false;
 		$('#DeviceConnectionState').removeClass('fa-blink')
 	});
