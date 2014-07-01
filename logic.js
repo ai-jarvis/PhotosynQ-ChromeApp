@@ -171,15 +171,12 @@ function onCharRead(readInfo) {
 		
 	if(str.match(/(\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
 
-		$('#ProgressBarQuick').attr('data-step',(parseInt($('#ProgressBarQuick').attr('data-step'))+1));
-		var progress = ProgressBar($('#ProgressBarQuick').attr('data-step'), $('#ProgressBarQuick').attr('data-total'));
-		$('#PlotsContainer').html(progress);
-
+		ProgressBar((parseInt($('#MeasurementProgress').attr('data-step'))+1), $('#MeasurementProgress').attr('data-total'));
 		try{
 			var pos = dataRead.lastIndexOf('{');
 			var testeded = dataRead.slice(pos);
 			testeded = testeded.split("\r\n");
-			if($('#ProgressBarQuick').attr('data-total') > 5 && ShowTansientgraph){
+			if($('#MeasurementProgress').attr('data-total') > 5 && ShowTansientgraph){
 				plottransient(testeded[0]);
 				
 			}
@@ -956,8 +953,7 @@ function DatabaseMeasurement() {
 			}
 			if(protocol_total === 0)
 				protocol_total = protocol.length
-			var progress = ProgressBar(1, protocol_total);
-			$('#PlotsContainer').html(progress);
+				ProgressBar(1, protocol_total)
 		}
 		else{
 			WriteMessage('No measurements in protocol','danger');
@@ -1031,8 +1027,7 @@ function QuickMeasurement() {
 			}
 			if(protocol_total === 0)
 				protocol_total = protocol.length
-			var progress = ProgressBar(1, protocol_total);
-			$('#PlotsContainer').html(progress);
+			ProgressBar(1, protocol_total)
 		}
 		else{
 			WriteMessage('No measurements in protocol','danger');
@@ -1091,8 +1086,7 @@ function ConsoleMeasurement() {
 			}
 			if(protocol_total === 0)
 				protocol_total = protocol.length
-			var progress = ProgressBar(1, protocol_total);
-			$('#PlotsContainer').html(progress);
+			ProgressBar(1, protocol_total);
 		}
 		else{
 			WriteMessage('No measurements in protocol','danger');
@@ -1122,7 +1116,7 @@ function WriteMessage(text,type){
 	toastr.options = {
 	  "closeButton": false,
 	  "debug": false,
-	  "positionClass": "toast-bottom-full-width",
+	  "positionClass": "toast-top-right",
 	  "onclick": null,
 	  "showDuration": "300",
 	  "hideDuration": "1000",
@@ -1162,6 +1156,7 @@ function WriteMessage(text,type){
 	html += '</li>'
 	html += '<li class="divider"></li>'
 	$('#NotificationHistory li ul').prepend(html);
+	$('.toast-top-right').css('top','55px');
 }
 
 
@@ -1170,14 +1165,10 @@ function WriteMessage(text,type){
 // ===============================================================================================
 function ProgressBar(step, total){
 	var percent = (parseInt(step)/parseInt(total))*100;
-	var progress ='<div class="text-center" style="margin-top:10px; padding-right:20%;padding-left:20%" id="ProgressBarQuick" data-step="'+step+'" data-total="'+total+'">';
-	progress += '<div class="progress active">';
-	progress +='<div class="progress-bar progress-bar-primary"  role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100" style="width: '+percent+'%">';
-	progress +='</div>';
-	progress +='</div>';
-	progress +='<small class="text-muted">Measurement '+step+' of '+total+'</small>';
-	progress +='</div>';
-	return progress;
+	$('#MeasurementProgress').attr('data-step', step).attr('data-total', total);
+	$('#MeasurementProgress .progress-bar').attr('aria-valuenow', percent).css('width', percent+'%');
+	$('#MeasurementProgressStep').text(step);
+	$('#MeasurementProgressTotal').text(total);
 }
 
 // ===============================================================================================

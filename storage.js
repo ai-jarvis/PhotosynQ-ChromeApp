@@ -402,6 +402,7 @@ function DiscardMeasurement(){
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
 	$('#DeviceConnectionState').removeClass('fa-blink');
+	ProgressBar(0, 0);
 	MeasurementType = null;
 	ProtocolArray = null;
 	QuickMeasurementProtocol = null;

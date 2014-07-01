@@ -229,7 +229,6 @@ window.addEventListener('message', function(event) {
 	}
 });
 
-/*
 // Show alert, when measurement is done
 // ===============================================================================================
 if(chrome.app.window.current().isMinimized()){
@@ -244,7 +243,6 @@ if(chrome.app.window.current().isMinimized()){
 		}, 3000);
 	});
 }
-*/
 
 function plottransient(data){
 
