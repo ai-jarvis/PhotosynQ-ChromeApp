@@ -55,7 +55,7 @@ function GetLocation(){
 				WriteMessage('Geo Location from cache','info');
 				$('#CurrentLocationDisplay,#CurrentLocationDisplayImgCoords').html('<small class="text-muted"><i class="fa fa-location-arrow"></i> '+_geolocation.latitude+', '+_geolocation.longitude+'</small>');
 				$('#CurrentLocationIndicator').toggleClass('text-muted fa-inverse').attr('title', _geolocation.latitude+', '+_geolocation.longitude);
-				if(_media[url] !== undefined){
+				if(_media[url] !== undefined)
 					$('#CurrentLocationDisplayImg').html('<img src="'+_media[url]+'">');
 			}
 		});
