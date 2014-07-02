@@ -27,6 +27,7 @@
 		"storage",
 		"unlimitedStorage",
 		"notifications",
+		"geolocation",
 		{
 			"fileSystem": ["write"]
 		},
