@@ -33,11 +33,11 @@ function GetLocation(){
 				}				
 			},
 			function(error){
-				WriteMessage(err.message,'danger');
+				WriteMessage(error.message,'danger');
 			},
 			{
 			  enableHighAccuracy: true,
-			  timeout: 5000,
+			  timeout: 15000,
 			  maximumAge: 0
 			}
 		);
