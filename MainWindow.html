@@ -182,7 +182,17 @@
 					<li><a href="#" id="DiscardAllNotifications" class="text-center"><small>Discard all notifications</small></a></li>
 				</ul>
 			</li>
-			<li><a href="#" style="cursor:default"><i class="fa fa-cloud text-muted" id="CurrentInternetConnectionIndicator" title="offline"></i></a></li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cloud text-muted" id="CurrentInternetConnectionIndicator" title="offline"></i></a>
+				<ul class="dropdown-menu" id="CacheInfo" style="width:200px;">
+					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Projects <small id="ProjectStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Protocols <small id="ProtocolStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Macros <small id="MacroStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+					<li><a href="#" style="cursor:default;"><i class="fa fa-file-image-o text-primary"></i> Media <small id="MediaStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+					<li class="divider"></li>
+					<li><a href="#" id="AppUpdateButton" class="text-center"><small>Update App Content</small></a></li>
+				</ul>
+			</li>
 			<li><a href="#" style="cursor:default"><i class="fa fa-location-arrow text-muted" id="CurrentLocationIndicator" title="unknown"></i></a></li>
 			<li><a href="#" style="cursor:default; font-size:18px"><i class="icon-bat1 text-danger" id="BatteryStatusIndicator" title="Please replace the battery"></i></a></li>
 		</ul>
@@ -211,8 +221,7 @@
 								<p class="help-block" id="ExperimentSelectionDescription"></p>
 							</div>
 							<button type="submit" value="" class="btn btn-default" id="ExperimentSelectionButton">Select</button>
-							<button type="submit" value="" class="btn btn-default" id="ExperimentSelectionUpdateButton"><i class="fa fa-refresh"></i></button>
-							<a class="btn btn-link" href="http://photosynq.venturit.net/#ProjectLists" target="_blank">Join a new Project</a>
+							<a class="btn btn-link pull-right" href="http://photosynq.venturit.net/#ProjectLists" target="_blank">Join a new Project</a>
 						 </form>
 					  </div>
 					</div>

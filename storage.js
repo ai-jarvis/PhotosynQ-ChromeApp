@@ -82,7 +82,10 @@ function LoadMediaFromStorage() {
 				RemoveFromStorage('media');
 				WriteMessage('Stored media has wrong format.','danger');
 				return;
-			}			
+			}
+			chrome.storage.local.getBytesInUse('media', function(response){
+				$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});		
 		}
 	});
 }
@@ -350,9 +353,18 @@ function SaveImgToLocalStorage(url,urlData){
 					WriteMessage('Stored media port has wrong format.','danger');
 					return;
 				}
+				
+				chrome.storage.local.getBytesInUse('media', function(response){
+					$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});	
+				
 			}else{
 				_media[url] = imgencoded;
-				SaveToStorage('media',_media,function(){});
+				SaveToStorage('media',_media,function(){
+					chrome.storage.local.getBytesInUse('media', function(response){
+						$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+					});	
+				});
 			}
 		});
         canvas = null; 

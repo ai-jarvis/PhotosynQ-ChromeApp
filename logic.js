@@ -478,8 +478,7 @@ onload = function() {
 
 	// Cache Update events
 	// ===============================================================================================
-	document.getElementById('ExperimentSelectionUpdateButton').addEventListener('click', function(e){
-		$('#ExperimentSelectionUpdateButton').blur();
+	document.getElementById('AppUpdateButton').addEventListener('click', function(e){
 		if(_authentication != null && navigator.onLine){
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);

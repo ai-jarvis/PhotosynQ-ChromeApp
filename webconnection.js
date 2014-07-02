@@ -107,6 +107,9 @@ function GetProjectsFromCache(){
 			$("#ExperimentSelection").empty().append( sortedProjects );
 			$('#ExperimentSelection').prepend('<option value="" title="Select the protocol you want to run.">Select a Project</option>');			
 			
+			chrome.storage.local.getBytesInUse('cached_experiments', function(response){
+				$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});
 		}
 		else{
 			WriteMessage('No Experiments cached. Connect to the internet to update your list.','warning')
@@ -187,6 +190,11 @@ function GetProtocolsFromCache(){
 			//var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
 			//$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
 			$('#QuickMeasurementProtocol').prepend('<option value="" title="Select the protocol you want to run.">Select a Protocol</option>');
+			
+			chrome.storage.local.getBytesInUse('cached_protocols', function(response){
+				$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});
+			
 		}
 		else{
 			WriteMessage('No Protocols cached. Connect to the internet to update your list.','warning')
@@ -255,6 +263,11 @@ function GetMacrosFromCache(){
 				WriteMessage('Cached macros have wrong format','danger');
 				return;
 			}
+			
+			chrome.storage.local.getBytesInUse('cached_macros', function(response){
+				$('#MacroStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});			
+			
 		}	
 		else{
 			WriteMessage('No Macros cached. Connect to the internet to update your list.','warning');
