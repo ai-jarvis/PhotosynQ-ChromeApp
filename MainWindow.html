@@ -193,7 +193,13 @@
 					<li><a href="#" id="AppUpdateButton" class="text-center"><small>Update App Content</small></a></li>
 				</ul>
 			</li>
-			<li><a href="#" style="cursor:default"><i class="fa fa-location-arrow text-muted" id="CurrentLocationIndicator" title="unknown"></i></a></li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-location-arrow text-muted" id="CurrentLocationIndicator" title="unknown"></i></a>
+				<ul class="dropdown-menu" id="CacheInfo" style="">
+					<li><a href="#" style="cursor:default; padding:3px" id="CurrentLocationDisplayImg"></a></li>
+					<li><a href="#" style="cursor:default;" class="text-center" id="CurrentLocationDisplayImgCoords"><small class="text-danger"><i class="fa fa-location-arrow"></i> Cannot determine location</small></a></li>
+				</ul>
+			</li>
 			<li><a href="#" style="cursor:default; font-size:18px"><i class="icon-bat1 text-danger" id="BatteryStatusIndicator" title="Please replace the battery"></i></a></li>
 		</ul>
     </div><!-- /.navbar-collapse -->
@@ -252,7 +258,7 @@
 								</div>
 							</div>
 						</div>
-						<div id="CurrentLocationDisplay" class="text-muted"><small><i class="fa fa-location-arrow"></i> unknown</small></div>
+						<div id="CurrentLocationDisplay"><small class="text-danger"><i class="fa fa-location-arrow"></i> unknown</small></div>
 					  </div>
 					</div>
 				  </div>

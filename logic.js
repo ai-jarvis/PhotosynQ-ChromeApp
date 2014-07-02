@@ -594,6 +594,16 @@ onload = function() {
 	} else {
 		WriteMessage('Offline','warning');
 	}
+	
+	$(window).on('offline', function(){
+		$('#CurrentInternetConnectionIndicator').removeClass('text-muted fa-inverse').addClass('text-muted').attr('title','offline');
+		WriteMessage('Offline','warning');
+	});
+	
+	$(window).on('online', function(){
+		$('#CurrentInternetConnectionIndicator').removeClass('text-muted fa-inverse').addClass('fa-inverse').attr('title','online');
+		WriteMessage('Online','info');
+	});	
 
 	// Built drop down menus
 	// ===============================================================================================
