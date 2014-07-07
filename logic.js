@@ -699,14 +699,18 @@ onload = function() {
 
 	window.addEventListener('message', function(event) {
 		if(event.data.protocol_to_console !== undefined){
-			$('#ConsoleProtocolContent').text(event.data.protocol_to_console);
+			$('#ConsoleProtocolContent').val(event.data.protocol_to_console);
 		}
 		if(event.data.protocol_run !== undefined){
-			$('#ConsoleProtocolContent').text(event.data.protocol_run);
+			$('#ConsoleProtocolContent').val(event.data.protocol_run);
 			ConsoleMeasurement();
 		}
 		if(event.data.protocol_save !== undefined){
-
+			/*description:
+			id:
+			macro_id:
+			name:
+			protocol_json:*/
 		}			
 	});
 };
