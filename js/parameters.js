@@ -15,13 +15,6 @@ var light_colors = {
 	14:{color:'infrared',hex:'#e1e1e1'}
 }
 
-
-//blue #428bca;
-//green #5cb85c;
-//light blue    #5bc0de;
-//orange #f0ad4e;
-//red #d9534f;
-
 var parameters = [
 		{
 		'name':'light_intensity',
@@ -90,7 +83,7 @@ var parameters = [
 		'title':'Size of measuring pulses',
 		'type':'int',
 		'group':'main',
-		'color':'#3c763d',
+		'color':'#5cb85c',
 		'range_type':'int_range',
 		'range':[5,100],
 		'input_type': 'text',
@@ -105,7 +98,7 @@ var parameters = [
 		'title':'Distance between measuring pulses',
 		'type':'int',
 		'group':'main',
-		'color':'#3c763d',
+		'color':'#5cb85c',
 		'range_type':'int_range',
 		'range':[1000,10000000],
 		'input_type': 'text',
@@ -133,7 +126,7 @@ var parameters = [
 		'title':'',
 		'type':'arrayarray_def',
 		'group':'main',
-		'color':'#3c763d',
+		'color':'#5cb85c',
 		'range_type':'int_list',
 		'range':detectors,
 		'input_type': 'array_text',
@@ -147,7 +140,7 @@ var parameters = [
 		'title':'Teensy pin number for measuring lights',
 		'type':'arrayarray_def',
 		'group':'main',
-		'color':'#3c763d',
+		'color':'#5cb85c',
 		'range_type':'int_list',
 		'range':all_lights,
 		'input_type': 'array_text',
@@ -308,6 +301,7 @@ var parameters = [
 		'title':'Number of times to repeat entire measurement',
 		'type':'int',
 		'group':'measurements',
+		'color':'#428bca',
 		'range_type':'int_range',
 		'range':[0,100000],
 		'input_type': 'text',
@@ -321,6 +315,7 @@ var parameters = [
 		'title':'Delay between measurements in seconds',
 		'type':'float',
 		'group':'measurements',
+		'color':'#428bca',
 		'range_type':'int_range',
 		'range':[0,100000],
 		'input_type': 'text',
@@ -347,6 +342,7 @@ var parameters = [
 		'title':'Number of times to repeat a protocol to produce a single averaged protocol output',
 		'type':'int',
 		'group':'averages',
+		'color':'#5bc0de',
 		'range_type':'int_range',
 		'range':[0,30],
 		'input_type': 'text',
@@ -360,6 +356,7 @@ var parameters = [
 		'title':'Delay between internal averages in seconds',
 		'type':'float',
 		'group':'averages',
+		'color':'#5bc0de',
 		'range_type':'int_range',
 		'range':[0,100000],
 		'input_type': 'text',
@@ -374,6 +371,7 @@ var parameters = [
 		'title':'Name of protocol (for calibration only)',
 		'type':'string',
 		'group':'calibration',
+		'color':'#f0ad4e',
 		'range_type':'string_list',
 		'range':['calibration','calibration_spad_ndvi'],
 		'input_type': 'select',
@@ -387,6 +385,7 @@ var parameters = [
 		'title':'Define as a calibration protocol',
 		'type':'int',
 		'group':'calibration',
+		'color':'#f0ad4e',
 		'range_type':'int_list',
 		'range':[0,1,2],
 		'input_type': 'text',

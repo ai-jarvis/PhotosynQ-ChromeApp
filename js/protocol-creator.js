@@ -80,6 +80,7 @@ onload = function() {
 	// Clear Protocol Fields 
 	// =====================================================================
 	$('#parameter_clear').on('click', function(){
+		$(this).blur();
 		$('#parameter_used li').appendTo("#parameter_unused");
 		$('#parameter_unused li .form-group div').hide()
 		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
@@ -174,7 +175,7 @@ onload = function() {
 					if(isNaN(intval)){
 						validity = false;
 						$(k).addClass('has-error');
-					}	
+					}
 				}
 				if(json[dataname].length === 0 || json[dataname].length != pulseblocks){
 					validity = false;
@@ -256,9 +257,9 @@ onload = function() {
 
 			var html = '<li class="list-group-item " title="'+json[param].title+'" id="'+json[param].name+'"';
 				if(json[param].color !== undefined)
-					html += ' style="border-left:3px solid '+ json[param].color+'"';
+					html += ' style="border-left:6px solid '+ json[param].color+'"';
 				else
-					html += ' style="border-left:3px solid #e1e1e1"';
+					html += ' style="border-left:6px solid #e1e1e1"';
 				html += '>'				
 				html +=  '<div class="form-group">'
 
