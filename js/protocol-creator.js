@@ -38,6 +38,8 @@ onload = function() {
 			$('#parameter_used li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
 			$('#parameter_used').removeClass('bg-warning');
 			$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+			$("#parameter_unused li").show();
+			$("#FilterParameterInput").val('');
 		}
 	}).disableSelection();
 
@@ -49,6 +51,8 @@ onload = function() {
 			$('#parameter_unused li .form-group div').hide();
 			$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12');
 			$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+			$("#parameter_unused li").show();
+			$("#FilterParameterInput").val('');
 		}
 	}).disableSelection();
 	
@@ -710,6 +714,22 @@ onload = function() {
 		return (bval < aval) ? 1 : -1;    
 	}
 
+	// Filter Parameter
+	// =====================================================================
+	jQuery.expr[':'].contains = function(a, i, m) { 
+		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0; 
+	};
+
+	$('#FilterParameterInput').on('keyup', function(){
+		if($(this).val() != ""){
+			$("#parameter_unused li").hide();
+			$("#parameter_unused li:contains('"+$(this).val()+"')").show();
+		}
+		else
+			$("#parameter_unused li").show();
+		return false;
+	});
+	
 	// Build click / hover events
 	// =====================================================================
 	$('#presets').on('click', 'a',function(){
@@ -820,15 +840,15 @@ onload = function() {
 
 	// Window resize events
 	// =====================================================================
-	var bodyheight =$(window).height()-52
+	var bodyheight =$(window).height()-45
 	$("#MainDisplayContainer").height(bodyheight);
-	$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
-	$("#RawProtocol,#preset_sort").height(bodyheight-369);
+	$("#parameter_used,#presets,#presets_second").height(bodyheight-400);
+	$("#parameter_unused").height(bodyheight-432);
 	$(window).resize(function() {
-		bodyheight = $(window).height()-52;
+		bodyheight = $(window).height()-45;
 		$("#MainDisplayContainer").height(bodyheight);
-		$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
-		$("#RawProtocol,#preset_sort").height(bodyheight-369);
+		$("#parameter_used,#presets,#presets_second").height(bodyheight-400);
+		$("#parameter_unused").height(bodyheight-432);
 	});
 
 }
