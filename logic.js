@@ -426,7 +426,11 @@ onload = function() {
 		$('#NotificationHistory li ul li').remove();
 		$('#NotificationHistory').prev().find('.fa-bell').removeClass('fa-inverse');
 	});
-
+	
+	document.getElementById('BtnLocationUpdate').addEventListener('click', function(e){
+		GetLocation();
+	});
+	
 
 	// Events saving measurements to db/file
 	// ===============================================================================================
@@ -585,6 +589,7 @@ onload = function() {
 	
 	$(window).on('online', function(){
 		$('#CurrentInternetConnectionIndicator').removeClass('text-muted fa-inverse').addClass('fa-inverse').attr('title','online');
+		GetLocation();
 		WriteMessage('Online','info');
 	});	
 

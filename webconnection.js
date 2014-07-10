@@ -3,7 +3,7 @@
 // ===============================================================================================
 function DatabaseSignIn(){
 	if(!navigator.onLine){
-		WriteMessage('<i class="fa fa-exclamation-triangle"></i> Offline','danger');
+		WriteMessage('<i class="fa fa-exclamation-triangle"></i> Offline','warning');
 		return false;
 	}
 	if(document.getElementById('SignInEmail').value == '' || document.getElementById('SignInPassword').value == ''){
@@ -64,7 +64,7 @@ function DatabaseSignOff(){
 			try {
 				var response = JSON.parse(xhr.responseText);
 			} catch (e) {
-				WriteMessage('Invalid database response.','danger');
+				WriteMessage('Invalid database response ('+e.message+')','danger');
 				return;
 			}
 			if(response['message'] != undefined)
@@ -74,7 +74,7 @@ function DatabaseSignOff(){
 			RemoveFromStorage('authentication');
 			$('#DatabaseSignedIn').hide();
 			$('#DatabaseSignInState').toggleClass('fa-lock fa-unlock-alt').toggleClass('text-muted fa-inverse').attr('title','Not signed in.');
-			$('#DatabaseSignedInUser, #DatabaseSignedInEmail').text('')
+			$('#DatabaseSignedInUser, #DatabaseSignedInEmail').text('');
 			$('#SignInEmail,#SignInPassword').val('');
 			$('#DatabaseSignInForm').show();
 		}
@@ -131,7 +131,6 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
-					console.log(tmp);
 					_experiments = {};
 					for(i in tmp){
 						_experiments[tmp[i].id] = {
@@ -207,9 +206,6 @@ function GetProtocolsFromCache(){
 				$('#QuickMeasurementProtocol optgroup[label="Your Protocols"]').append('<option value="user_'+i+'" title="'+_userprotocols[i].description+'">'+_userprotocols[i].name+'</option>');
 			}
 			
-		}
-		else{
-			WriteMessage('No user-defined Protocols cached.','info')
 		}
 		
 		chrome.storage.local.getBytesInUse(['cached_protocols','cached_userprotocols'], function(response){
@@ -302,7 +298,8 @@ function GetMacrosFromDB(token,email){
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	xhr.send();
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4){			try {
+		if (xhr.readyState == 4){			
+			try {
 				tmp = JSON.parse(xhr.responseText);
 				_macros = {};
 				for(i in tmp){
@@ -340,27 +337,7 @@ function DatabaseAddDataToProject(){
 	var project_id = SelectedProject;
 	var data = ResultString;
 	if(!navigator.onLine && (token != null && email != null && project_id != null && data != '')){
-		chrome.storage.local.get('cached_data', function(response){
-			if(response['cached_data'] !== undefined){
-				try {
-					var experiment_data = JSON.parse(response['cached_data']);
-				} catch (e) {
-					RemoveFromStorage('cached_data');
-					WriteMessage('Cached data has wrong format','danger');
-					return;
-				}
-			}
-			else{
-				var experiment_data = {};
-			}
-			if(experiment_data[email] === undefined)
-				experiment_data[email] = {}
-			if(experiment_data[email][project_id] === undefined)
-				experiment_data[email][project_id] = []
-			experiment_data[email][project_id].push(data);
-			SaveToStorage('cached_data',experiment_data,function(){});
-			WriteMessage('Measurement cached','info');
-		});
+		PushDataToStorage(email,project_id,data)
 	}
 	if(navigator.onLine && (token != null && email != null && project_id != null && data != '')){
 		$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud').addClass('fa-cloud-upload');
@@ -372,7 +349,7 @@ function DatabaseAddDataToProject(){
 			params = JSON.stringify(params);
 		}catch(e){
 			$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
-			WriteMessage('Can\'t send data, wrong format','danger');
+			WriteMessage('Cannot send data, wrong format ('+e.message+')','danger');
 			return;
 		}
 		xhr.send(params);
@@ -385,47 +362,52 @@ function DatabaseAddDataToProject(){
 						SelectProject(project_id);
 					}
 					else{
-						chrome.storage.local.get('cached_data', function(response){
-							if(response['cached_data'] !== undefined){
-								try {
-									var experiment_data = JSON.parse(response['cached_data']);
-								} catch (e) {
-									RemoveFromStorage('cached_data');
-									WriteMessage('Cached data has wrong format','danger');
-									return;
-								}
-							}
-							else{
-								var experiment_data = {};
-							}
-							if(experiment_data[email] === undefined)
-								experiment_data[email] = {}
-							if(experiment_data[email][project_id] === undefined)
-								experiment_data[email][project_id] = []
-							experiment_data[email][project_id].push(data);
-							SaveToStorage('cached_data',experiment_data, function(){});
-							WriteMessage('Measurement cached','info');
-						});
+						PushDataToStorage(email,project_id,data);
 					}
 				}catch(e){
 					$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
-					WriteMessage('Cannot send data, wrong format','danger');
+					WriteMessage('Invalid server response ('+ e.message +')','danger');
+					PushDataToStorage(email,project_id,data);
 					return;
 				}
 				$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
 			}
 		}
 	}
-	
 	DiscardMeasurement();
 	SelectProject(project_id);	
-	
 	return false;
 };
 
+// ===============================================================================================
+// 						Push data to storage in case server response is invalid
+// ===============================================================================================
+function PushDataToStorage(email,project_id,data){
+	chrome.storage.local.get('cached_data', function(response){
+		var experiment_data = {};
+		try {
+			experiment_data = JSON.parse(response['cached_data']);
+		} catch (e) {
+			RemoveFromStorage('cached_data');
+			WriteMessage('Cached data has wrong format ('+e.message+')','danger');
+			return;
+		}
+		if(experiment_data[email] === undefined)
+			experiment_data[email] = {}
+		if(experiment_data[email][project_id] === undefined)
+			experiment_data[email][project_id] = []
+		experiment_data[email][project_id].push(data);
+		SaveToStorage('cached_data',experiment_data, function(){
+			WriteMessage('Measurement cached','info');		
+		});
+	});
+}
 
+
+// ===============================================================================================
+// 						Push data from storage to database
+// ===============================================================================================
 function PushData(cacheProjectID, token, email, experiment_data, i, callback){
-		
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "http://photosynq.venturit.net/api/v1/projects/"+cacheProjectID+"/data.json", true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -435,7 +417,7 @@ function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 		xhr.loopid = i;
 		xhr.send(params);
 	}catch(e){
-		WriteMessage('Can\'t send data, wrong format','danger');
+		WriteMessage('Cannot send data, wrong format ('+e.message+')','danger');
 		delete experiment_data[email][cacheProjectID][i];
 		SaveToStorage('cached_data',experiment_data, function(){});
 		callback(false);
@@ -450,12 +432,12 @@ function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 					SaveToStorage('cached_data',experiment_data, function(){});
 					callback(true);
 				}
-				else{
-					WriteMessage('Your data could not be saved, sorry!','danger');
+				if(response.status == "failed"){
+					WriteMessage(response.notice,'danger');
 					callback(false);
 				}
 			}catch(e){
-				WriteMessage('Cannot send data, wrong format','danger');
+				WriteMessage('Invalid server response ('+ e.message +')','danger');
 				callback(false);
 			}
 		}
@@ -510,7 +492,7 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 					console.log(e);
 					//RemoveFromStorage('cached_data');
 					$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
-					WriteMessage('Cached data has wrong format','danger');
+					WriteMessage('Cached data has wrong format ('+e.message+')','danger');
 					return;
 				}
 			}
@@ -523,21 +505,25 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 // ===============================================================================================
 //									Get Images from server
 // ===============================================================================================
-function DatabaseGetImage(uri,callback){
-	if(_media[uri] !== undefined)
-		callback('<img src="'+_media[uri]+'">');
+function DatabaseGetImage(location,url,callback){
+	if(url === undefined){
+		return;
+	}
+	if(_media[location] !== undefined && _media[location][url] != undefined){
+		callback('<img src="'+_media[location][url]+'">');
+	}	
 	else{
 		var xhr = new XMLHttpRequest();
 		xhr.responseType = 'blob';
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4){
 				if(xhr.response !== null && xhr.response !== undefined){
-					SaveImgToLocalStorage(uri,window.URL.createObjectURL(xhr.response));
+					SaveImgToLocalStorage(location,url,window.URL.createObjectURL(xhr.response));
 					callback('<img src="'+window.URL.createObjectURL(xhr.response)+'">');
 				}
 			}
 		}
-		xhr.open('GET', uri, true);
+		xhr.open('GET', url, true);
 		xhr.send();
 	}
 };

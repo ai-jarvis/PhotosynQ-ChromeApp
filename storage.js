@@ -176,13 +176,12 @@ function SelectProject(id) {
 				
 				$('#PlotsContainer').append(html);
 				
-				
-				DatabaseGetImage(experiments[id].medium_image_url,function(image){
-					$('#ImageSpacer').html(image);
+				DatabaseGetImage('project',experiments[id].medium_image_url,function(img){
+					$('#ImageSpacer').html(img);
 					$('#ImageSpacer img').addClass('img-thumbnail')
 				});
-				DatabaseGetImage(experiments[id].image_file_name,function(image){
-					$('#LeadAvatar').html(image);
+				DatabaseGetImage('avatar',experiments[id].image_file_name,function(img){
+					$('#LeadAvatar').html(img);
 				});
 
 				$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
@@ -333,7 +332,7 @@ function SaveDataToFile(){
 // ===============================================================================================
 //						Save graph to file
 // ===============================================================================================
-function SaveImgToLocalStorage(url,urlData){
+function SaveImgToLocalStorage(location,url,urlData){
 	var canvas = document.createElement('CANVAS'),
         ctx = canvas.getContext('2d'),
         img = new Image;
@@ -347,20 +346,24 @@ function SaveImgToLocalStorage(url,urlData){
 			if(result['media'] !== undefined){
 				try {
 					_media = JSON.parse(result['media']);
-					_media[url] = imgencoded;
-					SaveToStorage('media',_media, function(){});
+					if(_media[location] === undefined)
+						_media[location] = {}
+					_media[location][url] = imgencoded;
+					SaveToStorage('media',_media, function(){
+						chrome.storage.local.getBytesInUse('media', function(response){
+							$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+						});	
+					});
 				} catch (e) {
 					RemoveFromStorage('media');
 					WriteMessage('Stored media port has wrong format.','danger');
 					return;
 				}
 				
-				chrome.storage.local.getBytesInUse('media', function(response){
-					$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
-				});	
-				
 			}else{
-				_media[url] = imgencoded;
+				if(_media[location] === undefined)
+					_media[location] = {}
+				_media[location][url] = imgencoded;
 				SaveToStorage('media',_media,function(){
 					chrome.storage.local.getBytesInUse('media', function(response){
 						$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
