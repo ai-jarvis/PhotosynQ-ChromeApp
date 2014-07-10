@@ -645,7 +645,11 @@ onload = function() {
 	LoadPortNameFromStorage();
 	getVersion(function (ver) { 
 		$('#AppVersion').text('v '+ver);
+		chrome.runtime.onUpdateAvailable.addListener(function(update){
+			$('#AppVersion').append('<span class="label label-danger">Update available</span>');
+		});
 	});
+	window.alert('test');
 
 	// Info message window test
 	// ===============================================================================================
