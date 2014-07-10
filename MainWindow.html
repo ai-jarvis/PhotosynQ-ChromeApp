@@ -93,7 +93,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">PhotosynQ</a>
+      <a class="navbar-brand" href="http://photosynq.org" target="_blank">PhotosynQ</a>
     </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="PhotosynqNavBar">
@@ -152,8 +152,8 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-offset-3 col-sm-9">
-									<button  type="submit" class="btn btn-default" id="DatabaseSignIn">Sign in</button>
+								<div class="col-sm-offset-3 col-sm-9 text-right">
+									<button  type="submit" class="btn btn-default" id="DatabaseSignIn"><i class="fa fa-sign-in"></i> Sign in</button>
 								</div>
 							</div>
 						</form>
@@ -167,7 +167,7 @@
 								<small class="text-muted" id="DatabaseSignedInEmail">Email</small>
 							  </div>
 							</div>							
-							<div style="margin-top:5px;" class="text-right"><button class="btn btn-default" id="DatabaseSignOff">Sign off</button></div>
+							<div style="margin-top:5px;" class="text-right"><button class="btn btn-default" id="DatabaseSignOff"><i class="fa fa-sign-out"></i> Sign out</button></div>
 						</div>
 					</div>
 				</div>
@@ -184,10 +184,10 @@
 			</li>
 			<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cloud text-muted" id="CurrentInternetConnectionIndicator" title="offline"></i></a>
-				<ul class="dropdown-menu" id="CacheInfo" style="width:200px;">
-					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Projects <small id="ProjectStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+				<ul class="dropdown-menu" id="CacheInfo" style="width:230px;">
+					<li><a href="#" style="cursor:default;"><i class="fa fa-flask text-primary"></i> Projects <small id="ProjectStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
 					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Protocols <small id="ProtocolStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
-					<li><a href="#" style="cursor:default;"><i class="fa fa-file-text-o text-primary"></i> Macros <small id="MacroStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
+					<li><a href="#" style="cursor:default;"><i class="fa fa-puzzle-piece text-primary"></i> Macros <small id="MacroStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
 					<li><a href="#" style="cursor:default;"><i class="fa fa-file-image-o text-primary"></i> Media <small id="MediaStorageQuota" class="text-muted pull-right">0.00 MB</small></a></li>
 					<li class="divider"></li>
 					<li><a href="#" id="AppUpdateButton" class="text-center"><small>Update App Content</small></a></li>
@@ -200,13 +200,13 @@
 					<li><a href="#" style="cursor:default;" class="text-center" id="CurrentLocationDisplayImgCoords"><small class="text-danger"><i class="fa fa-location-arrow"></i> Cannot determine location</small></a></li>
 				</ul>
 			</li>
-			<li><a href="#" style="cursor:default; font-size:18px"><i class="icon-bat1 text-danger" id="BatteryStatusIndicator" title="Please replace the battery"></i></a></li>
+			<li><a href="#" style="cursor:default; line-height:14px; font-size:20px;"><i class="icon-bat1 text-danger" id="BatteryStatusIndicator" title="Please replace the battery"></i></a></li>
 		</ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
 
-	<div id="container">
+	<div class="container-fluid">
 		<div class="row">
 			<!-- Container for Menu -->
 			<div class="col-md-4 col-lg-3" id="Menu">
@@ -275,7 +275,11 @@
 					  <div class="panel-body">
 						<div class="form" role="form">
 							<div class="form-group">
-								<select class="form-control" id="QuickMeasurementProtocol" data-live-search="true"></select>
+								<select class="form-control" id="QuickMeasurementProtocol">
+									<option value="" title="Select the protocol you want to run.">Select a Protocol</option>
+									<optgroup label="Your Protocols"></optgroup>
+									<optgroup label="PhotosynQ Protocols"></optgroup>
+								</select>
 								<p class="help-block" id="QuickMeasurementSelectionDescription">Select a protocol to measure.</p>
 							</div>
 						  <div class="form-group">
@@ -337,22 +341,15 @@
 							<button class="btn btn-danger btn-sm" id="TerminateMeasurement">Cancel</button> <button class="btn btn-default btn-sm" id="ShowOutputBtn">Output</button>
 							<p><textarea id="RawOutputTextarea" class="form-control" style="display:none;height:200px"></textarea></p>
 						</div>
-						<div id="DatabaseMeasurementMenu" class="well well-sm" style="display:none;">
-							<button id="SaveDatabaseMeasurement" class="btn btn-success"><i class="fa fa-cloud-upload"></i> Keep</button>
-							<button id="DiscardDatabaseMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
-						</div>
-						<div id="QuickMeasurementMenu"  class="well well-sm" style="display:none;">
-							<button id="SaveQuickMeasurementToFile" class="btn btn-success"><i class="fa fa-hdd-o"></i> Save</button>
-							<button id="DiscardQuickMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
-						</div>
-						<div id="ConsoleMeasurementMenu"  class="well well-sm" style="display:none;">
-							<button id="SaveConsoleMeasurementToFile" class="btn btn-success"><i class="fa fa-hdd-o"></i> Save</button>
-							<button id="DiscardConsoleMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
-						</div>
+					</div>
+					<div class="panel-footer" id="MeasurementMenu" style="display:none;">
+						<button id="SaveMeasurementToDB" class="btn btn-success" style="display:none;"><i class="fa fa-cloud-upload"></i> Keep</button>
+						<button id="SaveMeasurementToFile" class="btn btn-success" style="display:none;"><i class="fa fa-hdd-o"></i> Save</button>
+						<button id="DiscardMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
 					</div>
 				</div>
 			</div>
-		<div style="position:absolute; bottom:0;" class="col-md-5 col-lg-4"><small id="AppVersion" class="text-muted"></small></div>
+		<div style="position:absolute; bottom:0;" class="col-md-4 col-lg-3"><small id="AppVersion" class="text-muted"></small></div>
 		</div>
 	</div>
 	<iframe src="Sandbox.html" id="MacroSandbox" style="display:none"></iframe>
@@ -368,10 +365,7 @@
 			<div id="ModalDialogValue" class="text-primary text-center" style="font-size:30px; font-weight:bold; display:none"></div>
 			<div id="ModalDialogMsg" class="text-primary text-center" style="display:none"></div>
 			<div id="ModalDialogForm" style="display:none"></div>
-			<div id="ModalDialogSparkline" style="display:none; margin-bottom:-20px; margin-top:10px"></div>
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			<div id="ModalDialogSparkline" style="display:none; margin:10px -15px -15px -15px;"></div>
 		  </div>
 		</div>
 	  </div>

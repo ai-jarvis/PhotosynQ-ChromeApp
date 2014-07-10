@@ -12,6 +12,8 @@ function plot(data){
 	postData['protocols'] = [];
 
 	for(i in _used_protocols){
+		if(_protocols[_used_protocols[i]] === undefined)
+			continue;
 		postData['protocols'][_used_protocols[i]] = {'macro_id': _protocols[_used_protocols[i]].macro_id};
 		if(_protocols[_used_protocols[i]].macro_id !== '' && _macros[_protocols[_used_protocols[i]].macro_id] !== undefined)
 			postData['macros'][_protocols[_used_protocols[i]].macro_id] = _macros[_protocols[_used_protocols[i]].macro_id];
@@ -32,10 +34,18 @@ function plot(data){
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
 			var protocolname = 'Unknown protocol';
 			if(data[repeat][protocolID].protocol_id !== undefined){
-				try{
-					protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
+				if(data[repeat][protocolID].protocol_id.match(/(user_)/g)){
+					try{
+						protocolname = _userprotocols[data[repeat][protocolID].protocol_id].name;
+					}
+					catch(e){}
 				}
-				catch(e){}
+				else{
+					try{
+						protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
+					}
+					catch(e){}
+				}
 			}
 			
 			// replace protocol names here
@@ -152,6 +162,8 @@ function plot(data){
 	// Reset Measurement Protocols
 	// ===============================================================================================
 	_used_protocols = []
+	
+	$(window).trigger('resize');
 }
 
 // Apply changes from macros to plots

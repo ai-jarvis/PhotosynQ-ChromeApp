@@ -22,8 +22,7 @@ var light_colors = {
 //orange #f0ad4e;
 //red #d9534f;
 
-var parameters = {
-	'environmental_params': [
+var parameters = [
 		{
 		'name':'light_intensity',
 		'label':'Light intensity [&mu;mol s<sup>-1</sup> m<sup>2</sup>]',
@@ -83,9 +82,7 @@ var parameters = {
 		'input_label': ['before','after'],
 		'input_title': ['before spectroscopic measurement','after spectroscopic measurement'],
 		'value':0
-		}
-	],
-	'spectroscopic_params': [
+		},
 		// MAIN GROUP
 		{	
 		'name':'pulsesize',
@@ -93,6 +90,7 @@ var parameters = {
 		'title':'Size of measuring pulses',
 		'type':'int',
 		'group':'main',
+		'color':'#3c763d',
 		'range_type':'int_range',
 		'range':[5,100],
 		'input_type': 'text',
@@ -107,6 +105,7 @@ var parameters = {
 		'title':'Distance between measuring pulses',
 		'type':'int',
 		'group':'main',
+		'color':'#3c763d',
 		'range_type':'int_range',
 		'range':[1000,10000000],
 		'input_type': 'text',
@@ -120,11 +119,12 @@ var parameters = {
 		'title':'Number of pulses and number of pulse sets',
 		'type':'array',
 		'group':'main',
+		'color':'#3c763d',
 		'range_type':'int_range_sum',
 		'range':[0,5000],							// limit of ~5000, but I need to clarify this
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-5000',
 		'value':'100,100,100,100'
 		},
 		{	
@@ -133,11 +133,12 @@ var parameters = {
 		'title':'',
 		'type':'arrayarray_def',
 		'group':'main',
+		'color':'#3c763d',
 		'range_type':'int_list',
 		'range':detectors,
 		'input_type': 'array_text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':[[15],[15],[15],[15]]
 		},
 		{	
@@ -146,11 +147,12 @@ var parameters = {
 		'title':'Teensy pin number for measuring lights',
 		'type':'arrayarray_def',
 		'group':'main',
+		'color':'#3c763d',
 		'range_type':'int_list',
 		'range':all_lights,
 		'input_type': 'array_text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':[[15],[15],[15],[15]]
 		},
 // LIGHT INTENSITIES
@@ -164,7 +166,7 @@ var parameters = {
 		'range':[0,4095],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-4095',
 		'value':''
 		},
 		{	
@@ -177,7 +179,7 @@ var parameters = {
 		'range':[0,4095],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-4095',
 		'value':''
 		},
 		{	
@@ -190,7 +192,7 @@ var parameters = {
 		'range':[0,4095],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-4095',
 		'value':''
 		},
 // ACTINIC AND ALTERNATE LIGHTS
@@ -204,7 +206,7 @@ var parameters = {
 		'range':meas_act_lights,
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'1'
 		},
 		{	
@@ -217,7 +219,7 @@ var parameters = {
 		'range':meas_act_lights,
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'20'
 		},
 		{	
@@ -230,7 +232,7 @@ var parameters = {
 		'range':meas_act_lights,
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'16'
 		},
 		{	
@@ -243,7 +245,7 @@ var parameters = {
 		'range':meas_act_lights,
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'11'
 		},
 		{	
@@ -256,7 +258,7 @@ var parameters = {
 		'range':'',
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'100'
 		},
 // BACKGROUND ACTINIC SETTING
@@ -283,7 +285,7 @@ var parameters = {
 		'range':act_lights,
 		'input_type': 'select',
 		'input_label': 'Light',
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':20
 		},
 		{
@@ -296,7 +298,7 @@ var parameters = {
 		'range':[0,4095],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-4095',
 		'value':129
 		},
 // NUMBER OF MEASUREMENTS, AVERAGES, DELAYS, ETC.
@@ -310,7 +312,7 @@ var parameters = {
 		'range':[0,100000],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-100000',
 		'value':1
 		},
 		{	
@@ -323,7 +325,7 @@ var parameters = {
 		'range':[0,100000],
 		'input_type': 'text',
 		'input_label': 'sec',
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-100000',
 		'value':1
 		},
 		{	
@@ -336,7 +338,7 @@ var parameters = {
 		'range':[0,100000],
 		'input_type': 'text',
 		'input_label': 'sec',
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-100000',
 		'value':5
 		},
 		{	
@@ -362,7 +364,7 @@ var parameters = {
 		'range':[0,100000],
 		'input_type': 'text',
 		'input_label': 'sec',
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-100000',
 		'value':0
 		},
 // CALIBRATION
@@ -376,7 +378,7 @@ var parameters = {
 		'range':['calibration','calibration_spad_ndvi'],
 		'input_type': 'select',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': '',
 		'value':'calibration'
 		},
 		{	
@@ -389,7 +391,7 @@ var parameters = {
 		'range':[0,1,2],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0,1,2',
 		'value':2
 		},
 		{	
@@ -402,7 +404,7 @@ var parameters = {
 		'range':[0,1],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0,1',
 		'value':'0,0,0,0'
 		},
 // ADMIN FUNCTIONS
@@ -416,8 +418,7 @@ var parameters = {
 		'range':[0,30],
 		'input_type': 'text',
 		'input_label': false,
-		'input_title': 'Range 5-100',
+		'input_title': 'Range 0-30',
 		'value':1
 		}
 	]
-}

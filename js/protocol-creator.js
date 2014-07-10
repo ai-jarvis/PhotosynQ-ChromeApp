@@ -3,8 +3,10 @@ onload = function() {
 	// =====================================================================
 	GenerateParameterList(parameters);
 	window.addEventListener('message', function(event) {
-		GeneratePresetList(event.data);
-		_presets = event.data;
+		GeneratePresetList(event.data.db);
+		GenerateSavedProtocolList(event.data.user)
+		_presets = event.data.db;
+		_userprotocols = event.data.user
 		_event = event;
 	});
 	GenerateAndValidateScript();
@@ -12,72 +14,41 @@ onload = function() {
 	// Collapsable Icon Toggle
 	// =====================================================================  
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-		if($(e.target).attr('href') == '#environmental_params_list'){
-			$('#environmental').parent().show();
-			$('#spectroscopic').parent().hide();
-			$('#presets_info').hide();
-		}
-		if($(e.target).attr('href') == '#spectroscopic_params_list'){
-			$('#environmental').parent().hide();
-			$('#spectroscopic').parent().show();
+		if($(e.target).attr('href') == '#parameter_list'){
+			$('#parameter_used').parent().show();
 			$('#presets_info').hide();
 		}
 		if($(e.target).attr('href') == '#presets_list'){
-			$('#environmental').parent().hide();
-			$('#spectroscopic').parent().hide();
+			$('#parameter_used').parent().hide();
 			$('#presets_info').show();
 		}
 	});
 
 	// Connection Lists Environmental Parameters
 	// =====================================================================
-	$( "#environmental_params" ).sortable({
-		connectWith: "#environmental",
+	$( "#parameter_unused" ).sortable({
+		connectWith: "#parameter_used",
  		revert: 200,
  		tolerance: "pointer",
 		start: function( event, ui ) {
-			$( "#environmental" ).addClass('bg-warning')
+			$( "#parameter_used" ).addClass('bg-warning')
 		},
 		stop: function( event, ui ) {
-			$('#environmental li .form-group div').show()
-			$('#environmental li .control-label').removeClass('col-sm-12').addClass('col-sm-5')
-			$( "#environmental" ).removeClass('bg-warning')
+			$('#parameter_used li .form-group div').show();
+			$('#parameter_used li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
+			$('#parameter_used').removeClass('bg-warning');
+			$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 		}
 	}).disableSelection();
 
-	$( "#environmental" ).sortable({
-		connectWith: "#environmental_params",
+	$( "#parameter_used" ).sortable({
+		connectWith: "#parameter_unused",
 		revert: 200,
 		tolerance: "pointer" ,
 		stop: function( event, ui ) {
-			$('#environmental_params li .form-group div').hide()
-			$('#environmental_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
-		}
-	}).disableSelection();
-
-	// Connection Lists Measurement Parameters
-	// =====================================================================
-	$( "#spectroscopic_params" ).sortable({
-		connectWith: "#spectroscopic",
-		revert: 200,
-		tolerance: "pointer" ,
-		start: function( event, ui ) {
-			$( "#spectroscopic" ).addClass('bg-warning')
-		},
-		stop: function( event, ui ) {
-			$('#spectroscopic li .form-group div').show()
-			$('#spectroscopic li .control-label').removeClass('col-sm-12').addClass('col-sm-5')
-			$( "#spectroscopic" ).removeClass('bg-warning')
-		}
-	}).disableSelection();
-
-	$( "#spectroscopic" ).sortable({
-		connectWith: "#spectroscopic_params",
-		revert: 200,
-		tolerance: "pointer" ,
-		stop: function( event, ui ) {
-			$('#spectroscopic_params li .form-group div').hide()
-			$('#spectroscopic_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+			$('#parameter_unused li .form-group div').hide();
+			$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12');
+			$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
 		}
 	}).disableSelection();
 	
@@ -90,7 +61,7 @@ onload = function() {
 
 	// JSON building triggers
 	// =====================================================================
-	$( "#environmental_params,#environmental,#spectroscopic,#spectroscopic_params" ).on( "sortstop", function( event, ui ) {
+	$( "#parameter_unused,#parameter_used" ).on( "sortstop", function( event, ui ) {
 		$('#'+$(this).attr('id')+' li').each(function(i,value){
 			if($(value).find('input, select').attr('data-group') == ui.item.find('input, select').attr('data-group') && $(value).find('input, select').attr('data-group') !== undefined && $(value).find('input, select').attr('data-group') !== "")
 				$(value).appendTo('#'+ui.item.parent().attr('id'));
@@ -98,30 +69,22 @@ onload = function() {
 		GenerateAndValidateScript();
 	});
 	
-	$('input, select').on('input',function(){
+	$('#parameter_used').on('input','input, select', function(){
 		GenerateAndValidateScript();
 	});
 	
-	$('input[type="radio"]').on('change',function(){
+	$('#parameter_used').on('change','input[type="radio"]',function(){
 		GenerateAndValidateScript();
 	});	
 
 	// Clear Protocol Fields 
 	// =====================================================================
-	$('#environmental_clear').on('click', function(){
-		$('#environmental li').appendTo("#environmental_params");
-		$('#environmental_params li .form-group div').hide()
-		$('#environmental_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+	$('#parameter_clear').on('click', function(){
+		$('#parameter_used li').appendTo("#parameter_unused");
+		$('#parameter_unused li .form-group div').hide()
+		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 		GenerateAndValidateScript();
 	});
-
-	$('#spectroscopic_clear').on('click', function(){
-		$('#spectroscopic li').appendTo("#spectroscopic_params");
-		$('#spectroscopic_params li .form-group div').hide()
-		$('#spectroscopic_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
-		GenerateAndValidateScript();
-	});
-
 
 	// JSON building function
 	// =====================================================================
@@ -130,17 +93,20 @@ onload = function() {
 		var validity = true;
 		$('#RawProtocol').removeClass('panel-danger');
 		$('#ScriptGraphContainer').removeClass('panel-danger panel-success').addClass('panel-success');
+		$('#ScriptGraphContainer .panel-title button').removeClass('disabled');
 		$('li').removeClass('has-error');
 
 		// Environmental parameter control
-		$('#environmental li').each(function(i,k){
-			if(json['environmental'] === undefined)
-				json['environmental'] = []
-			json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
+		$('#parameter_used li').each(function(i,k){
+			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
+				if(json['environmental'] === undefined)
+					json['environmental'] = []
+				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
+			}
 		});
 
 		// Pulse parameter control
-		var arrpulseblocks = $('#spectroscopic li input[name="pulses"]').val();
+		var arrpulseblocks = $('#parameter_used li input[name="pulses"]').val();
 		var pulseblocks = 0;
 		var pulsenum = 0;
 		if(arrpulseblocks !== undefined){
@@ -152,7 +118,7 @@ onload = function() {
 				
 				if(isNaN(pulseval)){
 					validity = false;
-					$('#spectroscopic li input[name="pulses"]').parent().parent().parent().addClass('has-error');
+					$('#parameter_used li input[name="pulses"]').parent().parent().parent().addClass('has-error');
 				}
 				
 				json['pulses'].push(pulseval);
@@ -162,23 +128,23 @@ onload = function() {
 			if(pulsenum > 5000){
 				json['pulses'] = null
 				validity = false;
-				$('#spectroscopic li input[name="pulses"]').parent().parent().parent().addClass('has-error');
+				$('#parameter_used li input[name="pulses"]').parent().parent().parent().addClass('has-error');
 			}			
 			
 		}
 		
 		// Check and validate all other parameters
-		$('#spectroscopic li').each(function(i,k){
+		$('#parameter_used li').each(function(i,k){
 			var datatype = $(k).find( "input, select").attr('data-type');
 			var dataname = $(k).find( "input, select").attr('name');
 			var datainput = $(k).find( "input, select").val();
 			var datagroup = $(k).find( "input, select").attr('data-group');
-			var datamin = $(k).find( "input, select").attr('min');
-			var datamax = $(k).find( "input, select").attr('max');
+			var datamin = parseFloat($(k).find( "input, select").attr('min'));
+			var datamax = parseFloat($(k).find( "input, select").attr('max'));
 
 			if(datatype == 'int'){
 				json[dataname] = parseInt(datainput);
-				if(isNaN(json[dataname]) || datainput % 1 !== 0){
+				if(isNaN(json[dataname]) || datainput % 1 !== 0 || json[dataname] > datamax || json[dataname] < datamin){
 					validity = false;
 					json[dataname] = null;
 					$(k).addClass('has-error');
@@ -186,7 +152,7 @@ onload = function() {
 			}
 			else if(datatype == 'float'){
 				json[dataname] = parseFloat(datainput);
-				if(isNaN(json[dataname])){
+				if(isNaN(json[dataname]) || json[dataname] > datamax || json[dataname] < datamin){
 					validity = false;
 					$(k).addClass('has-error');
 				}
@@ -275,137 +241,141 @@ onload = function() {
 
 		json = [json];
 		$('#RawProtocol').html(JSON.stringify(json, null, 3).replace(/null|\"\"/g, '<i class="fa fa-exclamation-triangle text-danger"></i>'));
-		GenerateScriptPlot(json);
 		if(!validity){
 			$('#RawProtocol').addClass('panel-danger');
 			$('#ScriptGraphContainer').removeClass('panel-danger panel-success').addClass('panel-danger');
+			$('#ScriptGraphContainer .panel-title button').addClass('disabled');
 		}
+		GenerateScriptPlot(json);
 	}
 
 	// Build parameter list
 	// =====================================================================
 	function GenerateParameterList(json){
-		for(param_id in json){
-			for(param in json[param_id]){
+		for(param in json){
 
-				var html = '<li class="list-group-item " title="'+json[param_id][param].title+'" id="'+json[param_id][param].name+'">'				
-					html +=  '<div class="form-group">'
+			var html = '<li class="list-group-item " title="'+json[param].title+'" id="'+json[param].name+'"';
+				if(json[param].color !== undefined)
+					html += ' style="border-left:3px solid '+ json[param].color+'"';
+				else
+					html += ' style="border-left:3px solid #e1e1e1"';
+				html += '>'				
+				html +=  '<div class="form-group">'
 
-					// Label
-					html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">'
-					html +=  json[param_id][param].label
-					html +=  '</label>'
-					
-					// input
-					if(json[param_id][param].input_type == 'radio'){
-						html += '<div class="col-sm-7">'
-						for(i=0; i< json[param_id][param].range.length; i++){
-							html += '<label class="radio-inline">'
-							html +=  '<input type="radio"'
-							if(json[param_id][param].group !== '')
-								html +=  'data-group="'+json[param_id][param].group+'" '
-							html +=  'name="'+json[param_id][param].name+'" '
-							html +=  'data-type="'+json[param_id][param].type+'" '
-							html +=  'value="'+json[param_id][param].range[i]+'" '
-							if(json[param_id][param].range[i] == json[param_id][param].value)
-								html += 'checked '
-							html +=  'title="'+json[param_id][param].input_title[i]+'">'
-							html +=  ' ' + json[param_id][param].input_label[i]
-							html +=  '</label>'
-						}
-						html +=  '</div>'
+				// Label
+				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">'
+				html +=  json[param].label
+				html +=  '</label>'
+				
+				// input
+				if(json[param].input_type == 'radio'){
+					html += '<div class="col-sm-7">'
+					for(i=0; i< json[param].range.length; i++){
+						html += '<label class="radio-inline">'
+						html +=  '<input type="radio"'
+						if(json[param].group !== '')
+							html +=  'data-group="'+json[param].group+'" '
+						html +=  'name="'+json[param].name+'" '
+						html +=  'data-type="'+json[param].type+'" '
+						html +=  'value="'+json[param].range[i]+'" '
+						if(json[param].range[i] == json[param].value)
+							html += 'checked '
+						html +=  'title="'+json[param].input_title[i]+'">'
+						html +=  ' ' + json[param].input_label[i]
+						html +=  '</label>'
 					}
-					
-					if(json[param_id][param].input_type == 'text'){
-						if(json[param_id][param].input_label !== false){
-							html += '<div class="col-sm-5">'
-							html += '<div class="input-group">'
-						}
-						else
-							html += '<div class="col-sm-7">'
-						if(json[param_id][param].type == 'int'){
-							html +=  '<input type="number" class="form-control" '
-							html +=  'min="'+json[param_id][param].range[0]+'" '
-							html +=  'max="'+json[param_id][param].range[1]+'" '
-						}
-						if(json[param_id][param].type == 'float'){
-							html +=  '<input type="number" class="form-control" '
-							html +=  'min="'+json[param_id][param].range[0]+'" '
-							html +=  'max="'+json[param_id][param].range[1]+'" '
-							html +=  'step=".1" '
-						}
-						else
-							html +=  '<input type="text" class="form-control"'
-						html +=  'name="'+json[param_id][param].name+'" '
-						html +=  'data-type="'+json[param_id][param].type+'" '
-						if(json[param_id][param].group !== '')
-							html +=  'data-group="'+json[param_id][param].group+'" '
-						html +=  'value="'+json[param_id][param].value+'" '
-						html +=  'placeholder="'+json[param_id][param].range+'" '
-						html +=  'title="'+json[param_id][param].input_title+'">'
-						if(json[param_id][param].input_label !== false){
-							html +=  '<span class="input-group-addon">'+json[param_id][param].input_label+'</span>'
-							html +=  '</div>'
-						}
-						html +=  '</div>'
-					}
-
-					if(json[param_id][param].input_type == 'select'){
-						html += '<div class="col-sm-7">'
-						html += '<select class="form-control"'
-						html +=  'name="'+json[param_id][param].name+'" '
-						html +=  'data-type="'+json[param_id][param].type+'" '
-						if(json[param_id][param].group !== '')
-							html +=  'data-group="'+json[param_id][param].group+'" '
-						html += '>'
-
-						for(i=0; i< json[param_id][param].range.length; i++){
-							html +=  '<option '
-							html +=  'value="'+json[param_id][param].range[i]+'" '
-							if(json[param_id][param].range[i] == json[param_id][param].value)
-								html += 'selected '
-							if(json[param_id][param].input_label !== false)
-								html +=  'title="'+json[param_id][param].input_label + ' ' +json[param_id][param].range[i]+'">'
-							else
-								html +=  'title="' +json[param_id][param].range[i]+'">'
-							if(json[param_id][param].input_label !== false)
-								html +=  json[param_id][param].input_label + ' ' +json[param_id][param].range[i]
-							else
-							html +=  json[param_id][param].range[i]
-							html +=  '</option>'
-						}
-						html += '</select>'
-						html +=  '</div>'
-					}
-
-					if(json[param_id][param].input_type == 'array_text'){
-						html += '<div class="col-sm-7">'
-						for(i in json[param_id][param].value){
-							html += '<div class="col-sm-3">'
-							html +=  '<input type="text" class="form-control"'
-							html +=  'name="'+json[param_id][param].name+'" '
-							html +=  'data-type="'+json[param_id][param].type+'" '
-							if(json[param_id][param].group !== '')
-								html +=  'data-group="'+json[param_id][param].group+'" '
-							html +=  'value="'+json[param_id][param].value[i].join(',')+'" '
-							html +=  'placeholder="'+json[param_id][param].range+'" '
-							html +=  'title="'+json[param_id][param].input_title+'">'
-							html +=  '</div>'
-						}
-						html +=  '</div>'
-						
-					}
-					
 					html +=  '</div>'
-					html +=  '</li>'
+				}
 				
-				$('#'+param_id).append(html);
+				if(json[param].input_type == 'text'){
+					if(json[param].input_label !== false){
+						html += '<div class="col-sm-5">'
+						html += '<div class="input-group">'
+					}
+					else
+						html += '<div class="col-sm-7">'
+					if(json[param].type == 'int'){
+						html +=  '<input type="number" class="form-control" '
+						html +=  'min="'+json[param].range[0]+'" '
+						html +=  'max="'+json[param].range[1]+'" '
+					}
+					if(json[param].type == 'float'){
+						html +=  '<input type="number" class="form-control" '
+						html +=  'min="'+json[param].range[0]+'" '
+						html +=  'max="'+json[param].range[1]+'" '
+						html +=  'step=".1" '
+					}
+					else
+						html +=  '<input type="text" class="form-control"'
+					html +=  'name="'+json[param].name+'" '
+					html +=  'data-type="'+json[param].type+'" '
+					if(json[param].group !== '')
+						html +=  'data-group="'+json[param].group+'" '
+					html +=  'value="'+json[param].value+'" '
+					html +=  'placeholder="'+json[param].input_title+'" '
+					html +=  'title="'+json[param].input_title+'">'
+					if(json[param].input_label !== false){
+						html +=  '<span class="input-group-addon">'+json[param].input_label+'</span>'
+						html +=  '</div>'
+					}
+					html +=  '</div>'
+				}
+
+				if(json[param].input_type == 'select'){
+					html += '<div class="col-sm-7">'
+					html += '<select class="form-control"'
+					html +=  'name="'+json[param].name+'" '
+					html +=  'data-type="'+json[param].type+'" '
+					if(json[param].group !== '')
+						html +=  'data-group="'+json[param].group+'" '
+					html += '>'
+
+					for(i=0; i< json[param].range.length; i++){
+						html +=  '<option '
+						html +=  'value="'+json[param].range[i]+'" '
+						if(json[param].range[i] == json[param].value)
+							html += 'selected '
+						if(json[param].input_label !== false)
+							html +=  'title="'+json[param].input_label + ' ' +json[param].range[i]+'">'
+						else
+							html +=  'title="' +json[param].range[i]+'">'
+						if(json[param].input_label !== false)
+							html +=  json[param].input_label + ' ' +json[param].range[i]
+						else
+						html +=  json[param].range[i]
+						html +=  '</option>'
+					}
+					html += '</select>'
+					html +=  '</div>'
+				}
+
+				if(json[param].input_type == 'array_text'){
+					html += '<div class="col-sm-7">'
+					for(i in json[param].value){
+						html += '<div class="col-sm-3">'
+						html +=  '<input type="text" class="form-control"'
+						html +=  'name="'+json[param].name+'" '
+						html +=  'data-type="'+json[param].type+'" '
+						if(json[param].group !== '')
+							html +=  'data-group="'+json[param].group+'" '
+						html +=  'value="'+json[param].value[i].join(',')+'" '
+						html +=  'placeholder="'+json[param].range+'" '
+						html +=  'title="'+json[param].input_title+'">'
+						html +=  '</div>'
+					}
+					html +=  '</div>'
+					
+				}
+				
+				html +=  '</div>'
+				html +=  '</li>'
 			
-				$('#'+json[param_id][param].name+' .form-group div').hide()
-				$('#'+json[param_id][param].name+' .control-label').removeClass('col-sm-5').addClass('col-sm-12')
-				
-			}
+			$('#parameter_unused').append(html);
+		
+			$('#'+json[param].name+' .form-group div').hide()
+			$('#'+json[param].name+' .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 		}
+		$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
 	}
 
 	// Build presets list
@@ -418,7 +388,26 @@ onload = function() {
 			html += 'title="'+json[param_id].description+'">'
 			html += '<i class="fa fa-file-text"></i> '
 			html += json[param_id].name+'</a>'
-			$('#presets,#presets_second').append(html)
+			$('#presets,#presets_second').append(html);
+		}
+	}
+
+	// Build presets list
+	// =====================================================================
+	function GenerateSavedProtocolList(json){
+		$('.saveduserprotocols').remove();
+		console.log(json);
+		for(param_id in json){
+			var html = '<a class="list-group-item saveduserprotocols" '
+			html += 'data-link="user_'+param_id+'" '
+			html += 'style="cursor:pointer" '
+			html += 'title="'+json[param_id].description+'">'
+			html += '<i class="fa fa-user"></i> '
+			html += json[param_id].name+'</a>'
+			if(json[param_id].protocol_json.length > 1)
+				$('#presets_second').prepend(html);
+			else
+				$('#presets,#presets_second').prepend(html);
 		}
 	}
 
@@ -655,43 +644,43 @@ onload = function() {
 	// =====================================================================
 	function ImportScriptFromJSON(json){
 		/* Move all parameters back to the left */
-		$('#environmental li').appendTo("#environmental_params");
-		$('#spectroscopic li').appendTo("#spectroscopic_params");
-		$('#environmental_params li .form-group div, #spectroscopic_params li .form-group div').hide()
-		$('#environmental_params li .control-label, #spectroscopic_params li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+		$('#parameter_used li').appendTo("#parameter_unused");
+		$('#parameter_unused li .form-group div').hide()
+		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 
 		/* Add parameters according to the json */
 		for(param_id in json){
-			if($('#'+param_id).parent('ul').attr('id') !== undefined){
+			if($('#'+param_id) !== undefined){
 
 				/* Apply settings */
 				if(param_id == 'detectors' || param_id == 'meas_lights'){
 					for(i in param_id)
 						$('#'+param_id+' input[name="'+param_id+'"]:eq('+i+')').attr('value',json[param_id][i])
 				}
+				else if(param_id == 'environmental'){
+					for(envValue in json[param_id]){
+						/* Apply settings */
+						$('#'+json[param_id][envValue][0]+ ' input[value='+json[param_id][envValue][1]+']').prop('checked', true);
+
+
+						/* Move parameter to the left */
+						$('#'+json[param_id][envValue][0]).appendTo('#parameter_used');
+					
+						/* Change layout */
+						$('#'+json[param_id][envValue][0]+ ' .form-group div').show();
+						$('#'+json[param_id][envValue][0] + ' .control-label').removeClass('col-sm-12').addClass('col-sm-5');
+					}
+					continue;
+				}
 				else
 					$('#'+param_id+' input').attr('value',json[param_id])
 
 				/* Move parameter to the left */
-				$('#'+param_id).appendTo('#'+$('#'+param_id).parent('ul').attr('id').replace('_params',''));
+				$('#'+param_id).appendTo('#parameter_used');
 				
 				/* Change layout */
-				$('#'+$('#'+param_id).parent('ul').attr('id').replace('_params','') + ' li .form-group div').show();
-				$('#'+$('#'+param_id).parent('ul').attr('id').replace('_params','') + ' li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
-			}
-			else if(param_id == 'environmental'){
-				for(envValue in json[param_id]){
-					/* Apply settings */
-					$('#'+json[param_id][envValue][0]+ ' input[value='+json[param_id][envValue][1]+']').prop('checked', true);
-
-
-					/* Move parameter to the left */
-					$('#'+json[param_id][envValue][0]).appendTo('#'+$('#'+json[param_id][envValue][0]).parent('ul').attr('id').replace('_params',''));
-					
-					/* Change layout */
-					$('#'+$('#'+json[param_id][envValue][0]).parent('ul').attr('id').replace('_params','') + ' li .form-group div').show();
-					$('#'+$('#'+json[param_id][envValue][0]).parent('ul').attr('id').replace('_params','') + ' li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
-				}
+				$('#'+param_id+' .form-group div').show();
+				$('#'+param_id+' .control-label').removeClass('col-sm-12').addClass('col-sm-5');
 			}
 		}
 	}
@@ -702,27 +691,48 @@ onload = function() {
 		var MultiProtocol = []
 		$('#preset_sort li ').each(function(k,v){
 			var link = $(v).attr('data-link');
-			MultiProtocol.push(_presets[link].protocol_json)
+			if(link.match(/user_/g)){
+				MultiProtocol.push(_userprotocols[link.substr(5)].protocol_json)
+			}
+			else
+				MultiProtocol.push(_presets[link].protocol_json)
 		});
 		$('#RawProtocol').html(JSON.stringify(MultiProtocol, null, 3));
 		GenerateScriptPlot(MultiProtocol);
 	};
 
+	// Sort Parameter List
+	// =====================================================================
+	function SortParameterList(a,b){
+		var aval = $(a).find('input').attr('data-group') || "";
+		var bval = $(b).find('input').attr('data-group') || "";
+		return (bval < aval) ? 1 : -1;    
+	}
 
 	// Build click / hover events
 	// =====================================================================
-	$('body').on('click', '#presets a',function(){
-		$('a[href="#spectroscopic_params_list"]').tab('show');
+	$('#presets').on('click', 'a',function(){
+		$('a[href="#parameter_list"]').tab('show');
 		var link = $(this).attr('data-link');
-		ImportScriptFromJSON(_presets[link].protocol_json)
+		if($(this).hasClass('saveduserprotocols'))
+			ImportScriptFromJSON(_userprotocols[link.substr(5)].protocol_json);
+		else
+			ImportScriptFromJSON(_presets[link].protocol_json);
+		$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 		GenerateAndValidateScript();
 	});
 
-	$('body').on('hover', '#presets a',function(){
+	$('#presets').on('hover', 'a',function(){
 		var link = $(this).attr('data-link');
 		$('#presets_info').empty();
-		$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
-		$('#presets_info').append(_presets[link].description);
+		if($(this).hasClass('saveduserprotocols')){
+			$('#presets_info').append('<legend>'+_userprotocols[link.substr(5)].name+'</legend>');
+			$('#presets_info').append(_userprotocols[link.substr(5)].description);
+			$('#presets_info').append('<p><button value="'+link.substr(5)+'" class="btn btn-danger" id="BtnDeleteUserScript">Delete</button><p>');
+		}else{
+			$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
+			$('#presets_info').append(_presets[link].description);
+		}
 	});	
 	
 	$('#ProtocoltoConsoleBtn').on('click', function(){
@@ -734,6 +744,38 @@ onload = function() {
 		_event.source.postMessage({'protocol_run':$('#RawProtocol').text()}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
+
+	$('#presets_info').on('click', '#BtnDeleteUserScript', function(){
+		var protocol_id = $(this).val();
+		_event.source.postMessage({'protocol_delete':protocol_id}, _event.origin);
+		delete _userprotocols[protocol_id]
+		GenerateSavedProtocolList(_userprotocols);
+		$('#presets_info').empty();
+	});
+	
+	$('#BtnSaveProtocol').on('click', function(){
+		var protocol_id = -1;
+		for(k in _userprotocols){
+			if(k > protocol_id)
+				protocol_id = k;
+		}
+		protocol_id++;
+		try {
+			var protocol_json = JSON.parse($('#RawProtocol').text());
+			var protocol_save = {
+				'description': $('#DescriptionSaveProtocol').val(),
+				'id': protocol_id,
+				'macro_id': false,
+				'name': $('#NameSaveProtocol').val(),
+				'protocol_json': protocol_json[0]
+			}
+			_userprotocols[protocol_id] = protocol_save;
+			GenerateSavedProtocolList(_userprotocols);
+			_event.source.postMessage({'protocol_save':protocol_save}, _event.origin);
+			$('#saveModal').modal('hide');
+		}
+		catch(e){}
+	});	
 	
 	$('body').on('click', '.dismiss-preset',function(){
 		var link = $(this).parent().attr('data-link');
@@ -779,12 +821,12 @@ onload = function() {
 	// =====================================================================
 	var bodyheight =$(window).height()-52
 	$("#MainDisplayContainer").height(bodyheight);
-	$("#environmental_params,#presets,#spectroscopic_params,#environmental,#spectroscopic,#presets_second").height(bodyheight-400);
+	$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
 	$("#RawProtocol,#preset_sort").height(bodyheight-369);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-52;
 		$("#MainDisplayContainer").height(bodyheight);
-		$("#environmental_params,#presets,#spectroscopic_params,#environmental,#spectroscopic,#presets_second").height(bodyheight-400);
+		$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
 		$("#RawProtocol,#preset_sort").height(bodyheight-369);
 	});
 

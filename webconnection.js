@@ -131,6 +131,7 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
+					console.log(tmp);
 					_experiments = {};
 					for(i in tmp){
 						_experiments[tmp[i].id] = {
@@ -170,7 +171,7 @@ function GetProjectsFromDB(token,email){
 // 								Get Protocols From Cache
 // ===============================================================================================
 function GetProtocolsFromCache(){
-	chrome.storage.local.get('cached_protocols', function(response){
+	chrome.storage.local.get(['cached_protocols','cached_userprotocols'], function(response){
 		if(response['cached_protocols'] !== undefined){
 			try {
 				_protocols = JSON.parse(response['cached_protocols']);
@@ -179,26 +180,42 @@ function GetProtocolsFromCache(){
 				WriteMessage('Cached protocols have wrong format','danger');
 				return;
 			}
-			$('#QuickMeasurementProtocol').empty();
+			$('#QuickMeasurementProtocol optgroup[label="PhotosynQ Protocols"]').empty();
 			
-			//$('#QuickMeasurementProtocol').append('<optgroup label="Database Protocols">');
 			for(var i in _protocols){
-				$('#QuickMeasurementProtocol').append('<option value="'+i+'" data-protocol-ids="'+_protocols[i].id+'" title="'+_protocols[i].description+'">'+_protocols[i].name+'</option>');
+				$('#QuickMeasurementProtocol optgroup[label="PhotosynQ Protocols"]').append('<option value="'+i+'" title="'+_protocols[i].description+'">'+_protocols[i].name+'</option>');
 			}
-			//$('#QuickMeasurementProtocol').append('</optgroup>');
-			
+	
 			//var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
 			//$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
-			$('#QuickMeasurementProtocol').prepend('<option value="" title="Select the protocol you want to run.">Select a Protocol</option>');
-			
-			chrome.storage.local.getBytesInUse('cached_protocols', function(response){
-				$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
-			});
-			
 		}
 		else{
 			WriteMessage('No Protocols cached. Connect to the internet to update your list.','warning')
 		}
+		
+		if(response['cached_userprotocols'] !== undefined){
+			try {
+				_userprotocols = JSON.parse(response['cached_userprotocols']);
+			} catch (e) {
+				RemoveFromStorage('cached_userprotocols');
+				WriteMessage('Cached user protocols have wrong format','danger');
+				return;
+			}
+			$('#QuickMeasurementProtocol optgroup[label="Your Protocols"]').empty();
+
+			for(var i in _userprotocols){
+				$('#QuickMeasurementProtocol optgroup[label="Your Protocols"]').append('<option value="user_'+i+'" title="'+_userprotocols[i].description+'">'+_userprotocols[i].name+'</option>');
+			}
+			
+		}
+		else{
+			WriteMessage('No user-defined Protocols cached.','info')
+		}
+		
+		chrome.storage.local.getBytesInUse(['cached_protocols','cached_userprotocols'], function(response){
+			$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+		});
+		
 	});
 	return false;
 }

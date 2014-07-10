@@ -410,12 +410,13 @@ function readable_time(currentdate){
 // ===============================================================================================
 function DiscardMeasurement(){
 	EnableInputs();
-	$('#DatabaseMeasurementMenu,#QuickMeasurementMenu,#ConsoleMeasurementMenu').hide();
+	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
 	$('#DeviceConnectionState').removeClass('fa-blink');
 	ProgressBar(0, 0);
+	$(window).trigger('resize');
 	MeasurementType = null;
 	ProtocolArray = null;
 	QuickMeasurementProtocol = null;

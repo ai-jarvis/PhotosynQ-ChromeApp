@@ -14,7 +14,8 @@ var protocol;
 var SelectedProject = null;
 var _authentication;
 var _geolocation = false;
-var _protocols = [];
+var _protocols = {};
+var _userprotocols = {};
 var _experiments = [];
 var _macros = [];
 var _media = {};
@@ -100,10 +101,11 @@ function onCharRead(readInfo) {
 				$('#ModalDialogSparkline span').attr('values', values+','+passedValue);
 			}
 			$('#ModalDialogSparkline span').sparkline('html', { 
-				width: 258,
-				height: 30,
-				lineColor:'#a1a1a1',
-				fillColor:'#f1f1f1',
+				width: 296,
+				height: 45,
+				lineColor:'#357EBD',
+				fillColor:'#E6EFF8',
+				lineWidth:1,
 				minSpotColor: false,
 				maxSpotColor:false,
 				spotColor:'#aaaaaa',
@@ -197,25 +199,19 @@ function onCharRead(readInfo) {
 				return;
 			}			
 			dataSave = dataReadterm;				
-			
-			if(MeasurementType == 'quick'){
-				EnableInputs();
-				$('#QuickMeasurementMenu').show();
-				MeasurementType = null;
-				ResultString = dataReadterm;
-				WriteMessage('Protocol done.','success');
-				$('#DeviceConnectionState').removeClass('fa-blink')
-			}
+	
 			if(MeasurementType == 'console'){
-				EnableInputs();
-				$('#ConsoleMeasurementMenu').show();
-				MeasurementType = null;
-				ResultString = dataReadterm;
-				//ResultString['ConsoleInput'] = ConsoleProtocol.value.trim();
-				WriteMessage('Protocol done.','success');
-				$('#DeviceConnectionState').removeClass('fa-blink')
+				ResultString['ConsoleInput'] = ConsoleProtocol.value.trim();
 			}
+			
+			EnableInputs();
+			MeasurementType = null;
+			ResultString = dataReadterm;
+			WriteMessage('Protocol done.','success');
+			$('#DeviceConnectionState').removeClass('fa-blink')
+			
 			$('#PlotsContainer').empty();
+			$('#MeasurementMenu').show();
 			plot(dataReadterm);
 			setStatus('MultiSpeQ Ready','success');
 			dataRead = '';
@@ -239,30 +235,21 @@ function onCharRead(readInfo) {
 		WriteMessage('Protocol done.','success');
 
 		if(MeasurementType == 'database'){
-			$('#DatabaseMeasurementMenu').show();
+			$('#SaveMeasurementToDB').show();
 			ResultString['user_answers'] = _given_answers;
 			ResultString['location'] = [_geolocation.latitude, _geolocation.longitude];
-			if($('#CheckBoxRememberAnswers').is(':checked'))
-				console.log('keep');
-			else{
-				$('#collapseFour select').each(
-					function() {
-						$(this).attr('value','');
-					}
-				);
-			}
+		}
+		
+		if(MeasurementType == 'console' || (MeasurementType == 'quick')){
+			$('#SaveMeasurementToFile').show();
+			SelectedProject = null;
 		}
 
-		if(MeasurementType == 'quick'){
-			$('#QuickMeasurementMenu').show();
-		}
-
-		if(MeasurementType == 'console'){
-			$('#ConsoleMeasurementMenu').show();
+		if(MeasurementType == 'console')
 			ResultString['ConsoleInput'] = ConsoleProtocol.value.trim();
-		}
 
 		$('#PlotsContainer').empty();
+		$('#MeasurementMenu').show();
 		plot(dataRead);
 		setStatus('MultiSpeQ Ready','success');
 		dataRead = '';
@@ -443,19 +430,13 @@ onload = function() {
 
 	// Events saving measurements to db/file
 	// ===============================================================================================
-	document.getElementById('SaveDatabaseMeasurement').addEventListener('click', DatabaseAddDataToProject);
-	document.getElementById('SaveQuickMeasurementToFile').addEventListener('click', SaveDataToFile);
-	document.getElementById('SaveConsoleMeasurementToFile').addEventListener('click', SaveDataToFile);
+	document.getElementById('SaveMeasurementToDB').addEventListener('click', DatabaseAddDataToProject);
+	document.getElementById('SaveMeasurementToFile').addEventListener('click', SaveDataToFile);
 	
-	document.getElementById('DiscardDatabaseMeasurement').addEventListener('click', function(){
+	document.getElementById('DiscardMeasurement').addEventListener('click', function(){
 		DiscardMeasurement();
-		SelectProject(SelectedProject);
-	});
-	document.getElementById('DiscardQuickMeasurement').addEventListener('click', function(){
-		DiscardMeasurement();
-	});
-	document.getElementById('DiscardConsoleMeasurement').addEventListener('click', function(){
-		DiscardMeasurement();
+		if(SelectedProject)
+			SelectProject(SelectedProject);
 	});
 
 	// Nav bar events
@@ -506,8 +487,8 @@ onload = function() {
 	// ===============================================================================================
 	document.getElementById('QuickMeasurementProtocol').addEventListener('change', function(e){
 		var shorttext = "Select a protocol to measure."
-		if(_protocols[$('#QuickMeasurementProtocol option:selected').attr('value')] !== undefined){
-			shorttext = _protocols[$('#QuickMeasurementProtocol option:selected').attr('value')].description;
+		if($('#QuickMeasurementProtocol option:selected').attr('title') !== ""){
+			shorttext = $('#QuickMeasurementProtocol option:selected').attr('title');
 			if(shorttext === "")
 				shorttext = "No description..."
 			if(shorttext.length > 250){
@@ -539,13 +520,15 @@ onload = function() {
 
 	// Resizing app events
 	// ===============================================================================================
-	var bodyheight =$(window).height()-92
+	var bodyheight =$(window).height()-84
 	$("#MainDisplayContainer").height(bodyheight);
 	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
 	$(window).resize(function() {
-		bodyheight = $(window).height()-92;
+		bodyheight = $(window).height()-84;
 		$("#MainDisplayContainer").height(bodyheight);
 		$("#MainDisplayContainer > .panel-body").height(bodyheight-40);
+		if($("#MainDisplayContainer .panel-footer").is(":visible"))
+			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
 	});
 
 	// Menu toggle events
@@ -652,7 +635,7 @@ onload = function() {
 	LoadAuthentificationFromStorage();
 	GetMacrosFromCache();
 	GetProtocolsFromCache();
-	GetProjectsFromCache()
+	GetProjectsFromCache();
 	GetLocation();
 	LoadPortNameFromStorage();
 	getVersion(function (ver) { 
@@ -692,7 +675,7 @@ onload = function() {
 			minWidth: 1000
 		}, function (ProtocolWindow){
 			ProtocolWindow.contentWindow.addEventListener('load', function(e) {
-				ProtocolWindow.contentWindow.postMessage(_protocols, '*');
+				ProtocolWindow.contentWindow.postMessage({'db':_protocols,'user':_userprotocols}, '*');
 			});
 		});
 	});
@@ -706,12 +689,29 @@ onload = function() {
 			ConsoleMeasurement();
 		}
 		if(event.data.protocol_save !== undefined){
-			/*description:
-			id:
-			macro_id:
-			name:
-			protocol_json:*/
-		}			
+			try {
+				var userpID = event.data.protocol_save.id
+				_userprotocols[userpID] = event.data.protocol_save;
+				SaveToStorage('cached_userprotocols',_userprotocols, function(){
+					GetProtocolsFromCache();		
+				});
+			}
+			catch(e){
+				WriteMessage('Protocol has format','danger');
+			}
+		}
+		if(event.data.protocol_delete !== undefined){
+			try {
+				var userpID = event.data.protocol_delete
+				delete _userprotocols[userpID]
+				SaveToStorage('cached_userprotocols',_userprotocols, function(){
+					GetProtocolsFromCache();		
+				});
+			}
+			catch(e){
+				WriteMessage('Protocol has format','danger');
+			}
+		}
 	});
 };
 
@@ -760,7 +760,7 @@ function MenubarFunction(item,itemid) {
 
 	$('#ModalDialog').modal({
 		backdrop: 'static',
-		keyboard: false,
+		keyboard: true,
 		show:false
 	});	
 
@@ -986,16 +986,21 @@ function QuickMeasurement() {
 		DiscardMeasurement();
 		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
 		$('#QuickMeasurement').blur();
-		QuickMeasurementProtocol = document.getElementById('QuickMeasurementProtocol');
-		if(QuickMeasurementProtocol.value == ''){
+		if($('#QuickMeasurementProtocol').val() == ''){
 			WriteMessage('Select a protocol first','info');
 			return;
 		}
 		protocol = [];
-		if(_protocols[QuickMeasurementProtocol.value] !== undefined)
-			protocol.push(_protocols[QuickMeasurementProtocol.value].protocol_json);
-
-		if(protocol == false){
+		
+		if($('#QuickMeasurementProtocol').val().match(/(user_)/g)){
+			if(_userprotocols[$('#QuickMeasurementProtocol').val().substr(5)] !== undefined)
+				protocol.push(_userprotocols[$('#QuickMeasurementProtocol').val().substr(5)].protocol_json);
+		}
+		else{
+			if(_protocols[$('#QuickMeasurementProtocol').val()] !== undefined)
+				protocol.push(_protocols[$('#QuickMeasurementProtocol').val()].protocol_json);
+		}
+		if(protocol == false || protocol.length == 0){
 			WriteMessage('Protocol not found.','danger');
 			return;
 		}
@@ -1012,7 +1017,7 @@ function QuickMeasurement() {
 			ResultString = null;
 			ProtocolArray = [];
 			_used_protocols = [];
-			_used_protocols.push(QuickMeasurementProtocol.value);
+			_used_protocols.push($('#QuickMeasurementProtocol').val());
 			MacroArray = null;
 			DisableInputs();
 			
@@ -1232,7 +1237,7 @@ function BatteryLevel(batt_level){
 	$("#BatteryStatusIndicator").removeClass();
 	if((batt_level[0] - batt_level[1]) < 0.1){
 		state = 'USB Power Only'
-		$('#BatteryStatusIndicator').addClass('text-info').addClass('icon-bat4').attr('title',state);
+		$('#BatteryStatusIndicator').addClass('text-info').addClass('icon-bat-charge').attr('title',state);
 	}
 	else if(batt_level[1] < 5 && batt_level[0] > 7){
 		state = 'Low quality batteries, replace with NiMh or Li'
