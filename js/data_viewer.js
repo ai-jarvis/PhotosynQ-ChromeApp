@@ -6,6 +6,7 @@ onload = function() {
 	$(window).resize(function() {
 		bodyheight = $(window).height()-$('.navbar').height()-10;
 		$("#MainDisplayContainer").height(bodyheight);
+		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 	});
 
 	// Initial call for empty JSON
@@ -30,13 +31,15 @@ onload = function() {
 		}
 		// ===============================================================================================
 		$('#PlotsContainer').on('shown.bs.collapse', function (e) {
-			$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
+			$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-up');
 			$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
 		});
 		$('#PlotsContainer').on('hide.bs.collapse', function (e) {
-		  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
+		  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-up fa-chevron-down');
 		});	
 	});
+	
+	GeneratePanelClasses(HighchartColors);
 }
 
 function errorHandler(e){

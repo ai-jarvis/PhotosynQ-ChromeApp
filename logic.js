@@ -389,6 +389,20 @@ onload = function() {
 		$('#RawOutputTextarea').toggle(); 
 	});
 
+	document.getElementById('BtnToggleAllGraphs').addEventListener('click', function(){
+		$('#PlotsContainer [id^="plotRawDatabody"]').collapse('toggle');
+		$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
+		$('#BtnToggleAllGraphs').blur();
+	});
+
+	document.getElementById('BtnToggleSimpleAdvanced').addEventListener('click', function(){
+		$('#PlotsContainer [id^="plotRawDataHeader"], #PlotsContainer [id^="plotRawDataTable"], #PlotsContainer [id^="plotRawDataFooter"]').toggle();
+		$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
+		$('#BtnToggleSimpleAdvanced i').toggleClass('fa-toggle-left fa-toggle-right');
+		$('#BtnToggleSimpleAdvanced').blur();
+	});
+
+
 	// Events when port is changed
 	// ===============================================================================================
 	$('.preventClose').click(function(event){
@@ -533,16 +547,13 @@ onload = function() {
 		$("#MainDisplayContainer > .panel-body").height(bodyheight-40);
 		if($("#MainDisplayContainer .panel-footer").is(":visible"))
 			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
+		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 	});
 
 	// Menu toggle events
 	// ===============================================================================================
-	$('#accordion,#PlotsContainer').on('show.bs.collapse', function (e) {
-		$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-right');
-	});
-	
-	$('#accordion,#PlotsContainer').on('hide.bs.collapse', function (e) {
-	  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-right fa-chevron-down');
+	$('#accordion,#PlotsContainer').on('show.bs.collapse hide.bs.collapse', function (e) {
+		$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-up');
 	});
 
 	// Graphs toggle events
@@ -649,7 +660,6 @@ onload = function() {
 			$('#AppVersion').append('<span class="label label-danger">Update available</span>');
 		});
 	});
-	window.alert('test');
 
 	// Info message window test
 	// ===============================================================================================
@@ -722,6 +732,8 @@ onload = function() {
 			}
 		}
 	});
+	
+	GeneratePanelClasses(HighchartColors);
 };
 
 // ===============================================================================================

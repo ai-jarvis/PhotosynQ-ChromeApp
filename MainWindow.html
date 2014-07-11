@@ -8,7 +8,6 @@
 	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
 	<link href="css/toastr.css" media="all" rel="stylesheet" type="text/css">
 	<script src="backwardscompatibility.js"></script>
-	<script src="logic.js"></script>
 	<script src="js/jquery.min.js"></script>
 	<script src="js/highcharts.js"></script>
 	<script src="js/exporting.js"></script>
@@ -21,6 +20,7 @@
 	<script src="location.js"></script>
 	<script src="storage.js"></script>
 	<script src="webconnection.js"></script>
+	<script src="logic.js"></script>
 	<style>
 		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
 
@@ -237,7 +237,7 @@
 					<div class="panel-heading">
 					  <h4 class="panel-title">
 						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-						<i class="fa fa-chevron-right"></i> Take a Measurement
+						<i class="fa fa-chevron-up"></i> Take a Measurement
 						</a>
 					  </h4>
 					</div>
@@ -267,7 +267,7 @@
 					<div class="panel-heading">
 					  <h4 class="panel-title">
 						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-							<i class="fa fa-chevron-right"></i> Quick Measurement
+							<i class="fa fa-chevron-up"></i> Quick Measurement
 						</a>
 					  </h4>
 					</div>
@@ -294,7 +294,7 @@
 					<div class="panel-heading">
 					  <h4 class="panel-title">
 						<a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-						<i class="fa fa-chevron-right"></i> Console
+						<i class="fa fa-chevron-up"></i> Console
 						</a>
 					  </h4>
 					</div>
@@ -345,6 +345,8 @@
 					<div class="panel-footer" id="MeasurementMenu" style="display:none;">
 						<button id="SaveMeasurementToDB" class="btn btn-success" style="display:none;"><i class="fa fa-cloud-upload"></i> Keep</button>
 						<button id="SaveMeasurementToFile" class="btn btn-success" style="display:none;"><i class="fa fa-hdd-o"></i> Save</button>
+						<button id="BtnToggleAllGraphs" class="btn btn-default"><i class="fa fa-chevron-down"></i></button>
+						<button id="BtnToggleSimpleAdvanced" class="btn btn-default"><i class="fa fa-toggle-left"></i></button>
 						<button id="DiscardMeasurement" class="btn btn-danger pull-right"><i class="fa fa-trash-o"></i> Discard</button>
 					</div>
 				</div>
