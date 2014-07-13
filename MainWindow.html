@@ -23,6 +23,7 @@
 	<script src="logic.js"></script>
 	<style>
 		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+		/*body {background-image: -webkit-linear-gradient(top, #fff 50%, #efefef 100%); margin:0px; padding:0px;}*/
 
 		body > #container {margin-top:-5px; padding:0px 10px 10px 10px;}
 
@@ -207,120 +208,110 @@
 </nav>
 
 	<div class="container-fluid">
+			
+			
 		<div class="row">
 			<!-- Container for Menu -->
 			<div class="col-md-4 col-lg-3" id="Menu">
-				<div class="panel-group" id="accordion">
-				  <div class="panel panel-default">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-						<i class="fa fa-chevron-down"></i> Select a Project
-						</a>
-					  </h4>
-					</div>
-					<div id="collapseThree" class="panel-collapse collapse in">
-					  <div class="panel-body">
-						  <form class="form" role="form" id="ExperimentSelectionForm">
-							<div class="form-group">
-								<select class="form-control" id="ExperimentSelection"></select>
-								<p class="help-block" id="ExperimentSelectionDescription"></p>
-							</div>
-							<button type="submit" value="" class="btn btn-default" id="ExperimentSelectionButton">Select</button>
-							<a class="btn btn-link pull-right" href="http://photosynq.venturit.net/#ProjectLists" target="_blank">Join a new Project</a>
-						 </form>
-					  </div>
-					</div>
-				  </div>
-				  
-				  <div class="panel panel-default">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-						<i class="fa fa-chevron-up"></i> Take a Measurement
-						</a>
-					  </h4>
-					</div>
-					<div id="collapseFour" class="panel-collapse collapse">
-					  <div class="panel-body">
-						<div role="form" id="UserAnswers">
-							<div class="alert alert-warning">Select a project first</div>
-						</div>
-						<div class="form-group">
-							<div class="row">
-								<div  class="col-md-4">
-								<button id="DatabaseMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
-								</div>
-								<div  class="col-md-8">
-									<label>
-									  <input type="checkbox" id="CheckBoxRememberAnswers" value="KeepAnswers"> Remember my answers
-									</label>
-								</div>
-							</div>
-						</div>
-						<div id="CurrentLocationDisplay"><small class="text-danger"><i class="fa fa-location-arrow"></i> unknown</small></div>
-					  </div>
-					</div>
-				  </div>
-				  
-				  <div class="panel panel-default">
-					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-							<i class="fa fa-chevron-up"></i> Quick Measurement
-						</a>
-					  </h4>
-					</div>
-					<div id="collapseFive" class="panel-collapse collapse">
-					  <div class="panel-body">
-						<div class="form" role="form">
-							<div class="form-group">
-								<select class="form-control" id="QuickMeasurementProtocol">
-									<option value="" title="Select the protocol you want to run.">Select a Protocol</option>
-									<optgroup label="Your Protocols"></optgroup>
-									<optgroup label="PhotosynQ Protocols"></optgroup>
-								</select>
-								<p class="help-block" id="QuickMeasurementSelectionDescription">Select a protocol to measure.</p>
-							</div>
-						  <div class="form-group">
-							<button id="QuickMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
-						  </div>
-						</div>
-					  </div>
-					</div>
-				  </div>
 
-				  <div class="panel panel-default">
+<style>
+.navbar-nav.nav-justified > li{
+    float:none;
+}
+
+.nav-justified > li > a {
+    padding:5px 15px 5px 15px;
+}
+
+.nav-justified > li > a > i {
+    font-size: 18px
+}
+</style>
+
+		<nav class="navbar navbar-default" role="navigation">
+			<ul class="nav navbar-nav nav-justified text-center" id="SubNavigation">
+				<li class="active"><a href="#ProjectTab" role="tab" data-toggle="tab"><i class="fa fa-flask"></i><br><small>Projects</small></a></li>
+				<li style="display:none;"><a href="#ProjectMeasurementTab" role="tab" data-toggle="tab"></a></li>
+				<li><a href="#QuickMeasurementTab" role="tab" data-toggle="tab"><i class="fa fa-rocket"></i><br><small>Measurements</small></a></li>
+				<li><a href="#ConsoleTab" role="tab" data-toggle="tab"><i class="fa fa-terminal"></i><br><small>Console</small></a></li>
+			</ul>
+		</nav>
+
+			<div class="tab-content">
+			
+				<div class="panel panel-default tab-pane fade in active" id="ProjectTab">
 					<div class="panel-heading">
-					  <h4 class="panel-title">
-						<a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-						<i class="fa fa-chevron-up"></i> Console
-						</a>
-					  </h4>
+						<span class="badge pull-right">0</span>
+						<h4 class="panel-title">Projects</h4>
 					</div>
-					<div id="collapseSix" class="panel-collapse collapse">
-					  <div class="panel-body">
-						<div class="form" role="form">
-							<div class="form-group">
-								<textarea id="ConsoleProtocolContent" class="form-control" style="height:150px;"></textarea>
+					<div class="panel-body" style="padding:1px">
+						<input type="text" class="form-control input-sm" id="FilterProjectList" placeholder="Filter Projects">
+					</div>
+					<div class="list-group" style="height:300px; overflow-y:scroll" id="ProjectList">
+					</div>			
+					<div class="panel-footer text-right">
+						<a class="btn btn-xs btn-default" href="http://photosynq.venturit.net/projects" target="_blank" title="Join new projects"><i class="fa fa-plus"></i></a>
+					</div>
+				</div>	
+
+				<div class="panel panel-default tab-pane fade" id="ProjectMeasurementTab">
+					<div class="panel-heading">
+						<h4 class="panel-title">Take a Measurement</h4>
+					</div>
+					<div class="panel-body">
+							<div role="form" id="UserAnswers">
+								<div class="alert alert-warning">Select a project first</div>
 							</div>
-							<div class="form-group">
-								<div class="row">
-									<div  class="col-md-4">
-									<button id="ConsoleMeasurement" value="send" class="btn btn-success"><i class="fa fa-play"></i> Start</button>
-									</div>
-									<div  class="col-md-8">
-										<label>
-										  <input type="checkbox" id="ConsoleProtocolRaw"> Raw input
-										</label>
-									</div>
-								</div>
-							</div>
+							<label>
+							  <input type="checkbox" id="CheckBoxRememberAnswers" value="KeepAnswers"> Remember my answers
+							</label>
+							<div id="CurrentLocationDisplay"><small class="text-danger"><i class="fa fa-location-arrow"></i> unknown</small></div>
+					</div>
+					<div class="panel-footer">
+						<button id="DatabaseMeasurement" value="send" class="btn btn-xs btn-success" title="Start Measurement"><i class="fa fa-play"></i> Start</button>
+						<button id="BtnBackToProjects" class="btn btn-xs btn-default pull-right" title="Back to Projects"><i class="fa fa-chevron-left"></i></a>
+					</div>
+				</div>			
+				
+				<div class="panel panel-default tab-pane fade" id="QuickMeasurementTab">
+					<div class="panel-heading">
+						<span class="badge pull-right">0</span>
+						<h4 class="panel-title">Quick Measurements</h4>
+					</div>
+					<div class="panel-body" style="padding:1px">
+						<input type="text" class="form-control input-sm" id="FilterProtocolList" placeholder="Filter Scripts">
+					</div>
+					<div class="list-group" style="height:300px; overflow-y:scroll" id="QuickMeasurementProtocol">
+						<div id ="UserProtocolsList">
 						</div>
-					  </div>
+						<div id="PhotosynQProtocolsList">
+						</div>
+					</div>			
+					<div class="panel-footer">
+						<button id="QuickMeasurement" value="send" class="btn btn-xs btn-success" title="Protocol Assembly"><i class="fa fa-play"></i> Start</button>
+						<button class="btn btn-xs btn-default pull-right" title="Protocol Assembly" id="BtnProtocolAssembly"><i class="fa fa-plus"></i></button>
 					</div>
-				  </div>	
-				</div>
+				</div>					
+
+				<div class="panel panel-default tab-pane fade" id="ConsoleTab">
+					<div class="panel-heading">
+						<h4 class="panel-title">Console</h4>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<textarea id="ConsoleProtocolContent" class="form-control" style="max-height:150px;height:150px;"></textarea>
+						</div>
+					</div>
+					<div class="panel-footer">
+						<button id="ConsoleMeasurement" value="send" class="btn btn-xs btn-success" title="Start Measurement"><i class="fa fa-play"></i> Start</button>
+						<label class="pull-right">
+						  <input type="checkbox" id="ConsoleProtocolRaw"> Raw input
+						</label>
+					</div>
+				</div>	
+				
+			</div>
+				
 			</div>
 			
 			<!-- Container for Plots -->

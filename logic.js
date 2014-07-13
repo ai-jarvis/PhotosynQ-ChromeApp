@@ -402,6 +402,22 @@ onload = function() {
 		$('#BtnToggleSimpleAdvanced').blur();
 	});
 
+	$('#ProjectList').on('click','a',function(){
+		if(!$(this).hasClass('active')){
+			SelectProject($(this).attr('data-value'));
+			$('#SubNavigation a[href="#ProjectMeasurementTab"]').tab('show');
+			SelectedProject = $('#ProjectListTab .list-group .active').attr('data-value');
+		}
+		else{
+			DiscardMeasurement();
+			SelectedProject = null;
+		}
+	});
+	
+	$('#BtnBackToProjects').on('click',function(){
+		$(this).blur();
+		$('#SubNavigation a[href="#ProjectTab"]').tab('show');
+	});
 
 	// Events when port is changed
 	// ===============================================================================================
@@ -488,59 +504,62 @@ onload = function() {
 		e.preventDefault();
 	});
 
-	// Experiment selection event - > change short description
-	// ===============================================================================================
-	document.getElementById('ExperimentSelection').addEventListener('change', function(e){
-		var shorttext = $('#ExperimentSelection option:selected').attr('title');
-		if(shorttext.length > 250){
-			shorttext = shorttext.slice(0,250).split(' ');
-			shorttext.pop();
-			shorttext = shorttext.join(' ')+'...';
+	// Filter Parameter
+	// =====================================================================
+	jQuery.expr[':'].contains = function(a, i, m) { 
+		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0; 
+	};
+
+	$('#FilterProtocolList').on('keyup', function(){
+		if($(this).val() != ""){
+			$("#PhotosynQProtocolsList a, #UserProtocolsList a").hide();
+			$("#PhotosynQProtocolsList a:contains('"+$(this).val()+"'), #UserProtocolsList a:contains('"+$(this).val()+"')").show();
 		}
-		$('#ExperimentSelectionDescription').html(shorttext);
+		else
+			$("#PhotosynQProtocolsList a, #UserProtocolsList a").show();
+		
+		$('#QuickMeasurementTab .panel-heading .badge').text(
+			$('#QuickMeasurementTab .list-group a:visible').length
+		);
+		return false;
 	});
 
-	
-	// Quickmeasurement selection event - > change short description
-	// ===============================================================================================
-	document.getElementById('QuickMeasurementProtocol').addEventListener('change', function(e){
-		var shorttext = "Select a protocol to measure."
-		if($('#QuickMeasurementProtocol option:selected').attr('title') !== ""){
-			shorttext = $('#QuickMeasurementProtocol option:selected').attr('title');
-			if(shorttext === "")
-				shorttext = "No description..."
-			if(shorttext.length > 250){
-				shorttext = shorttext.slice(0,250).split(' ');
-				shorttext.pop();
-				shorttext = shorttext.join(' ')+'...';
-			}
+	$('#FilterProjectList').on('keyup', function(){
+		if($(this).val() != ""){
+			$("#ProjectTab .list-group a").hide();
+			$("#ProjectTab .list-group a:contains('"+$(this).val()+"')").show();
 		}
-		$('#QuickMeasurementSelectionDescription').html(shorttext);
+		else
+			$("#ProjectTab .list-group a").show();
+		
+		$('#ProjectTab .panel-heading .badge').text(
+			$('#ProjectTab .list-group a:visible').length
+		);
+		return false;
 	});
 
 
-	// Experiment selection event - > show instructions
-	// ===============================================================================================
-	document.getElementById('ExperimentSelectionButton').addEventListener('click', function(e){
-		DiscardMeasurement();
-		if($('#ExperimentSelection').attr('value') == ""){
-			$('#UserAnswers').html('<div class="alert alert-warning">Select a project first</div>');
-			WriteMessage('Please select a project','danger');
-		}
+	$('#QuickMeasurementTab .list-group, #ProjectTab .list-group').on('click', 'a', function(){
+		if($(this).hasClass('active'))
+			$(this).removeClass('active');
 		else{
-			SelectedProject = null;
-			SelectProject($('#ExperimentSelection').attr('value'));
-			$( 'a[href="#collapseFour"]').trigger( "click" );
+			$('#QuickMeasurementTab .list-group a, #ProjectTab .list-group a').removeClass('active');
+			$(this).addClass('active');
 		}
-		$('#ExperimentSelectionButton').blur();
-		e.preventDefault();
+		return false;
 	});
+	
+	$('#SubNavigation').on('click', ' li, a', function(){
+		if($(this).hasClass('disabled'))
+			return false;
+	});	
 
 	// Resizing app events
 	// ===============================================================================================
 	var bodyheight =$(window).height()-84
 	$("#MainDisplayContainer").height(bodyheight);
 	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
+	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-200);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-84;
 		$("#MainDisplayContainer").height(bodyheight);
@@ -548,6 +567,7 @@ onload = function() {
 		if($("#MainDisplayContainer .panel-footer").is(":visible"))
 			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
 		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
+		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-200);
 	});
 
 	// Menu toggle events
@@ -1007,19 +1027,20 @@ function QuickMeasurement() {
 		DiscardMeasurement();
 		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
 		$('#QuickMeasurement').blur();
-		if($('#QuickMeasurementProtocol').val() == ''){
+		var QuickMeasurementProtocol = $('#QuickMeasurementTab .list-group .active').attr('data-value');
+		if(QuickMeasurementProtocol === undefined){
 			WriteMessage('Select a protocol first','info');
 			return;
 		}
 		protocol = [];
 		
-		if($('#QuickMeasurementProtocol').val().match(/(user_)/g)){
-			if(_userprotocols[$('#QuickMeasurementProtocol').val().substr(5)] !== undefined)
-				protocol.push(_userprotocols[$('#QuickMeasurementProtocol').val().substr(5)].protocol_json);
+		if(QuickMeasurementProtocol.match(/(user_)/g)){
+			if(_userprotocols[QuickMeasurementProtocol.substr(5)] !== undefined)
+				protocol.push(_userprotocols[QuickMeasurementProtocol.substr(5)].protocol_json);
 		}
 		else{
-			if(_protocols[$('#QuickMeasurementProtocol').val()] !== undefined)
-				protocol.push(_protocols[$('#QuickMeasurementProtocol').val()].protocol_json);
+			if(_protocols[QuickMeasurementProtocol] !== undefined)
+				protocol.push(_protocols[QuickMeasurementProtocol].protocol_json);
 		}
 		if(protocol == false || protocol.length == 0){
 			WriteMessage('Protocol not found.','danger');
@@ -1038,7 +1059,7 @@ function QuickMeasurement() {
 			ResultString = null;
 			ProtocolArray = [];
 			_used_protocols = [];
-			_used_protocols.push($('#QuickMeasurementProtocol').val());
+			_used_protocols.push(QuickMeasurementProtocol);
 			MacroArray = null;
 			DisableInputs();
 			
@@ -1215,6 +1236,7 @@ function ProgressBar(step, total){
 // ===============================================================================================
 function DisableInputs(){
 	$( "button, input[type='button'], select, input[type='checkbox'], textarea" ).prop( "disabled", true );
+	$('#SubNavigation li').addClass('disabled');
 	$('#TerminateMeasurement, #ShowOutputBtn, #RawOutputTextarea').prop( "disabled", false );
 	$('#RawOutputTextarea').hide();
 	$('#TerminateMeasurementMenu').show();
@@ -1225,6 +1247,7 @@ function DisableInputs(){
 // ===============================================================================================
 function EnableInputs(){
 	$( "button, input[type='button'], select, input[type='checkbox'], textarea" ).prop( "disabled", false );
+	$('#SubNavigation li').removeClass('disabled');
 	$('#TerminateMeasurementMenu').hide();
 }
 

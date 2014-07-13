@@ -97,16 +97,24 @@ function GetProjectsFromCache(){
 				WriteMessage('Cached projects have wrong format','danger');
 				return;
 			}
-			$('#ExperimentSelection').empty();
-			$('#ExperimentSelectionDescription').text("Select the project you want to collect data for.");
+
+			$('#ProjectList').empty();	
 			for(var i in _experiments){
-				$('#ExperimentSelection').append('<option value="'+_experiments[i].id+'" title="'+_experiments[i].description+'">'+_experiments[i].name+'</option>');
+				var html = '<a href="#" class="list-group-item" data-value="'+_experiments[i].id+'" style="min-height:88px;">';
+				html += '<img class="media-object pull-left" alt="64x64" data-url="'+_experiments[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
+				html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;">'+_experiments[i].name+'</h4>';
+				html += '<p class="list-group-item-text">'+_experiments[i].description+'</p>';
+				html += '</a>';
+				$('#ProjectList').append(html);
+				DatabaseGetImage('media',_experiments[i].medium_image_url,function(img){
+					$('#ProjectList > a img[data-url^="'+_experiments[i].medium_image_url+'"]').attr('src', $(img).attr('src'))
+				});
 			}
-			
-			var sortedProjects = $("#ExperimentSelection option").sort(sortingAZ)
-			$("#ExperimentSelection").empty().append( sortedProjects );
-			$('#ExperimentSelection').prepend('<option value="" title="Select the protocol you want to run.">Select a Project</option>');			
-			
+
+			$('#ProjectTab .panel-heading .badge').text(
+				$('#ProjectTab .list-group a').length
+			);
+
 			chrome.storage.local.getBytesInUse('cached_experiments', function(response){
 				$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 			});
@@ -179,14 +187,16 @@ function GetProtocolsFromCache(){
 				WriteMessage('Cached protocols have wrong format','danger');
 				return;
 			}
-			$('#QuickMeasurementProtocol optgroup[label="PhotosynQ Protocols"]').empty();
 			
+			$('#PhotosynQProtocolsList').empty();	
 			for(var i in _protocols){
-				$('#QuickMeasurementProtocol optgroup[label="PhotosynQ Protocols"]').append('<option value="'+i+'" title="'+_protocols[i].description+'">'+_protocols[i].name+'</option>');
+					var html = '<a href="#" class="list-group-item" data-value="'+i+'">';
+					html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;">'+_protocols[i].name+'</h4>';
+					html += '<p class="list-group-item-text">'+_protocols[i].description+'</p>';
+					html += '</a>';
+				$('#PhotosynQProtocolsList').append(html);
 			}
-	
-			//var sortedProtocols = $("#QuickMeasurementProtocol option").sort(sortingAZ)
-			//$("#QuickMeasurementProtocol").empty().append( sortedProtocols );
+
 		}
 		else{
 			WriteMessage('No Protocols cached. Connect to the internet to update your list.','warning')
@@ -200,13 +210,21 @@ function GetProtocolsFromCache(){
 				WriteMessage('Cached user protocols have wrong format','danger');
 				return;
 			}
-			$('#QuickMeasurementProtocol optgroup[label="Your Protocols"]').empty();
 
-			for(var i in _userprotocols){
-				$('#QuickMeasurementProtocol optgroup[label="Your Protocols"]').append('<option value="user_'+i+'" title="'+_userprotocols[i].description+'">'+_userprotocols[i].name+'</option>');
+			$('#UserProtocolsList').empty();	
+			for(var i in _protocols){
+					var html = '<a href="#" class="list-group-item" data-value="user_'+i+'">';
+					html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;"><i class="fa fa-user text-muted"></i> '+_protocols[i].name+'</h4>';
+					html += '<p class="list-group-item-text">'+_protocols[i].description+'</p>';
+					html += '</a>';
+				$('#UserProtocolsList').append(html);
 			}
 			
 		}
+
+		$('#QuickMeasurementTab .panel-heading .badge').text(
+			$('#QuickMeasurementTab .list-group a').length
+		);
 		
 		chrome.storage.local.getBytesInUse(['cached_protocols','cached_userprotocols'], function(response){
 			$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
