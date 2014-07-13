@@ -106,7 +106,7 @@ function GetProjectsFromCache(){
 				html += '<p class="list-group-item-text">'+_experiments[i].description+'</p>';
 				html += '</a>';
 				$('#ProjectList').append(html);
-				DatabaseGetImage('media',_experiments[i].medium_image_url,function(img){
+				DatabaseGetImage('project',_experiments[i].medium_image_url,function(img){
 					$('#ProjectList > a img[data-url^="'+_experiments[i].medium_image_url+'"]').attr('src', $(img).attr('src'))
 				});
 			}
