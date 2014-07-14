@@ -416,7 +416,16 @@ onload = function() {
 	
 	$('#BtnBackToProjects').on('click',function(){
 		$(this).blur();
+		$('#ProjectList a').removeClass('active');
+		DiscardMeasurement();
+		SelectedProject = null;
 		$('#SubNavigation a[href="#ProjectTab"]').tab('show');
+	});
+	
+	$('#SubNavigation a[href="#ProjectTab"]').on('click',function(){
+		$('#ProjectList a').removeClass('active');
+		DiscardMeasurement();
+		SelectedProject = null;
 	});
 
 	// Events when port is changed
@@ -504,6 +513,10 @@ onload = function() {
 		e.preventDefault();
 	});
 
+	chrome.runtime.onUpdateAvailable.addListener(function(update){
+		WriteMessage('Update available!','warning');
+	});
+
 	// Filter Parameter
 	// =====================================================================
 	jQuery.expr[':'].contains = function(a, i, m) { 
@@ -559,7 +572,7 @@ onload = function() {
 	var bodyheight =$(window).height()-84
 	$("#MainDisplayContainer").height(bodyheight);
 	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
-	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-200);
+	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-84;
 		$("#MainDisplayContainer").height(bodyheight);
@@ -567,7 +580,7 @@ onload = function() {
 		if($("#MainDisplayContainer .panel-footer").is(":visible"))
 			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
 		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
-		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-200);
+		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
 	});
 
 	// Menu toggle events
@@ -674,12 +687,6 @@ onload = function() {
 	GetProjectsFromCache();
 	GetLocation();
 	LoadPortNameFromStorage();
-	getVersion(function (ver) { 
-		$('#AppVersion').text('v '+ver);
-		chrome.runtime.onUpdateAvailable.addListener(function(update){
-			$('#AppVersion').append('<span class="label label-danger">Update available</span>');
-		});
-	});
 
 	// Info message window test
 	// ===============================================================================================
@@ -1249,21 +1256,6 @@ function EnableInputs(){
 	$( "button, input[type='button'], select, input[type='checkbox'], textarea" ).prop( "disabled", false );
 	$('#SubNavigation li').removeClass('disabled');
 	$('#TerminateMeasurementMenu').hide();
-}
-
-// ===============================================================================================
-//						Show App Version
-// ===============================================================================================
-function getVersion(callback) {
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'manifest.json');
-	xhr.onreadystatechange = function (e) {
-		if (xhr.readyState == 4){
-			var manifest = JSON.parse(xhr.responseText);
-			callback(manifest.version);
-		}
-	}
-	xhr.send(null);
 }
 
 

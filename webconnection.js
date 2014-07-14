@@ -102,8 +102,8 @@ function GetProjectsFromCache(){
 			for(var i in _experiments){
 				var html = '<a href="#" class="list-group-item" data-value="'+_experiments[i].id+'" style="min-height:88px;">';
 				html += '<img class="media-object pull-left" data-url="'+_experiments[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
-				html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;">'+_experiments[i].name+'</h4>';
-				html += '<p class="list-group-item-text">'+_experiments[i].description+'</p>';
+				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_experiments[i].name+'</h5>';
+				html += '<small class="list-group-item-text">'+_experiments[i].description+'</small>';
 				html += '</a>';
 				$('#ProjectList').append(html);
 				
@@ -192,8 +192,8 @@ function GetProtocolsFromCache(){
 			$('#PhotosynQProtocolsList').empty();	
 			for(var i in _protocols){
 					var html = '<a href="#" class="list-group-item" data-value="'+i+'">';
-					html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;">'+_protocols[i].name+'</h4>';
-					html += '<p class="list-group-item-text">'+_protocols[i].description+'</p>';
+					html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_protocols[i].name+'</h5>';
+					html += '<small class="list-group-item-text">'+_protocols[i].description+'</small>';
 					html += '</a>';
 				$('#PhotosynQProtocolsList').append(html);
 			}

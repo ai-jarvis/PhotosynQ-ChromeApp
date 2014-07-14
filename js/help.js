@@ -7,4 +7,6 @@ onload = function() {
 		bodyheight = $(window).height()-$('.navbar').height()-10;
 		$("#MainDisplayContainer").height(bodyheight);
 	});
+	var version = chrome.runtime.getManifest().version;
+	$('#AppVersion').text('Version: '+version);
 }
