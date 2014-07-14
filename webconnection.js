@@ -106,8 +106,9 @@ function GetProjectsFromCache(){
 				html += '<p class="list-group-item-text">'+_experiments[i].description+'</p>';
 				html += '</a>';
 				$('#ProjectList').append(html);
+				
 				DatabaseGetImage('project',_experiments[i].medium_image_url,function(img){
-					$('#ProjectList > a img[data-url^="'+_experiments[i].medium_image_url+'"]').attr('src', $(img).attr('src'))
+					$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', $(img.img).attr('src'))
 				});
 			}
 
@@ -527,8 +528,8 @@ function DatabaseGetImage(location,url,callback){
 	if(url === undefined){
 		return;
 	}
-	if(_media[location] !== undefined && _media[location][url] != undefined){
-		callback('<img src="'+_media[location][url]+'">');
+	if(_media[location] !== undefined && _media[location][url] !== undefined){
+		callback({'img':'<img src="'+_media[location][url]+'">','url':url});
 	}	
 	else{
 		var xhr = new XMLHttpRequest();
@@ -537,7 +538,7 @@ function DatabaseGetImage(location,url,callback){
 			if (xhr.readyState == 4){
 				if(xhr.response !== null && xhr.response !== undefined){
 					SaveImgToLocalStorage(location,url,window.URL.createObjectURL(xhr.response));
-					callback('<img src="'+window.URL.createObjectURL(xhr.response)+'">');
+					callback({'img':'<img src="'+window.URL.createObjectURL(xhr.response)+'">','url':url});
 				}
 			}
 		}

@@ -177,11 +177,11 @@ function SelectProject(id) {
 				$('#PlotsContainer').append(html);
 				
 				DatabaseGetImage('project',experiments[id].medium_image_url,function(img){
-					$('#ImageSpacer').html(img);
+					$('#ImageSpacer').html(img.img);
 					$('#ImageSpacer img').addClass('img-thumbnail')
 				});
 				DatabaseGetImage('avatar',experiments[id].image_file_name,function(img){
-					$('#LeadAvatar').html(img);
+					$('#LeadAvatar').html(img.img);
 				});
 
 				$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
