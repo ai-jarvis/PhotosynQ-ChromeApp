@@ -457,6 +457,11 @@ onload = function() {
 			}
 		}
 	});
+	
+	document.getElementById('BtnProtocolAssembly').addEventListener('click', function(e){
+		$(this).blur();
+		OpenProtocolCreator();
+	});
 
 	// Events for sign in/off
 	// ===============================================================================================
@@ -575,6 +580,7 @@ onload = function() {
 	$("#MainDisplayContainer").height(bodyheight);
 	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
 	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
+	$('#ConsoleProtocolContent').height(bodyheight-213);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-84;
 		$("#MainDisplayContainer").height(bodyheight);
@@ -583,6 +589,7 @@ onload = function() {
 			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
 		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
+		$('#ConsoleProtocolContent').height(bodyheight-213);
 	});
 
 	// Menu toggle events
@@ -710,7 +717,12 @@ onload = function() {
 	// Info message window test
 	// ===============================================================================================
 	document.getElementById('BuiltYourQuickMeasurement').addEventListener('click', function(e){
-		$('#BuiltYourQuickMeasurement').blur();
+		$(this).blur();
+		OpenProtocolCreator();
+	});
+
+
+	function OpenProtocolCreator(){
 		chrome.app.window.create('ProtocolCreator.html', {
 			id: "protocolcreate",
 			bounds: {
@@ -725,8 +737,8 @@ onload = function() {
 			ProtocolWindow.contentWindow.addEventListener('load', function(e) {
 				ProtocolWindow.contentWindow.postMessage({'db':_protocols,'user':_userprotocols}, '*');
 			});
-		});
-	});
+		});	
+	}
 
 	window.addEventListener('message', function(event) {
 		if(event.data.protocol_to_console !== undefined){
