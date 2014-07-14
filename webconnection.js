@@ -101,7 +101,7 @@ function GetProjectsFromCache(){
 			$('#ProjectList').empty();	
 			for(var i in _experiments){
 				var html = '<a href="#" class="list-group-item" data-value="'+_experiments[i].id+'" style="min-height:88px;">';
-				html += '<img class="media-object pull-left" alt="64x64" data-url="'+_experiments[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
+				html += '<img class="media-object pull-left" data-url="'+_experiments[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
 				html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;">'+_experiments[i].name+'</h4>';
 				html += '<p class="list-group-item-text">'+_experiments[i].description+'</p>';
 				html += '</a>';
@@ -404,12 +404,14 @@ function DatabaseAddDataToProject(){
 function PushDataToStorage(email,project_id,data){
 	chrome.storage.local.get('cached_data', function(response){
 		var experiment_data = {};
-		try {
-			experiment_data = JSON.parse(response['cached_data']);
-		} catch (e) {
-			RemoveFromStorage('cached_data');
-			WriteMessage('Cached data has wrong format ('+e.message+')','danger');
-			return;
+		if(response['cached_data'] !== undefined){
+			try {
+				experiment_data = JSON.parse(response['cached_data']);
+			} catch (e) {
+				RemoveFromStorage('cached_data');
+				WriteMessage('Cached data has wrong format ('+e.message+')','danger');
+				return;
+			}
 		}
 		if(experiment_data[email] === undefined)
 			experiment_data[email] = {}
@@ -508,7 +510,6 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 						}
 					}
 				} catch (e) {
-					console.log(e);
 					//RemoveFromStorage('cached_data');
 					$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-upload').addClass('fa-cloud');
 					WriteMessage('Cached data has wrong format ('+e.message+')','danger');
