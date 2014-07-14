@@ -185,6 +185,9 @@ function SelectProject(id) {
 				});
 
 				$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
+				
+				if($('#CheckBoxRememberAnswers:checked').length == 1)
+					return
 
 				SelectedProject = experiments[id].id;
 				var html = '';

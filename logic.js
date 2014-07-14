@@ -419,6 +419,7 @@ onload = function() {
 		$('#ProjectList a').removeClass('active');
 		DiscardMeasurement();
 		SelectedProject = null;
+		$('#CheckBoxRememberAnswers').prop('checked', false); 
 		$('#SubNavigation a[href="#ProjectTab"]').tab('show');
 	});
 	
@@ -426,6 +427,7 @@ onload = function() {
 		$('#ProjectList a').removeClass('active');
 		DiscardMeasurement();
 		SelectedProject = null;
+		$('#CheckBoxRememberAnswers').prop('checked', false); 
 	});
 
 	// Events when port is changed
