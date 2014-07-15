@@ -707,6 +707,23 @@ onload = function() {
 
 	// Info message window test
 	// ===============================================================================================
+	document.getElementById('BuiltYourMacro').addEventListener('click', function(e){
+		chrome.app.window.create('MacroCreator.html', {
+			id: "macro",
+			bounds: {
+				top: 0,
+				left: 0,
+				width: 1024,
+				height: 720
+			},
+			minHeight: 650,
+			minWidth: 1000
+		}, function (ProtocolWindow){
+		});
+	});
+
+	// Info message window test
+	// ===============================================================================================
 	document.getElementById('BuiltYourQuickMeasurement').addEventListener('click', function(e){
 		$('#BuiltYourQuickMeasurement').blur();
 		chrome.app.window.create('ProtocolCreator.html', {

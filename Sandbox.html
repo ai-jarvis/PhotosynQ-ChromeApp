@@ -45,7 +45,7 @@ window.addEventListener('message', function(event) {
 					data_return[sampleID][measurementID] = fn.apply(null, new Array(protocol_data));
 				}
 				catch(e){
-					console.log(e);
+					data_return.error = e.message;
 				}
 			}
 		}
