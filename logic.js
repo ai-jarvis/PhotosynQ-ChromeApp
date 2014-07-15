@@ -710,7 +710,27 @@ onload = function() {
 			},
 			minHeight: 650,
 			minWidth: 1000
-		}, function (ProtocolWindow){
+		}, function (HelpWindow){
+		});
+	});
+
+	// Info message window test
+	// ===============================================================================================
+	document.getElementById('BuiltYourMacro').addEventListener('click', function(e){
+		chrome.app.window.create('MacroCreator.html', {
+			id: "macro",
+			bounds: {
+				top: 0,
+				left: 0,
+				width: 1024,
+				height: 720
+			},
+			minHeight: 680,
+			minWidth: 1000
+		}, function (MacroWindow){
+			MacroWindow.contentWindow.addEventListener('load', function(e) {
+				MacroWindow.contentWindow.postMessage({'macros':_macros}, '*');
+			});
 		});
 	});
 

@@ -53,7 +53,8 @@
 					</div>
 					<div id="HelpDeviceConnect">
 						<h3><i class="fa fa-chain"></i> Connect your device</h3>
-						You can connect your device to your computer using a micro-USB cable or using bluetooth. See
+						You can connect your device to your computer using a micro-USB <a href="http://en.wikipedia.org/wiki/USB#Mini_and_Micro_connectors" target="_blank"><i class="fa fa-external-link"></i></a>
+						cable or using bluetooth <a href="http://en.wikipedia.org/wiki/Bluetooth" target="_blank"><i class="fa fa-external-link"></i></a>. See
 						instructions below for the major operating systems.<br>
 						Once you have connected your device, open up the app and click on the <i class="fa fa-chain-broken"></i> 
 						symbol in the menu bar. Select the port for your device and click on the Connect button.
@@ -131,6 +132,7 @@
 						in, in order to receive a list of projects, measurement protocols and data crunching macros.<br>
 						Click on the <i class="fa fa-lock"></i> icon and enter your email address and your password. When you
 						are successfully signed in, your avatar, name and email address appears as well as the Sign off button.<br>
+						If you don't have 
 						<em><i class="fa fa-info-circle"></i> Make sure that you have an internet connection when you try to sign in.</em>
 					</div>
 					<hr>
@@ -216,6 +218,21 @@
 						<h4 class="text-primary"><i class="fa fa-magic"></i> Protocol assembly</h4>
 						This tool allows you to assemble measurement protocols simply by drag 'n drop of the available commands.
 						The full documentation will be available here.
+						<h4 class="text-primary"><i class="fa fa-puzzle-piece"></i> Macro development</h4>
+						This tool allows you to create little code snippets, called <em>macros</em> that are applied to your measurement,
+						after it is done, in order to evaluate it on the fly. The programing language used is javascript.<br>
+						Open the macro development tool. Click on <i class="fa fa-folder-open"></i> file in the menu and select a locally
+						saved measurement you want to apply your macro to. Then select the protocol you want to work with from the upper right panel. If your 
+						measurement consists only of one protocol, you cannot select another. By standard, the first Protocol (Protocol 0, because in 
+						programming you start counting with 0) is selected. The panel gives you all variables returned from your
+						measurement. Just click on one, and its correct name is added to the code on the left large panel. Below that, in case you
+						did a spectroscopic measurement, is the intensity trace from the detector. Hover over it and click on a point to
+						add its value to your code. To access basic mathematical functions, click on functions in the menu bar and select the
+						function you need. It will be added to your code. Just replace values with your set of values.<br>
+						If you want to use a macro and modify it, click on available macros, and select the one you need. The code is added to the
+						code panel.<br>
+						Once your finished, click on the <i class="fa fa-cogs"></i> run button to test your macro. The calculated values or eventual errors are shown in the
+						lower right panel. If you're satisfied with your macro, go to the photosynq website and save your macro.
 					</div>
 					<hr>
 					<div id="HelpDevice">
