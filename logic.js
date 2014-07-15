@@ -701,7 +701,7 @@ onload = function() {
 			},
 			minHeight: 650,
 			minWidth: 1000
-		}, function (ProtocolWindow){
+		}, function (HelpWindow){
 		});
 	});
 
@@ -716,9 +716,12 @@ onload = function() {
 				width: 1024,
 				height: 720
 			},
-			minHeight: 650,
+			minHeight: 680,
 			minWidth: 1000
-		}, function (ProtocolWindow){
+		}, function (MacroWindow){
+			MacroWindow.contentWindow.addEventListener('load', function(e) {
+				MacroWindow.contentWindow.postMessage({'macros':_macros}, '*');
+			});
 		});
 	});
 

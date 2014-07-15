@@ -5,12 +5,15 @@ onload = function() {
 	// ===============================================================================================
 	var bodyheight =$(window).height()-$('.navbar').height()-10
 	$("#MainDisplayContainer").height(bodyheight);
+	$('#CodePanel').height(bodyheight-25);
+	$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-476)/2);
 	$('#CodeMirrorContainer').height(bodyheight-100);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-$('.navbar').height()-10;
-		$('#MainDisplayContainer').height(bodyheight);
+		$("#MainDisplayContainer").height(bodyheight);
+		$('#CodePanel').height(bodyheight-25);
+		$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-476)/2);
 		$('#CodeMirrorContainer').height(bodyheight-100);
-		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 	});
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -52,11 +55,25 @@ onload = function() {
 	});
 	
 	$('#ProtocolToTest').on('change', function(){
-		var variables = []
-		for(i in _json.sample[0][$('#ProtocolToTest').val()]){
-			variables.push(i);
+		$('#ProtocolVariables').empty();
+		var variables = '<ul class="list-inline">'
+		for(i in filedata.sample[0][0]){
+			variables += '<li title="json.'+i+'">'+i+'</li>';
 		}
-		$('#ProtocolVariables').empty().append(variables.join(' | '));
+		variables += '</ul>';
+		$('#ProtocolVariables').append(variables);
+		$('#RawTrace').sparkline(filedata.sample[0][0].data_raw, { 
+			type:'line', 
+			lineWidth:2,
+			lineColor: $('#RawTrace').prev().css('border-color'),
+			fillColor: $('#RawTrace').prev().css('background-color'),
+			height:'70px',
+			width: $('#RawTrace').width()+'px',
+			minSpotColor: false,
+			maxSpotColor: false,
+			spotColor: false,
+			tooltipFormat: '<span>x: {{x}}, y: {{y}}</span>'
+		});
 	});
 	
 	document.getElementById('BtnOpenFile').addEventListener('click', function(e){
@@ -73,7 +90,27 @@ onload = function() {
 			chrome.storage.local.set({'chosenFile': chrome.fileSystem.retainEntry(theEntry)});
 			loadFileData(theEntry);
 		  });
-	});	
+	});
+	
+	$('[id^="BtnFunction"]').on('click',function(e){
+        e.preventDefault();
+        var FunctionCode = $(this).children('small').text();
+		MacroCodeContainer.replaceSelection( FunctionCode );
+	});
+	
+	
+	$('#ProtocolVariables').on('click','li',function(e){
+        e.preventDefault();
+        var VariableCode = $(this).attr('title');
+		MacroCodeContainer.replaceSelection( VariableCode );
+	});
+
+
+	$('#MacroList').on('click','a',function(e){
+        e.preventDefault();
+        var MacroID = $(this).attr('data-macro-id');
+		MacroCodeContainer.setValue( _macros[MacroID].javascript_code );
+	});
 
 	function loadFileData(_chosenEntry) {
 		chosenEntry = _chosenEntry;
@@ -86,14 +123,27 @@ onload = function() {
 						_json = filedata;
 						$('#ProtocolToTest').empty();
 						for(i in _json.sample[0]){
-							$('#ProtocolToTest').append('<option value="'+i+'">'+i+'</option>');
+							$('#ProtocolToTest').append('<option value="'+i+'">Protocol '+i+'</option>');
 						}
 						$('#ProtocolVariables').empty();
-						var variables = []
+						var variables = '<ul class="list-unstyled">'
 						for(i in filedata.sample[0][0]){
-							variables.push(i);
+							variables += '<li title="json.'+i+'"><a href="#">'+i+'</a></li>';
 						}
-						$('#ProtocolVariables').append(variables.join(' | '));
+						variables += '</ul>';
+						$('#ProtocolVariables').append(variables);
+						$('#RawTrace').sparkline(filedata.sample[0][0].data_raw, { 
+							type:'line', 
+							lineWidth:2,
+							lineColor: $('#RawTrace').prev().css('border-color'),
+							fillColor: $('#RawTrace').prev().css('background-color'),
+							height:'70px',
+							width: $('#RawTrace').width()+'px',
+							minSpotColor: false,
+							maxSpotColor: false,
+							spotColor: false,
+							tooltipFormat: '<span>x: {{x}}, y: {{y}}</span>'
+						});
 					}
 					catch(e){
 						//console.log(e);
@@ -103,19 +153,33 @@ onload = function() {
 		});
 	}
 
+	$('#RawTrace').bind('sparklineClick', function(ev) {
+		var sparkline = ev.sparklines[0],
+		region = sparkline.getCurrentRegionFields();
+		MacroCodeContainer.replaceSelection('json.data_raw['+region.x+']' );
+	});
+
 	window.addEventListener('message', function(event) {
-		if(event.data.graph.error !== undefined){
-			$('#MacroReturnContent .panel-body').html('<strong>Error:</strong> '+event.data.graph.error);	// Add error message
-			$('#MacroReturnContent').removeClass('panel-default').addClass('panel-danger');	// Change panel color to red
-		}
-		var MacroOut = event.data.graph[0][0];
-		var MacroOutHtml = '';
 		if(event.data.graph !== undefined){
-			$.each(MacroOut, function(key, value){
-				MacroOutHtml += '<em>'+key +'</em>: '+value+'<br>';  // Get macro output and transform to key value pairs in html
-			});
-			$('#MacroReturnContent .panel-body').append(MacroOutHtml);
-			$('#MacroReturnContent').removeClass('panel-default, panel-danger').addClass('panel-success');		// Color MacroReturnContent green for success	
+			if(event.data.graph.error !== undefined){
+				$('#MacroReturnContent .panel-body').html('<strong>Error:</strong> '+event.data.graph.error);	// Add error message
+				$('#MacroReturnContent').removeClass('panel-default').addClass('panel-danger');	// Change panel color to red
+			}
+			var MacroOut = event.data.graph[0][0];
+			var MacroOutHtml = '';
+			if(event.data.graph !== undefined){
+				$.each(MacroOut, function(key, value){
+					MacroOutHtml += '<em>'+key +'</em>: '+value+'<br>';  // Get macro output and transform to key value pairs in html
+				});
+				$('#MacroReturnContent .panel-body').append(MacroOutHtml);
+				$('#MacroReturnContent').removeClass('panel-default, panel-danger').addClass('panel-success');		// Color MacroReturnContent green for success	
+			}
+		}
+		if(event.data.macros !== undefined){
+			_macros = event.data.macros;
+			for(i in _macros){
+				$('#MacroList').append('<li><a href="#" data-macro-id="'+i+'">'+_macros[i].name+'</a></li>');
+			}
 		}
 	});
 }

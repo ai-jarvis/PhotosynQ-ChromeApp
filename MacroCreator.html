@@ -14,10 +14,18 @@
 	<script src="js/codemirror.js"></script>
 	<script src="js/javascript.js"></script>
 	<script src="js/macro-creator.js"></script>
+	<script src="js/jquery.sparkline.min.js"></script>
 	<script src="storage.js"></script>
 	<style>
 		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
 		.CodeMirror {height:100%}
+		.jqstooltip {
+		  -webkit-box-sizing: content-box;
+		  -moz-box-sizing: content-box;
+		  box-sizing: content-box;
+		}
+
+		.jqstooltip > .jqsfield {font-size:12px}
 	</style>
 </head>
 <body>
@@ -25,13 +33,38 @@
 	  <div class="container-fluid">
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<a class="navbar-brand" href="http://photosynq.org" target="_blank"><i class="fa fa-puzzle-piece"></i> Macro Development</a>
+		<ul class="nav navbar-nav">
+			<li><a href="#" id="BtnOpenFile" title="Open saved experiment"><i class="fa fa-folder-open"></i> File</a></li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Functions <b class="caret"></b></a>
+				<ul class="dropdown-menu" style="max-height:400px; overflow:hidden;overflow-y: auto;">
+					<li><a href="#" id="BtnFunctionMathSUM" title="Calculate the sum from an array of numbers (e.g. [1,5,10,2] returns 18).">Sum <small class="text-muted">MathSUM(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathMEAN" title="Calculate the mean from an array of numbers (e.g. [1,5,10,2] returns 4.5).">Mean <small class="text-muted">MathMEAN(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathMAX" title="Displays the maximum from an array of numbers (e.g. [1,5,10,2] retruns 10).">Maximum <small class="text-muted">MathMAX(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathMIN" title="Displays the minimum from an array of numbers (e.g. [1,5,10,2] returns 1).">Minimum <small class="text-muted">MathMIN(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathSTDEV" title="Calculate the standard deviation of a population from an array of numbers (e.g. [1,5,10,2] returns 3.5).">Standard Deviation of a Population <small class="text-muted">MathSTDEV(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathSTDEVS" title="Calculate the standard deviation of a sample from an array of numbers (e.g. [1,5,10,2] returns 4.04).">Standard Deviation of a Sample <small class="text-muted">MathSTDEVS(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathSTDERR" title="Calculate the standard error from an array of numbers (e.g. [1,5,10,2] returns 1.75).">Standard Error <small class="text-muted">MathSTDERR(values)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathLOG" title="Calculate the logarithm base 10 from a number (e.g. 7 returns 0.845).">Logarithm (Base 10) <small class="text-muted">MathLOG(value)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathLN" title="Calculate the logarithm base 2 from a number (e.g. 7 returns 1.946)." title="Calculate the sum from an array of numbers (e.g. [1,5,10,2]).">Natural Logarithm (Base 2) <small class="text-muted">MathLN(value)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathROUND" title="Round a number to x digits (e.g. 1.26354,2 retruns 1.26).">Round <small class="text-muted">MathROUND(value, digets)</small></a></li>
+					<li><a href="#" id="BtnFunctionMathLINREG" title="Calculate y=mx + b for a set of coordinates (e.g. [1,2,3,4,5,6],[0,0.5,0.9,1.5,2,2.45] returns m = 0.496, b = -0.51, r=0.999, r2=0.998).">Linear Regression <small class="text-muted">MathLINREG(x, y)</small></a></li>
+					<li role="presentation" class="divider"></li>
+					<li><a href="http://www.w3schools.com/jsref/default.asp" target="_blank"><i class="fa fa-external-link"></i> Native Javascript Functions</a></li>
+				</ul>
+			</li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Available Macros <b class="caret"></b></a>
+				<ul class="dropdown-menu" id="MacroList"></ul>
+			</li>
+		</ul>
 	  </div><!-- /.container-fluid -->
 	</nav>
-	<div class="container-fluid" id="MainDisplayContainer" style="padding:5px;overflow:hidden; overflow-y: auto;">
+	<div class="container-fluid" id="MainDisplayContainer" style="padding:5px; overflow:hidden; overflow-y: auto;">
 	<div class="row">
 		<div class="col-md-8">
-			<div class="panel panel-primary">
-				<div class="panel-heading" id="ExperimentTitle">
+			<div class="panel panel-primary" id="CodePanel">
+				<div class="panel-heading">
 				<button name="TestMacroButton" id="TestMacroButton" value="Run" class="btn btn-default btn-xs pull-right"><i class="fa fa-cogs"></i> Run</button>
 				<h4 class="panel-title"><i class="fa fa-code"></i> Code</h4>
 				</div>
@@ -43,32 +76,30 @@
 		<div class="col-md-4">
 			<div class="panel panel-default">
 				<div class="panel-heading"><strong><i class="fa fa-file-text"></i> Data from Device</strong></div>
-				<div class="panel-body form-horizontal">
-					<div class="form-group">
-						<label for="ProtocolToTest" class="col-sm-4 control-label">Protocols</label>
-						<div class="col-sm-4">
-							<select class="form-control" id="ProtocolToTest"></select>
-						</div>
-						<div class="col-md-4">
-							<label for="select-1">&nbsp;</label>
-							<button class="btn btn-default" id="BtnOpenFile"><i class="fa fa-folder-open"></i></button>
-						</div>
-					</div>
+				<div class="panel-body">
+					<select class="form-control" id="ProtocolToTest"></select>
 				</div>
 			</div>
 
 			<div class="panel panel-default">
 				<div class="panel-heading"><strong><i class="fa fa-archive"></i> Protocol Variables</strong></div>
-				<div class="panel-body" style="word-wrap: break-word" id="ProtocolVariables">
+				<div class="panel-body" style="word-wrap: break-word; height:100px; overflow:hidden; overflow-y: auto;" id="ProtocolVariables">
 					<div class="alert alert-warning"><i class="fa fa-file-text"></i> Load a result file first</div>
 				</div>
 			</div>
 
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong><i class="icon-polynomial"></i> Raw trace</strong></div>
+				<div class="panel-body" style="height:100px;" id="RawTrace"></div>
+			</div>
+
+
 			<div class="panel panel-default" id="MacroReturnContent">
-				<div class="panel-heading" id="ExperimentTitle"><strong><i class="fa fa-share-square-o"></i> Macro Output</strong></div>
-				<div class="panel-body" style="word-wrap: break-word"></div>
+				<div class="panel-heading"><strong><i class="fa fa-share-square-o"></i> Macro Output</strong></div>
+				<div class="panel-body" style="word-wrap: break-word; height:100px;"></div>
 			</div>
 		</div>
+	</div>
 	</div>
 	<iframe src="Sandbox.html" id="MacroSandbox" style="display:none"></iframe>
 </body>
