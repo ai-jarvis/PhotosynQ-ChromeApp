@@ -6,14 +6,16 @@ onload = function() {
 	var bodyheight =$(window).height()-$('.navbar').height()-10
 	$("#MainDisplayContainer").height(bodyheight);
 	$('#CodePanel').height(bodyheight-25);
-	$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-476)/2);
+	$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-356)/2);
 	$('#CodeMirrorContainer').height(bodyheight-100);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-$('.navbar').height()-10;
 		$("#MainDisplayContainer").height(bodyheight);
 		$('#CodePanel').height(bodyheight-25);
-		$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-476)/2);
+		$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-356)/2);
 		$('#CodeMirrorContainer').height(bodyheight-100);
+		if(_json !== undefined && _json.sample !== undefined)
+			Sparkline(_json.sample[0][0].data_raw);
 	});
 
 	//-----------------------------------------------------------------------------------------------------------------------------------
@@ -55,25 +57,15 @@ onload = function() {
 	});
 	
 	$('#ProtocolToTest').on('change', function(){
+		var protocol = $(this).val();
 		$('#ProtocolVariables').empty();
-		var variables = '<ul class="list-inline">'
-		for(i in filedata.sample[0][0]){
-			variables += '<li title="json.'+i+'">'+i+'</li>';
+		var variables = '<ul class="list-unstyled">'
+		for(i in _json.sample[0][protocol]){
+			variables += '<li title="json.'+i+'"><a href="#">'+i+'</a> <small class="text-muted">('+typeof _json.sample[0][0][i]+')</small></li>';
 		}
 		variables += '</ul>';
 		$('#ProtocolVariables').append(variables);
-		$('#RawTrace').sparkline(filedata.sample[0][0].data_raw, { 
-			type:'line', 
-			lineWidth:2,
-			lineColor: $('#RawTrace').prev().css('border-color'),
-			fillColor: $('#RawTrace').prev().css('background-color'),
-			height:'70px',
-			width: $('#RawTrace').width()+'px',
-			minSpotColor: false,
-			maxSpotColor: false,
-			spotColor: false,
-			tooltipFormat: '<span>x: {{x}}, y: {{y}}</span>'
-		});
+		Sparkline(_json.sample[0][protocol].data_raw);
 	});
 	
 	document.getElementById('BtnOpenFile').addEventListener('click', function(e){
@@ -127,29 +119,34 @@ onload = function() {
 						}
 						$('#ProtocolVariables').empty();
 						var variables = '<ul class="list-unstyled">'
-						for(i in filedata.sample[0][0]){
-							variables += '<li title="json.'+i+'"><a href="#">'+i+'</a></li>';
+						for(i in _json.sample[0][0]){
+							variables += '<li title="json.'+i+'"><a href="#">'+i+'</a> <small class="text-muted">('+typeof _json.sample[0][0][i]+')</small></li>';
 						}
 						variables += '</ul>';
 						$('#ProtocolVariables').append(variables);
-						$('#RawTrace').sparkline(filedata.sample[0][0].data_raw, { 
-							type:'line', 
-							lineWidth:2,
-							lineColor: $('#RawTrace').prev().css('border-color'),
-							fillColor: $('#RawTrace').prev().css('background-color'),
-							height:'70px',
-							width: $('#RawTrace').width()+'px',
-							minSpotColor: false,
-							maxSpotColor: false,
-							spotColor: false,
-							tooltipFormat: '<span>x: {{x}}, y: {{y}}</span>'
-						});
+						Sparkline(_json.sample[0][0].data_raw);
 					}
 					catch(e){
 						//console.log(e);
 					}
 				}
 			});
+		});
+	}
+
+
+	function Sparkline(data){
+		$('#RawTrace').sparkline(data, { 
+			type:'line', 
+			lineWidth:2,
+			lineColor: $('#RawTrace').prev().css('color'),
+			fillColor: $('#RawTrace').prev().css('background-color'),
+			height:$('#RawTrace').height()+'px',
+			width: $('#RawTrace').width()+'px',
+			minSpotColor: false,
+			maxSpotColor: false,
+			spotColor: false,
+			tooltipFormat: '<span>x: {{x}}, y: {{y}}</span>'
 		});
 	}
 

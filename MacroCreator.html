@@ -75,14 +75,12 @@
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">
-				<div class="panel-heading"><strong><i class="fa fa-file-text"></i> Data from Device</strong></div>
-				<div class="panel-body">
-					<select class="form-control" id="ProtocolToTest"></select>
+				<div class="panel-heading">
+					<div class="row">
+						<div class="col-md-5"><strong><i class="fa fa-archive"></i> Variables</strong></div>
+						<div class="col-md-7"><select class="form-control input-sm" style="margin-top:-3px;margin-bottom:-5px" id="ProtocolToTest"></select></div>
+					</div>
 				</div>
-			</div>
-
-			<div class="panel panel-default">
-				<div class="panel-heading"><strong><i class="fa fa-archive"></i> Protocol Variables</strong></div>
 				<div class="panel-body" style="word-wrap: break-word; height:100px; overflow:hidden; overflow-y: auto;" id="ProtocolVariables">
 					<div class="alert alert-warning"><i class="fa fa-file-text"></i> Load a result file first</div>
 				</div>
@@ -90,13 +88,13 @@
 
 			<div class="panel panel-default">
 				<div class="panel-heading"><strong><i class="icon-polynomial"></i> Raw trace</strong></div>
-				<div class="panel-body" style="height:100px;" id="RawTrace"></div>
+				<div class="panel-body" style="height:100px; padding:0px;" id="RawTrace"></div>
 			</div>
 
 
 			<div class="panel panel-default" id="MacroReturnContent">
 				<div class="panel-heading"><strong><i class="fa fa-share-square-o"></i> Macro Output</strong></div>
-				<div class="panel-body" style="word-wrap: break-word; height:100px;"></div>
+				<div class="panel-body" style="word-wrap: break-word; height:100px; overflow:hidden; overflow-y: auto;"></div>
 			</div>
 		</div>
 	</div>
