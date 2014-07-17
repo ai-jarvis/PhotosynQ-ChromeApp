@@ -241,7 +241,7 @@ function errorHandler(e) {
 // ===============================================================================================
 function SaveDataToFile(){
 	var timestamp = append_file_time();
-	chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: 'PhotosynQuick'+timestamp, accepts: [{extensions: ['txt']}] }, function(writableFileEntry) {
+	chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: 'PhotosynQ_'+timestamp+'.txt', accepts: [{extensions: ['txt']}] }, function(writableFileEntry) {
 		if(!writableFileEntry)
 			return;
 		writableFileEntry.createWriter(function(writer) {
@@ -322,7 +322,7 @@ function SaveDataToFile(){
 			readabledata += '--------------------------------------------------------------------------\n';
 			readabledata += JSON.stringify(ResultString);
 
-
+			console.log(writer);
 
 		  	writer.write(new Blob([readabledata], {type: 'text/plain'}));
 		  }

@@ -197,21 +197,21 @@ function plot(data){
 							}, {
 								text: 'Save as png image',
 								onclick: function() {
-									SaveGraphToFile(this.getSVG(),'png','Photosynq');
+									SaveGraphToFile(this.getSVG(),'png','Photosynq_Graph.png');
 								},
 								separator: false
 							},
 							{
 								text: 'Save as jpeg image',
 								onclick: function() {
-									SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+									SaveGraphToFile(this.getSVG(),'jpeg','Photosynq_Graph.jpg');
 								},
 								separator: false
 							},
 							{
 								text: 'Save as pdf image',
 								onclick: function() {
-									SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
+									SaveGraphToFile(this.getSVG(),'pdf','Photosynq_Graph.pdf');
 								},
 								separator: false
 							}]
@@ -415,21 +415,21 @@ function plottransient(data){
 						}, {
 							text: 'Save as png image',
 							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'png','Photosynq');
+								SaveGraphToFile(this.getSVG(),'png','PhotosynQ_Graph.png');
 							},
 							separator: false
 						},
 						{
 							text: 'Save as jpeg image',
 							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+								SaveGraphToFile(this.getSVG(),'jpeg','PhotosynQ_Graph.jpg');
 							},
 							separator: false
 						},
 						{
 							text: 'Save as pdf image',
 							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
+								SaveGraphToFile(this.getSVG(),'pdf','PhotosynQ_Graph.pdf');
 							},
 							separator: false
 						}]
@@ -571,21 +571,21 @@ function plottransientFast(data){
 					}, {
 						text: 'Save as png image',
 						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'png','Photosynq');
+							SaveGraphToFile(this.getSVG(),'png','PhotosynQ_Graph.png');
 						},
 						separator: false
 					},
 					{
 						text: 'Save as jpeg image',
 						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'jpeg','Photosynq');
+							SaveGraphToFile(this.getSVG(),'jpeg','PhotosynQ_Graph.jpg');
 						},
 						separator: false
 					},
 					{
 						text: 'Save as pdf image',
 						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'pdf','Photosynq');
+							SaveGraphToFile(this.getSVG(),'pdf','PhotosynQ_Graph.pdf');
 						},
 						separator: false
 					}]
@@ -660,16 +660,26 @@ function SaveGraphToFile(data, type, name){
 			xhr.responseType = 'blob';
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState == 4){
-					if(xhr.response !== null && xhr.response !== undefined){					
-						chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [type]}] }, function(writableFileEntry) {
+					if(xhr.response !== null && xhr.response !== undefined){
+						var mimetype = 'image/png';
+						var extension = 'png';
+						if(type == 'jpeg'){
+							mimetype = 'image/jpeg';
+							extension = 'jpg';						
+						}
+						if(type == 'pdf'){
+							mimetype = 'application/pdf';
+							extension = 'pdf';					
+						}
+						chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [extension]}] }, function(writableFileEntry) {
 							if(!writableFileEntry)
 								return;
 							writableFileEntry.createWriter(function(writer) {
 							  writer.onerror = errorHandler;
 							  writer.onwriteend = function(e) {
-								console.log('File saved.');
+								WriteMessage('Graph saved as '+extension, 'success');
 							  };
-								writer.write(xhr.response);
+								writer.write(xhr.response, {type: mimetype});
 							}, errorHandler);
 						});
 						
@@ -682,4 +692,3 @@ function SaveGraphToFile(data, type, name){
 		  }
 	});
 }
-
