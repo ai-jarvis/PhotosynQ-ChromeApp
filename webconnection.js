@@ -34,7 +34,7 @@ function DatabaseSignIn(){
 				_authentication = response;
 				SaveToStorage('authentication',response,function(){});
 				$('#DatabaseSignedIn').show();
-				$('#DatabaseSignInState').toggleClass('fa-lock fa-unlock-alt').toggleClass('text-muted fa-inverse').attr('title', 'Signed in as '+response['name']);
+				$('#DatabaseSignInState').toggleClass('text-muted fa-inverse').attr('title', 'Signed in as '+response['name']);
 				$('#DatabaseSignedInUser').text(response['name'])
 				$('#DatabaseSignedInEmail').text(response['email'])
 				$('#DatabaseSignInForm').hide();
@@ -73,7 +73,7 @@ function DatabaseSignOff(){
 			_authentication = null;
 			RemoveFromStorage('authentication');
 			$('#DatabaseSignedIn').hide();
-			$('#DatabaseSignInState').toggleClass('fa-lock fa-unlock-alt').toggleClass('text-muted fa-inverse').attr('title','Not signed in.');
+			$('#DatabaseSignInState').toggleClass('text-muted fa-inverse').attr('title','Not signed in.');
 			$('#DatabaseSignedInUser, #DatabaseSignedInEmail').text('');
 			$('#SignInEmail,#SignInPassword').val('');
 			$('#DatabaseSignInForm').show();
