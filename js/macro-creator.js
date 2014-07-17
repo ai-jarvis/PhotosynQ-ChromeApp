@@ -68,7 +68,7 @@ onload = function() {
 		Sparkline(_json.sample[0][protocol].data_raw);
 	});
 	
-	document.getElementById('BtnOpenFile').addEventListener('click', function(e){
+	$('#BtnOpenFile, #ProtocolVariables .alert').on('click', function(e){
 		var accepts = [{
 			mimeTypes: ['text/*'],
 			extensions: ['txt']
@@ -153,7 +153,7 @@ onload = function() {
 	$('#RawTrace').bind('sparklineClick', function(ev) {
 		var sparkline = ev.sparklines[0],
 		region = sparkline.getCurrentRegionFields();
-		MacroCodeContainer.replaceSelection('json.data_raw['+region.x+']' );
+		MacroCodeContainer.replaceSelection('json.data_raw['+region.x+']');
 	});
 
 	window.addEventListener('message', function(event) {
