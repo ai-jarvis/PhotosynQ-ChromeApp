@@ -54,7 +54,7 @@ function LoadAuthentificationFromStorage() {
 				return;
 			}			
 			$('#DatabaseSignedIn').show();
-			$('#DatabaseSignInState').toggleClass('fa-lock fa-unlock-alt').toggleClass('text-muted fa-inverse').attr('title', 'Signed in as '+_authentication.name);
+			$('#DatabaseSignInState').toggleClass('text-muted fa-inverse').attr('title', 'Signed in as '+_authentication.name);
 			$('#DatabaseSignedInUser').text(_authentication.name)
 			$('#DatabaseSignedInEmail').text(_authentication.email)
 			$('#DatabaseSignInForm').hide();
@@ -421,7 +421,7 @@ function DiscardMeasurement(){
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
-	$('#DeviceConnectionState').removeClass('fa-blink');
+	$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 	ProgressBar(0, 0);
 	$(window).trigger('resize');
 	MeasurementType = null;

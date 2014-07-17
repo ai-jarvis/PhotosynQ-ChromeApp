@@ -50,7 +50,7 @@ function onCharRead(readInfo) {
 
 	if(dataRead.match(/(MultispeQ Ready\r\n)/gi)){
 		setStatus("MultispeQ Ready",'success');
-		$('#DeviceConnectionState').removeClass('text-muted').removeClass('fa-chain-broken').addClass('fa-inverse').addClass('fa-link').attr('title','Device connected to port '+port_path);
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success').parent().attr('title','Device connected to port '+port_path);
 		var SaveConnection = {}
 		SaveConnection["os"] = port_os;
 		SaveConnection["path"] = port_path;
@@ -208,7 +208,7 @@ function onCharRead(readInfo) {
 			MeasurementType = null;
 			ResultString = dataReadterm;
 			WriteMessage('Protocol done.','success');
-			$('#DeviceConnectionState').removeClass('fa-blink')
+			$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 			
 			$('#PlotsContainer').empty();
 			$('#MeasurementMenu').show();
@@ -231,7 +231,7 @@ function onCharRead(readInfo) {
 		dataSave = dataRead;
 		EnableInputs();
 		ResultString = dataRead;
-		$('#DeviceConnectionState').removeClass('fa-blink')
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 		WriteMessage('Protocol done.','success');
 
 		if(MeasurementType == 'database'){
@@ -271,13 +271,13 @@ chrome.serial.onReceive.addListener(onCharRead);
 function onConnect(connectionInfo) {
   if (!connectionInfo) {
     setStatus('Could not open port','danger');
-    $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Could not open port');
+    $('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Could not open port');
     $('#ConnectBtn').button('reset');
     return;
   }
   connectionId = connectionInfo.connectionId;
   setStatus('Unknown Device','warning');
-  $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Unknown Device');
+  $('#DeviceConnectionState').removeClass().addClass('fa fa-exclamation-triangle text-warning').parent().attr('title','Unknown Device');
   chrome.serial.send(connectionId, str2ab("1000+"), function(e){ });	// send 1000+ to get the answer 'MultiSpeQ Ready'
   $('#ConnectBtn').button('complete');
 };
@@ -333,7 +333,7 @@ function buildPortPicker(ports) {
 		$('#ConnectBtn').button('reset');
       });
     }
-    $('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+    $('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
     setStatus('Not connected','info');
     deviceConnected = false;
   };
@@ -348,8 +348,9 @@ chrome.serial.onReceiveError.addListener(function(e){
 	if(e.error == 'device_lost'){
 		connectionId = -1;
 		deviceConnected = false;
-     	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+     	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
 		setStatus('Not connected','info');
+		console.log(e.error)
 		$('#ConnectBtn').button('reset');
 	}
 });
@@ -448,7 +449,7 @@ onload = function() {
 		if($('#ConnectBtn').text() == "Disconnect"){
 			if (connectionId != -1) {
 				chrome.serial.disconnect(connectionId, function(){
-			    	$('#DeviceConnectionState').removeClass('fa-link').removeClass('fa-inverse').addClass('text-muted').addClass('fa-chain-broken').attr('title','Not connected');
+			    	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
 					setStatus('Not connected','info');
 					$('#ConnectBtn').blur().button('reset');
 					deviceConnected = false;
@@ -520,8 +521,11 @@ onload = function() {
 		e.preventDefault();
 	});
 
+
+	// Check for updates
+	// =====================================================================
 	chrome.runtime.onUpdateAvailable.addListener(function(update){
-		WriteMessage('Update available!','warning');
+		WriteMessage('Update available, Version '+ update.version,'warning');
 	});
 
 	// Filter Parameter
@@ -942,7 +946,7 @@ function MenubarFunction(item,itemid) {
 	
 
 	if (connectionId != -1 && deviceConnected){
-		$('#DeviceConnectionState').addClass('fa-blink');
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 		$('#ModalDialog').modal('show');
 		if(dialog !== 'prompt'){
 			chrome.serial.send(connectionId, str2ab(command), function(){});
@@ -955,7 +959,7 @@ function MenubarFunction(item,itemid) {
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
 		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		MeasurementType = false;
-		$('#DeviceConnectionState').removeClass('fa-blink')
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 	});
 
 };
@@ -1016,7 +1020,7 @@ function DatabaseMeasurement() {
 		
 		if(protocol.length > 0){
 			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').addClass('fa-blink')
+			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 			MeasurementType = 'database';
 			ResultString = null;
 			//ProtocolArray = [3];
@@ -1095,7 +1099,7 @@ function QuickMeasurement() {
 		}
 		if(protocol.length > 0){
 			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').addClass('fa-blink')
+			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 			MeasurementType = 'quick';
 			ResultString = null;
 			ProtocolArray = [];
@@ -1168,7 +1172,7 @@ function ConsoleMeasurement() {
 		}
 		if(protocol.length > 0){
 			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').addClass('fa-blink');
+			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 			MeasurementType = 'console';
 			ResultString = null;
 			MacroArray = null;
@@ -1205,7 +1209,7 @@ function ConsoleMeasurement() {
 // ===============================================================================================
 function TerminateMeasurement(){
 	$('#TerminateMeasurement').blur();
-	$('#DeviceConnectionState').removeClass('fa-blink');
+	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger');
 	_terminate = true;
 	EnableInputs();
 }
