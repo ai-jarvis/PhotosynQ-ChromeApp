@@ -675,11 +675,15 @@ function SaveGraphToFile(data, type, name){
 							if(!writableFileEntry)
 								return;
 							writableFileEntry.createWriter(function(writer) {
-							  writer.onerror = errorHandler;
-							  writer.onwriteend = function(e) {
+							  writer.onerror = function(e) {
+								WriteMessage('Graph couldn\'t be saved', 'danger');
+							  };
+							  writer.onwrite = function(e) {
+								writer.onwrite = null;
+								writer.truncate(writer.position);
 								WriteMessage('Graph saved as '+extension, 'success');
 							  };
-								writer.write(xhr.response, {type: mimetype});
+							  writer.write(xhr.response, {type: mimetype});
 							}, errorHandler);
 						});
 						

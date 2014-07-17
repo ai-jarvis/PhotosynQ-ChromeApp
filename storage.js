@@ -245,8 +245,12 @@ function SaveDataToFile(){
 		if(!writableFileEntry)
 			return;
 		writableFileEntry.createWriter(function(writer) {
-		  writer.onerror = errorHandler;
-		  writer.onwriteend = function(e) {
+		  writer.onerror = function(e) {
+			WriteMessage('Textfile couldn\'t be saved', 'danger');
+		  };
+		  writer.onwrite = function(e) {
+		  	writer.onwrite = null;
+			writer.truncate(writer.position);
 		  	$('#SaveQuickMeasurementToFile,#SaveConsoleMeasurementToFile').blur();
 			WriteMessage('File saved.','success');
 		  };
@@ -321,9 +325,6 @@ function SaveDataToFile(){
 			readabledata += 'Raw Data Output\n'
 			readabledata += '--------------------------------------------------------------------------\n';
 			readabledata += JSON.stringify(ResultString);
-
-			console.log(writer);
-
 		  	writer.write(new Blob([readabledata], {type: 'text/plain'}));
 		  }
 		  else
