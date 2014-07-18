@@ -107,9 +107,11 @@ function GetProjectsFromCache(){
 				html += '</a>';
 				$('#ProjectList').append(html);
 				
-				DatabaseGetImage('project',_experiments[i].medium_image_url,function(img){
-					$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', $(img.img).attr('src'))
-				});
+				if(_experiments[i].medium_image_url != '/images/medium/missing.png'){
+					DatabaseGetImage('project',_experiments[i].medium_image_url,function(img){
+						$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', $(img.img).attr('src'))
+					});
+				}
 			}
 
 			$('#ProjectTab .panel-heading .badge').text(
@@ -536,7 +538,7 @@ function DatabaseGetImage(location,url,callback){
 		var xhr = new XMLHttpRequest();
 		xhr.responseType = 'blob';
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4){
+			if (xhr.readyState == 4 && xhr.status == 200){
 				if(xhr.response !== null && xhr.response !== undefined){
 					SaveImgToLocalStorage(location,url,window.URL.createObjectURL(xhr.response));
 					callback({'img':'<img src="'+window.URL.createObjectURL(xhr.response)+'">','url':url});

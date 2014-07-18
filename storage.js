@@ -421,7 +421,8 @@ function DiscardMeasurement(){
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
-	$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+	if(connectionId != -1 && deviceConnected)
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 	ProgressBar(0, 0);
 	$(window).trigger('resize');
 	MeasurementType = null;

@@ -68,7 +68,7 @@ function onCharRead(readInfo) {
 				var info = JSON.parse(dataRead);
 				for(key in info){
 					if (key == 'batt_level')
-						BatteryLevel(info[key]);
+						BatteryLevel(info[key], false);
 						MeasurementType = false;
 						dataRead = '';
 				}
@@ -123,7 +123,7 @@ function onCharRead(readInfo) {
 					if(key == 'response')
 						$('#ModalDialogMsg').show().append(info[key]+'<br>');
 					else if (key == 'batt_level')
-						BatteryLevel(info[key]);
+						BatteryLevel(info[key],true);
 					else if(key == 'pwr_off'){
 						$('#ModalDialogMsg').show().append('<span class="text-primary">Device powered off</span>');
 						dataRead = '';
@@ -201,7 +201,7 @@ function onCharRead(readInfo) {
 			dataSave = dataReadterm;				
 	
 			if(MeasurementType == 'console'){
-				ResultString['ConsoleInput'] = ConsoleProtocol.value.trim();
+				ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
 			}
 			
 			EnableInputs();
@@ -246,7 +246,7 @@ function onCharRead(readInfo) {
 		}
 
 		if(MeasurementType == 'console')
-			ResultString['ConsoleInput'] = ConsoleProtocol.value.trim();
+			ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
 
 		$('#PlotsContainer').empty();
 		$('#MeasurementMenu').show();
@@ -261,7 +261,7 @@ function onCharRead(readInfo) {
 // 					Set Port info 
 // ===============================================================================================
 chrome.serial.onReceive.addListener(onCharRead);
-	chrome.runtime.getPlatformInfo(function(info) {
+chrome.runtime.getPlatformInfo(function(info) {
 		port_os = info.os;
 });
 
@@ -391,15 +391,29 @@ onload = function() {
 	});
 
 	document.getElementById('BtnToggleAllGraphs').addEventListener('click', function(){
-		$('#PlotsContainer [id^="plotRawDatabody"]').collapse('toggle');
 		$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
+		if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-down'))
+			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('show');
+		else
+			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
 		$('#BtnToggleAllGraphs').blur();
 	});
 
 	document.getElementById('BtnToggleSimpleAdvanced').addEventListener('click', function(){
 		$('#PlotsContainer [id^="plotRawDataHeader"], #PlotsContainer [id^="plotRawDataTable"], #PlotsContainer [id^="plotRawDataFooter"]').toggle();
-		$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
 		$('#BtnToggleSimpleAdvanced i').toggleClass('fa-toggle-left fa-toggle-right');
+	
+		if($('#BtnToggleSimpleAdvanced i').hasClass('fa-toggle-right')){
+			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
+			if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-down'))
+				$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
+		}
+		else{
+			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('show');
+			if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-up'))
+				$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
+		}
+		
 		$('#BtnToggleSimpleAdvanced').blur();
 	});
 
@@ -714,7 +728,6 @@ onload = function() {
 			},
 			minHeight: 650,
 			minWidth: 1000
-		}, function (HelpWindow){
 		});
 	});
 
@@ -767,10 +780,18 @@ onload = function() {
 	window.addEventListener('message', function(event) {
 		if(event.data.protocol_to_console !== undefined){
 			$('#ConsoleProtocolContent').val(event.data.protocol_to_console);
+			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
 		}
 		if(event.data.protocol_run !== undefined){
 			$('#ConsoleProtocolContent').val(event.data.protocol_run);
-			ConsoleMeasurement();
+			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
+			try{
+				var protocol = JSON.parse(event.data.protocol_run.trim());
+				RunMeasurement(protocol,'console');
+			}
+			catch(e){
+				WriteMessage('Protocol has wrong format.','danger')
+			}
 		}
 		if(event.data.protocol_save !== undefined){
 			try {
@@ -842,6 +863,10 @@ function SendLongStrings(string){
 // 						Run functions from the menu bar
 // ===============================================================================================
 function MenubarFunction(item,itemid) {
+	if(connectionId == -1 || !deviceConnected){
+		WriteMessage('MultispeQ device not connected', 'danger');
+		return;
+	}
 	DiscardMeasurement();
 
 	$('#ModalDialog').modal({
@@ -969,179 +994,66 @@ function MenubarFunction(item,itemid) {
 //						 Logic run if Regular Measurement is started
 // ===============================================================================================
 function DatabaseMeasurement() {
-	if (connectionId != -1 && deviceConnected) {
-		DiscardMeasurement();
-		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-		$('#DatabaseMeasurement').blur();
-		if(SelectedProject === null){
-			WriteMessage('Please select a project first','warning');
-			return;
-		}
-		
-		var no_answers = false;
-		_given_answers = [];
-		$('#UserAnswers select option:selected').each(function(i,k){
-			_given_answers.push($(k).attr('value'));
-			if($(k).attr('value') === ""){
-				no_answers = true;
-			}
-		});
-		if(no_answers){
-			WriteMessage('<i class="fa fa-exclamation-triangle"></i> Please answer all questions first','danger');
-			return false;
-		}
-		var protocol = [];
-		_used_protocols = [];
-		if(_experiments[SelectedProject].protocols_ids !== undefined){
-			_used_protocols = _experiments[SelectedProject].protocols_ids;
-			for(pIds in _experiments[SelectedProject].protocols_ids){
-				var pID = _experiments[SelectedProject].protocols_ids[pIds];
-				if(_protocols[pID].protocol_json !== undefined){
-					if(_protocols[pID].protocol_json !== ''){
-						protocol.push(_protocols[pID].protocol_json);
-					}
-					else
-						protocol.push({});
-				}
-			}
-		}
-
-		try {
-			var protocol_string = JSON.stringify(protocol);
-		} catch (e) {
-			WriteMessage('Protocol has invalid format.','danger');
-			return;
-		}
-
-		if(protocol.length == 0){
-			WriteMessage('<i class="fa fa-exclamation-triangle"></i> Project has no measuring protocol','danger');
-			return;
-		}
-		
-		if(protocol.length > 0){
-			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
-			MeasurementType = 'database';
-			ResultString = null;
-			//ProtocolArray = [3];
-			MacroArray = null;
-			DisableInputs();
-			
-			// Send data in chunks to overcome serial issues on a mac
-			//--------------------------------------------------------------------------------------------------
-			protocol_string +='!';
-			SendLongStrings(protocol_string);
-			dataRead = '';
-			$('#TransientPlotsContainer').css('min-height','55%');
-
-
-			//chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
-			//	dataRead = '';
-			//	$('#TransientPlotsContainer').css('min-height','55%');
-			//});
-			var protocol_total = 0;
-			ShowTansientgraph = true;
-			for(m in protocol){
-				console.log(protocol[m]);
-				if(protocol[m].measurements !== undefined)
-					protocol_total += protocol[m].measurements;
-				else
-					protocol_total += 1
-				if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1)
-					ShowTansientgraph = false;
-			}
-			if(protocol_total === 0)
-				protocol_total = protocol.length
-				ProgressBar(1, protocol_total)
-		}
-		else{
-			WriteMessage('No measurements in protocol','danger');
-		}
+	$('#DatabaseMeasurement').blur();
+	if(SelectedProject === null){
+		WriteMessage('Please select a project first','warning');
 		return;
 	}
-	else{
-		WriteMessage('MultispeQ device not connected','danger');
+	
+	var no_answers = false;
+	_given_answers = [];
+	$('#UserAnswers select option:selected').each(function(i,k){
+		_given_answers.push($(k).attr('value'));
+		if($(k).attr('value') === ""){
+			no_answers = true;
+		}
+	});
+	if(no_answers){
+		WriteMessage('<i class="fa fa-exclamation-triangle"></i> Please answer all questions first','danger');
+		return false;
 	}
+	var protocol = [];
+	_used_protocols = [];
+	if(_experiments[SelectedProject].protocols_ids !== undefined){
+		_used_protocols = _experiments[SelectedProject].protocols_ids;
+		for(pIds in _experiments[SelectedProject].protocols_ids){
+			var pID = _experiments[SelectedProject].protocols_ids[pIds];
+			if(_protocols[pID].protocol_json !== undefined){
+				if(_protocols[pID].protocol_json !== ''){
+					protocol.push(_protocols[pID].protocol_json);
+				}
+				else
+					protocol.push({});
+			}
+		}
+	}
+	RunMeasurement(protocol,'database');
+	return;
 };
 
 // ===============================================================================================
 // 						Logic run if Quick Measurement is started
 // ===============================================================================================
 function QuickMeasurement() {
-	if (connectionId != -1 && deviceConnected) {
-		DiscardMeasurement();
-		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-		$('#QuickMeasurement').blur();
-		var QuickMeasurementProtocol = $('#QuickMeasurementTab .list-group .active').attr('data-value');
-		if(QuickMeasurementProtocol === undefined){
-			WriteMessage('Select a protocol first','info');
-			return;
-		}
-		protocol = [];
-		
-		if(QuickMeasurementProtocol.match(/(user_)/g)){
-			if(_userprotocols[QuickMeasurementProtocol.substr(5)] !== undefined)
-				protocol.push(_userprotocols[QuickMeasurementProtocol.substr(5)].protocol_json);
-		}
-		else{
-			if(_protocols[QuickMeasurementProtocol] !== undefined)
-				protocol.push(_protocols[QuickMeasurementProtocol].protocol_json);
-		}
-		if(protocol == false || protocol.length == 0){
-			WriteMessage('Protocol not found.','danger');
-			return;
-		}
-		try {
-		  protocol_string = JSON.stringify(protocol);
-		} catch (e) {
-			WriteMessage('Protocol has invalid format.','danger');
-			return;
-		}
-		if(protocol.length > 0){
-			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
-			MeasurementType = 'quick';
-			ResultString = null;
-			ProtocolArray = [];
-			_used_protocols = [];
-			_used_protocols.push(QuickMeasurementProtocol);
-			MacroArray = null;
-			DisableInputs();
-			
-			// Send data in chunks to overcome serial issues on a mac
-			//--------------------------------------------------------------------------------------------------
-			protocol_string +='!';
-			SendLongStrings(protocol_string);
-			dataRead = '';
-			$('#TransientPlotsContainer').css('min-height','55%');
-			
-			//chrome.serial.send(connectionId, str2ab(protocol_string + '!'), function(){
-//			dataRead = '';
-//			$('#TransientPlotsContainer').css('min-height','55%');
-
-//			});
-			var protocol_total = 0;
-			ShowTansientgraph = true;
-			for(m in protocol){
-				if(protocol[m].measurements !== undefined)
-					protocol_total = protocol[m].measurements;
-				else
-					protocol_total += 1
-				if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1)
-					ShowTansientgraph = false;
-			}
-			if(protocol_total === 0)
-				protocol_total = protocol.length
-			ProgressBar(1, protocol_total)
-		}
-		else{
-			WriteMessage('No measurements in protocol','danger');
-		}
+	var QuickMeasurementProtocol = $('#QuickMeasurementTab .list-group .active').attr('data-value');
+	if(QuickMeasurementProtocol === undefined){
+		WriteMessage('Select a protocol first','info');
 		return;
 	}
-	else{
-		WriteMessage('MultispeQ device not connected','danger');
+
+	protocol = [];
+	if(QuickMeasurementProtocol.match(/(user_)/g)){
+		if(_userprotocols[QuickMeasurementProtocol.substr(5)] !== undefined)
+			protocol.push(_userprotocols[QuickMeasurementProtocol.substr(5)].protocol_json);
 	}
+	else{
+		if(_protocols[QuickMeasurementProtocol] !== undefined)
+			protocol.push(_protocols[QuickMeasurementProtocol].protocol_json);
+	}
+	_used_protocols = [];
+	_used_protocols.push(QuickMeasurementProtocol);
+	RunMeasurement(protocol,'quick')
+	return;
 };
 
 
@@ -1149,59 +1061,85 @@ function QuickMeasurement() {
 // 						Logic run if Console Measurement is started
 // ===============================================================================================
 function ConsoleMeasurement() {
-	if (connectionId != -1 && deviceConnected) {
-		DiscardMeasurement();
-		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-		$('#ConsoleProtocol').blur();
-		ConsoleProtocol = document.getElementById('ConsoleProtocolContent');
-		if(ConsoleProtocol.value == ''){
-			WriteMessage('Console is empty...','danger');
-			return;
-		}
-		if($('#ConsoleProtocolRaw').is(':checked')){
-			MeasurementType = 'consoleraw';
-			SendLongStrings(ConsoleProtocol.value);
-			dataRead = '';
-			return;
-		}
-		try {
-		  protocol = JSON.parse(ConsoleProtocol.value.trim())
-		} catch (e) {
-			WriteMessage('Protocol has invalid format.','danger');
-			return;
-		}
-		if(protocol.length > 0){
-			setStatus('MultiSpeQ Busy','danger');
-			$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
-			MeasurementType = 'console';
-			ResultString = null;
-			MacroArray = null;
-			DisableInputs();
-			SendLongStrings(ConsoleProtocol.value.trim());
-			$('#TransientPlotsContainer').css('min-height','55%');
-			var protocol_total = 0;
-			ShowTansientgraph = true;
-			for(m in protocol){
-				if(protocol[m].measurements !== undefined)
-					protocol_total = protocol[m].measurements;
-				else
-					protocol_total += 1
-				if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1)
-					ShowTansientgraph = false;
-			}
-			if(protocol_total === 0)
-				protocol_total = protocol.length
-			ProgressBar(1, protocol_total);
-		}
-		else{
-			WriteMessage('No measurements in protocol','danger');
-		}
+	ConsoleProtocol = $('#ConsoleProtocolContent').val();
+	if(ConsoleProtocol == ''){
+		WriteMessage('Console is empty...','danger');
 		return;
 	}
-	else{
-		WriteMessage('MultispeQ device not connected','danger');
+	if($('#ConsoleProtocolRaw').is(':checked')){
+		DiscardMeasurement();
+		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+		MeasurementType = 'consoleraw';
+		SendLongStrings(ConsoleProtocol+'!');
+		dataRead = '';
+		return;
 	}
+	
+	try{
+		ConsoleProtocol = JSON.parse(ConsoleProtocol.trim());
+	}
+	catch(e){
+		WriteMessage('Protocol has wrong format','danger');
+		return;
+	}
+	RunMeasurement(ConsoleProtocol,'console');
+	return;
 };
+
+// ===============================================================================================
+// 									Run Measurement
+// ===============================================================================================
+function RunMeasurement(protocol,mtype){
+	// Check Connection
+	if (connectionId == -1 || !deviceConnected){
+		WriteMessage('MultispeQ device not connected','danger');
+		return;
+	}
+	
+	// Check if protocol is a valid json
+	var protocol_string = false;
+	try {
+	  protocol_string = JSON.stringify(protocol);
+	} catch (e) {
+		WriteMessage('Protocol has invalid format.','danger');
+		return;
+	}
+
+	if(protocol == false || protocol.length == 0){
+		WriteMessage('Protocol not found or empty.','danger');
+		return;
+	}
+
+	// Reset variables, empty MainDisplayContainer, blur buttons
+	DiscardMeasurement();
+	$('#DatabaseMeasurement, #QuickMeasurement, #ConsoleProtocol').blur();
+	$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+	
+	// Check protocol and submit
+	setStatus('MultiSpeQ Busy','danger');
+	$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
+	ResultString = null;
+	MacroArray = null;
+	MeasurementType = mtype;
+	dataRead = '';
+	DisableInputs();
+	SendLongStrings(protocol_string+'!');
+	$('#TransientPlotsContainer').css('min-height','55%');
+	var protocol_total = protocol.length;
+	var protocol_measurements = 1;
+	ShowTansientgraph = true;
+	for(m in protocol){
+		if(protocol[m].measurements !== undefined){
+			if(protocol[m].measurements > protocol_measurements)
+				protocol_measurements = protocol[m].measurements;
+		}
+		if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1 && ShowTansientgraph)
+			ShowTansientgraph = false;
+	}
+	protocol_total *= protocol_measurements;
+	ProgressBar(1, protocol_total);
+	return;
+}
 
 
 // ===============================================================================================
@@ -1209,7 +1147,7 @@ function ConsoleMeasurement() {
 // ===============================================================================================
 function TerminateMeasurement(){
 	$('#TerminateMeasurement').blur();
-	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger');
+	$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 	_terminate = true;
 	EnableInputs();
 }
@@ -1306,7 +1244,7 @@ function remove(arr, item) {
   }
 
 
-function BatteryLevel(batt_level){
+function BatteryLevel(batt_level,dialog){
 	var state = '';
 	$("#BatteryStatusIndicator").removeClass();
 	if((batt_level[0] - batt_level[1]) < 0.1){
@@ -1339,6 +1277,7 @@ function BatteryLevel(batt_level){
 			$('#BatteryStatusIndicator').addClass('text-success').addClass('icon-bat4').attr('title',state);
 		}
 	}
-	$('#ModalDialogMsg').show().append('<div class="text-primary">'+state+'<br><small class="text-muted">'+batt_level[0]+', '+batt_level[1]+', '+batt_level[2]+'</small></div>');
+	if(dialog)
+		$('#ModalDialogMsg').show().append('<div class="text-primary">'+state+'<br><small class="text-muted">'+batt_level[0]+', '+batt_level[1]+', '+batt_level[2]+'</small></div>');
 }
 
