@@ -212,6 +212,7 @@ function onCharRead(readInfo) {
 			
 			$('#PlotsContainer').empty();
 			$('#MeasurementMenu').show();
+			chrome.power.releaseKeepAwake();
 			plot(dataReadterm);
 			setStatus('MultiSpeQ Ready','success');
 			dataRead = '';
@@ -250,6 +251,7 @@ function onCharRead(readInfo) {
 
 		$('#PlotsContainer').empty();
 		$('#MeasurementMenu').show();
+		chrome.power.releaseKeepAwake();
 		plot(dataRead);
 		setStatus('MultiSpeQ Ready','success');
 		dataRead = '';
@@ -539,8 +541,68 @@ onload = function() {
 	// Check for updates
 	// =====================================================================
 	chrome.runtime.onUpdateAvailable.addListener(function(update){
-		WriteMessage('Update available, Version '+ update.version,'warning');
+		UpdateNotification();
 	});
+	
+	chrome.runtime.requestUpdateCheck(function(status) {
+		if (status == "update_available")
+			UpdateNotification();
+	});
+
+	$('#NotificationHistory li ul').on('click', '#ClickToUpdate', function(){
+		chrome.runtime.reload();
+	});	
+	
+	// Update Info routine
+	// =====================================================================
+	chrome.runtime.onInstalled.addListener(function(update){
+		//"install", "update", "chrome_update", or "shared_module_update"
+		//update.previousVersion only with "update"
+		
+		if(update.reason == 'update')
+			WriteMessage('PhotosynQ App was updated','info');
+			
+		if(update.reason == 'chrome_update')
+			WriteMessage('Google Chrome was updated','info');
+		
+		if(update.reason == 'install')
+			WriteMessage('Welcome to PhotosynQ','warning');
+
+	});
+
+	// Update notification generation
+	// =====================================================================	
+	function UpdateNotification(){
+		if($('#ClickToUpdate').length > 0)
+			return;
+		toastr.options = {
+		  "closeButton": false,
+		  "debug": false,
+		  "positionClass": "toast-top-right",
+		  "onclick": function () {
+			chrome.runtime.reload();
+		  },
+		  "showDuration": "300",
+		  "hideDuration": "1000",
+		  "timeOut": "10000",
+		  "extendedTimeOut": "1000",
+		  "showEasing": "swing",
+		  "hideEasing": "linear",
+		  "showMethod": "fadeIn",
+		  "hideMethod": "fadeOut"
+		}
+		var text = 'Update available, click to update app';
+		toastr.warning(text);
+		
+		html = '<li style="padding:2px 15px 2px 15px; cursor:pointer;" id="ClickToUpdate">'
+		html += '<i class="fa fa-exclamation-circle text-warning" style="margin-right:10px;"></i>'
+		html += '<span class="text-muted">'+text+'</span>'
+		html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
+		html += '</li>'
+		html += '<li class="divider"></li>'
+		$('#NotificationHistory li ul').prepend(html);
+		$('.toast-top-right').css('top','55px');	
+	}
 
 	// Filter Parameter
 	// =====================================================================
@@ -634,8 +696,10 @@ onload = function() {
 	  				notetime.text( Math.floor(timediff % 60000 / 1000) +' sec ago')
 	  			else if(timediff < 36e5)
 	  				notetime.text( Math.floor(timediff % 36e5 / 60000) +' min ago')
-	  			else if(timediff >= 36e5)
-	  				notetime.text( Math.floor(timediff % 36e5) +' h ago')
+	  			else if(timediff < 864e5)
+	  				notetime.text( Math.floor(timediff % 864e5 / 36e5) +' h ago')
+	  			else if(timediff >= 864e5)
+	  				notetime.text( Math.floor(timediff / 864e5) +' d ago')
 	  		}
 	  	});
 	});
@@ -980,11 +1044,15 @@ function MenubarFunction(item,itemid) {
 	else
 		WriteMessage('MultispeQ device not connected','danger');
 	
+	$('#ModalDialog').on('show.bs.modal', function () {
+		chrome.power.requestKeepAwake('system');
+	});
 
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
 		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		MeasurementType = false;
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		chrome.power.releaseKeepAwake();
 	});
 
 };
@@ -1123,6 +1191,7 @@ function RunMeasurement(protocol,mtype){
 	MeasurementType = mtype;
 	dataRead = '';
 	DisableInputs();
+	chrome.power.requestKeepAwake('system');
 	SendLongStrings(protocol_string+'!');
 	$('#TransientPlotsContainer').css('min-height','55%');
 	var protocol_total = protocol.length;

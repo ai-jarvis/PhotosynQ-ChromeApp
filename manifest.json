@@ -1,6 +1,6 @@
 {
 	"name": "PhotosynQ",
-	"short_name": "PQ",
+	"short_name": "PhotosynQ",
 	"version": "0.2.1",
 	"manifest_version": 2,
 	"minimum_chrome_version": "23",
@@ -28,13 +28,13 @@
 		"unlimitedStorage",
 		"notifications",
 		"geolocation",
+		"power",
 		{
 			"fileSystem": ["write"]
 		},
 		"http://www.photosynq.venturit.net/*",
 		"http://photosynq.venturit.net/*",
 		"http://s3.amazonaws.com/photosynq/*",
-		"https://freegeoip.net/*",
 		"http://export.highcharts.com/*"
 	],
 	"sandbox": {

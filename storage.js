@@ -416,6 +416,7 @@ function readable_time(currentdate){
 //							Discard measurement and remove all plots
 // ===============================================================================================
 function DiscardMeasurement(){
+	chrome.power.releaseKeepAwake();
 	EnableInputs();
 	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
