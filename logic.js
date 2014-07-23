@@ -454,6 +454,10 @@ onload = function() {
 	 });
 	document.getElementById('refetchPorts').addEventListener('click', fetchPorts);
 	document.getElementById('ConnectBtn').addEventListener('click', function(e){
+		if($('#port-picker option').length == 0){
+			WriteMessage('No ports available to connect to.','warning');
+			return;
+		}
 		if($('#ConnectBtn').text() == "Connect"){
 			$('#ConnectBtn').blur().button('loading');
 			if (connectionId != -1) {

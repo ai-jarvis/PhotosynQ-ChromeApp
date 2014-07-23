@@ -103,7 +103,7 @@ function LoadPortNameFromStorage() {
 				WriteMessage('Stored com port has wrong format.','danger');
 				return;
 			}
-			if($('#port-picker option[value="'+port_request['path']+'"]').length > 0){
+			if($('#port-picker option[value="'+port_request['path']+'"]').length > 0 && $('#port-picker option').length > 0){
 				$('#port-picker option[value="'+port_request['path']+'"]').prop('selected', true);
 				$('#ConnectBtn').click();
 			}
