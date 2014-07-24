@@ -531,6 +531,26 @@ onload = function() {
 	// Cache Update events
 	// ===============================================================================================
 	document.getElementById('AppUpdateButton').addEventListener('click', function(e){
+		if(e.shiftKey) {
+       		chrome.storage.local.clear(function(){
+ 				DatabaseSignOff();
+ 				chrome.storage.local.getBytesInUse('cached_experiments', function(response){
+					$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});
+ 				chrome.storage.local.getBytesInUse(['cached_protocols','cached_userprotocols'], function(response){
+					$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});
+ 				chrome.storage.local.getBytesInUse('cached_macros', function(response){
+					$('#MacroStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});
+ 				chrome.storage.local.getBytesInUse('media', function(response){
+					$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});
+						
+       		});
+       		e.preventDefault();
+       		return;
+    	} 
 		if(_authentication != null && navigator.onLine){
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
