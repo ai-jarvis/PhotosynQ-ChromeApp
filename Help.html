@@ -22,6 +22,11 @@
 		  <a class="navbar-brand" href="#">Help</a>
 		</div>
 		<div class="collapse navbar-collapse">
+		<div class="navbar-form navbar-right" role="search">
+		  <div class="form-group">
+			<input type="text" class="form-control" placeholder="Search" id="SearchHelpContent">
+		  </div>
+		</div>
 		</div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
 	</nav>
@@ -30,18 +35,18 @@
 			<div class="col-md-3 col-lg-2">
 				<div class="panel panel-body" data-spy="affix">
 					<ul class="nav nav-pills nav-stacked">
-						<li><a href="#HelpDeviceConnect"><i class="fa fa-chain"></i> Connect your device</a></li>
-						<li><a href="#HelpSignIn"><i class="fa fa-lock"></i> Sign in to PhotosynQ</a></li>
+						<li><a href="#HelpDeviceConnect"><i class="fa fa-desktop"></i> Connect your device</a></li>
+						<li><a href="#HelpSignIn"><i class="fa fa-user"></i> Sign in to PhotosynQ</a></li>
 						<li><a href="#HelpNotifications"><i class="fa fa-bell"></i> Notifications</a></li>
 						<li><a href="#HelpInternetConnection"><i class="fa fa-cloud"></i> Internet connection</a></li>
 						<li><a href="#HelpYourLocation"><i class="fa fa-location-arrow"></i> Your Location</a></li>
-						<li><a href="#HelpSelectExperiment"><i class="fa fa-flask"></i> Select an experiment</a></li>
-						<li><a href="#HelpTakeMeasurement"><i class="fa fa-bar-chart-o"></i> Take a measurement</a></li>
+						<li><a href="#HelpProjects"><i class="fa fa-flask"></i> Projects</a></li>
 						<li><a href="#HelpQuickMeasurement"><i class="fa fa-rocket"></i> Quick measurements</a></li>
 						<li><a href="#HelpConsole"><i class="fa fa-terminal"></i> Console</a></li>
 						<li><a href="#HelpTools"><i class="fa fa-briefcase"></i> Tools</a></li>
 						<li><a href="#HelpDevice"><i class="fa fa-info-circle"></i> Device</a></li>
 						<li><a href="#HelpManualControl"><i class="fa fa-sliders"></i> Manual Control</a></li>
+						<li><a href="#HelpAppUpdate"><i class="fa fa-repeat"></i> Updates & Firmware</a></li>
 					</ul>
 					<small id="AppVersion" class="text-muted"></small>
 				</div>				
@@ -52,88 +57,87 @@
 					  <h1>Working with PhotosynQ <small> and MultispeQ</small></h1>
 					</div>
 					<div id="HelpDeviceConnect">
-						<h3><i class="fa fa-chain"></i> Connect your device</h3>
+						<h3><i class="fa fa-desktop"></i> Connect your device</h3>
 						You can connect your device to your computer using a micro-USB <a href="http://en.wikipedia.org/wiki/USB#Mini_and_Micro_connectors" target="_blank"><i class="fa fa-external-link"></i></a>
-						cable or using bluetooth <a href="http://en.wikipedia.org/wiki/Bluetooth" target="_blank"><i class="fa fa-external-link"></i></a>. See
+						cable or bluetooth <a href="http://en.wikipedia.org/wiki/Bluetooth" target="_blank"><i class="fa fa-external-link"></i></a>. See
 						instructions below for the major operating systems.<br>
-						Once you have connected your device, open up the app and click on the <i class="fa fa-chain-broken"></i> 
+						Once you have connected your device, open up the app and click on the <i class="fa fa-desktop"></i> 
 						symbol in the menu bar. Select the port for your device and click on the Connect button.
 						The Status will change to &quot; MultspeQ Ready&quot; if the port is correct and you have 
 						successfully connected your device. If you have the wrong port, select another one and connect
 						again. If your app was already running while you connected your device, click on the <i class="fa fa-refresh"></i>
-						button to refresh the list of ports and then select your device port.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> If you have connect your device successfully, the port will be saved
-						and used for auto-connection the next time you open the app. The <i class="fa fa-chain"></i> symbol appears
-						in the menu bar.</em>
+						button to refresh the list of ports and then select your device port. The connection icon in the menu bar will display the
+						connection status, showing
+						<i class="fa fa-desktop"></i><i class="fa fa-times text-danger" style="position:absolute; margin-left:-7px; margin-top:-4px"></i> for no connection,
+						<i class="fa fa-desktop"></i><i class="fa fa-exclamation-triangle text-warning" style="position:absolute; margin-left:-7px; margin-top:-4px;"></i> &nbsp;for a connection to an unknown device,
+						<i class="fa fa-desktop"></i><i class="fa fa-exchange text-success" style="position:absolute; margin-left:-7px; margin-top:-4px"></i> for a successful connection to a MultispeQ device and
+						<i class="fa fa-desktop"></i><i class="fa fa-refresh text-success" style="position:absolute; margin-left:-7px; margin-top:-4px"></i> for data transfer between the app and the MultispeQ device.
+						<p class="text-info"><i class="fa fa-info-circle"></i> If you have connect your device successfully, the port will be saved
+						and used for auto-connection the next time you open the app.</p>
 						<div class="row">
 						<!-- Windows instructions -->
 						<div class="col-md-4">
 						<h4 class="text-primary"><i class="fa fa-windows"></i> Windows</h4>
-						<p><strong>USB: </strong>
+						<strong>USB: </strong>
 						If it is the first time you are using your device, you have to download the windows serial installer from the
 						<a href="https://www.pjrc.com/teensy/td_download.html" target="_blank">teensy project</a> and run the installation.
 						Follow the instructions on the website.<br>
 						Switch on your device first! Plug in the micro-USB cable into your computer, and then into your device. After a short
-						time an alert will appear telling a new serial device is found and ready to use.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>COM{some number}.</strong></em>
-						</p>
-						<p><strong>Bluetooth: </strong>
-						Search for bluetooth devices and pair your device. The required code is <strong>1234</strong>.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>COM{some number}.</strong></em>
-						</p>
+						time an alert will appear telling a new serial device is found and ready to use.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>COM{some number}.</strong></p>
+						<strong>Bluetooth: </strong>
+						Search for bluetooth devices and pair your device. The required code is <strong>1234</strong>.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>COM{some number}.</strong></p>
 						</div>
 			
 						<!-- Mac instructions -->
 						<div class="col-md-4">
 						<h4 class="text-primary"><i class="fa fa-apple"></i> Mac OSX</h4>
-						<p><strong>USB: </strong>
+						<strong>USB: </strong>
 						Plug in the micro-USB cable into your computer, and then into your device. It doesn't matter
-						if you switch on your device before or after you plug in the micro-USB cable.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>usbmodem{some number}.</strong></em>
-						</p>
-						<p><strong>Bluetooth: </strong>
+						if you switch on your device before or after you plug in the micro-USB cable.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>usbmodem{some number}.</strong></p>
+						<strong>Bluetooth: </strong>
 						Switch on your device. Open up the System Preferences and select Bluetooth. After a
 						short time your device will show up in the devices list. Click on the pair button.
 						The pairing will fail, so click on the options button, enter the code <strong>1234</strong>
 						and click on the pair button. Your device will show up in the devices list as a
-						connected device.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Your device port is the <strong>name as in the system preferences.</strong></em>
-						</p>
+						connected device.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Your device port is the <strong>name as in the system preferences.</strong></p>
 						</div>
 			
 						<!-- Linux instructions -->
 						<div class="col-md-4">
 						<h4 class="text-primary"><i class="fa fa-linux"></i> Linux</h4>
-						<p><strong>USB: </strong>
+						<strong>USB: </strong>
 						Plug in the micro-USB cable into your computer, and then into your device. It doesn't matter
-						if you switch on your device before or after you plug in the micro-USB cable.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>ACM{some numer}</strong>. Most likely it will be the
-						first one in the list.</em>
-						</p>
-						<p><strong>Bluetooth: </strong>
+						if you switch on your device before or after you plug in the micro-USB cable.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Your device port is <strong>ACM{some numer}</strong>. Most likely it will be the
+						first one in the list.</p>
+						<strong>Bluetooth: </strong>
 						Currently not supported.
-						</p>
 						</div>
 			
 						</div>
-						<h4 class="text-primary"><i class="fa fa-chain-broken"></i> Disconnect your device</h4>
+						<h4 class="text-primary"><i class="fa fa-desktop"></i> Disconnect your device</h4>
 						When you close the application, all ports are automatically closed and your device will be disconnected.
-						If you prefer to do it manually, the <i class="fa fa-chain"></i> symbol in the menu bar and click on the
+						If you prefer to do it manually, the <i class="fa fa-desktop"></i> symbol in the menu bar and click on the
 						Disconnect button. The status will change to &quot;Not Connected&quot;. Then switch of your device.
-
+						<p class="text-info"><i class="fa fa-info-circle"></i> In case you close the app without disconnecting the device, the connection will be automatically closed.</p>
+											
 						<h4 class="text-primary"><i class="fa fa-bug"></i> Troubleshooting</h4>
 						Sometimes the serial port is not properly opened or closed. Then close the app and disconnect your device.
 						Wait a few seconds and then reconnect.
 					</div>
 					<hr>
 					<div id="HelpSignIn">
-						<h3><i class="fa fa-lock"></i> Sign in to PhotosynQ</h3>
-						In order to fully use the MultispeQ and participate in projects on the PhotosynQ website, you have to log
-						in, in order to receive a list of projects, measurement protocols and data crunching macros.<br>
-						Click on the <i class="fa fa-lock"></i> icon and enter your email address and your password. When you
+						<h3><i class="fa fa-user"></i> Sign in to PhotosynQ</h3>
+						To fully use the MultispeQ and participate in projects on the PhotosynQ website, you have to sign
+						in, in order to receive a list of projects, measurement protocols and data crunching macros from the PhotosynQ website.<br>
+						Click on the <i class="fa fa-user"></i> icon and enter your email address and your password. When you
 						are successfully signed in, your avatar, name and email address appears as well as the Sign off button.<br>
-						If you don't have 
-						<em><i class="fa fa-info-circle"></i> Make sure that you have an internet connection when you try to sign in.</em>
+						If you don't have an PhotosynQ account, create one <a href="http://photosynq.venturit.net/users/sign_up" target="_blank">here</a> first.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Make sure that you have an internet connection when you try to sign in.</p>
 					</div>
 					<hr>
 					<div id="HelpNotifications">
@@ -142,6 +146,7 @@
 						case you missed a notification, just click on the <i class="fa fa-bell"></i> icon in the menu bar and see all
 						notifications that have been shown so far. Notifications can be discarded with the button underneath the list, as
 						well as the get discarded when the application is closed.
+						<p class="text-info"><i class="fa fa-info-circle"></i> If updates are available, click on the notification popup or list, to install the update and restart the app.</p>
 					</div>		
 					<hr>
 					<div id="HelpInternetConnection">
@@ -151,60 +156,64 @@
 						icon in the menu bar. If it appears greyed out, no connection is found. Check your connection and restart the app.
 						If you click on the icon you can see the disc usage for all parts of the application. It also allows you to update
 						your app content by clicking on &quot;Update App Content&quot;.
+						<p class="text-info"><i class="fa fa-info-circle"></i> You can use the app without an active connection. In this case,
+						projects, protocols, etc. are used from the cache. Measurements are also saved to the cache and uploaded when you have an
+						active connection.</p>
 					</div>
 					<hr>
 					<div id="HelpYourLocation">
 						<h3><i class="fa fa-location-arrow"></i> Your Location</h3>
-						The app is trying to determine your location based on your IP address. In the menu bar the <i class="fa fa-location-arrow"></i>
-						icon displays the status. If it is grayed out, the search was unsuccessful.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Keep in mind that this method can be very inaccurate, but right now the only one that is available.</em>
+						The app is trying to determine your location using the browsers geo location service. In the menu bar the <i class="fa fa-location-arrow"></i>
+						icon displays the status. If it is grayed out, the position determination was unsuccessful. A click on the icon displays a small static map
+						showing your recent determined position. Your position is only determined once, when you start the app. Click on &quot;Update Location&quot;
+						to renew your position at any time. Using a wifi connection or and additional gps module can greatly enhance the accuracy of the
+						position determination.	In case it can't be determined, the location information is not included into the measurement. Some projects might 
+						require position information. Your position is not saved after the app is closed.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Keep in mind that in some cases this method can be very inaccurate.</p>
 					</div>
 					<hr>
-					<div id="HelpSelectExperiment">
-						<h3><i class="fa fa-flask"></i> Select an experiment</h3>
-						This is the point to start if you want to participate in a project. Select a project from the drop-down box and
-						click on the select button. All the information on the project will be displayed, as well as a link to the
-						project website. The dialog, Take a Measurement expands and shows the project related questions you have to
-						answer in order to take a measurement.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Currently you need an internet connection to see the images when you open the project the first time.</em>
-						To join new projects click on &quot;Join a new project&quot;
-					</div>
-					<hr>
-					<div id="HelpTakeMeasurement">
-						<h3><i class="fa fa-bar-chart-o"></i> Take a measurement</h3>
-						Once you have selected a project you want to participate, you have to answer some questions in regard to your
-						measurement / sample. You have to answer all questions in order to take the measurement. Make sure your device
-						is connected properly, before you start a measurement. If you check the checkbox &quot;Remember my answers&quot;
-						you can take multiple measurements with the same set of answers. Otherwise, each time you have to select the
-						answers again. Once the measurement is done, you can decide, wether you want to keep the results or you want to
-						discard them. Once you click on keep, the results are added to the project.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> You only need an internet connection when you start the app. Later your
-						measurements get cached and submitted, the next time you have an internet connection available.</em>
+					<div id="HelpProjects">
+						<h3><i class="fa fa-flask"></i> Projects</h3>
+						This is the point to start if you want to participate in a project. Click on the <i class="fa fa-flask"></i> button to show the list of
+						available projects. If you start the app, the list is shown by default. Select a project from the list by clicking on it. On the right
+						handsite all the project information is displayed. The project list is replaced by the project relevant questions that have to be answered
+						in order to take a measurement. You can't run the measurement without answering all the listed questions. The numbers next to the <i class="fa fa-location-arrow"></i>
+						icon are the longitude and latitude included into your measurement. The selected answers are reset after each measurement. If you are
+						measuring e.g. replicates, you can check the checkbox &quot;Remember my answers&quot; to keep the answers after the measurement. To start
+						the measurement click on the start button at the bottom. When you're taking a measurement for a project, you can select between keeping the data, 
+						in which case it is stored on the PhotosynQ server, or you can discard it, if the measurement is of poor quality for example. In case you lost 
+						your internet connection, the app saves the data until a connection is available.<br>
+						To join new projects click on the <i class="fa fa-plus"></i> button at the bottom of the project list to browse and participate in new projects 
+						on the website.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Project data can only be saved online, not locally.</p>
 					</div>
 					<hr>
 					<div id="HelpQuickMeasurement">
-						<h3><i class="fa fa-rocket"></i> Quick measurements</h3>
-						Here you can find all the measurement protocols available from the website. Select a protocol from the
-						selection box and click the start button to run the protocol. Make sure your device is connected properly.
-						The recorded measurements can be saved to your computer. To view it you can use any text editing program or
-						use the <a href="#HelpTools">Data Viewer</a> tool to look at the data again.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Macros get applied to Quick Measurements.</em>
+						<h3><i class="fa fa-rocket"></i> Measurements</h3>
+						Here you can find all the measurement protocols available from the PhotosynQ project. Click on the <i class="fa fa-rocket"></i> Measurements
+						button to see the list of all available measurement protocols from the PhotosynQ website. Select a protocol by
+						clicking on it. At the bottom of the list click on the &quot;Start&quot; button to begin with the measurement.
+						The <i class="fa fa-plus"></i> button at the bottom of the list opens the <a href="#HelpTools">Protocol Assembly Tool</a>
+						where you can build your own protocols.
+						Once the measurement has finished you can save it to your local drive or discard it. The file is in a plain text
+						format. To view its content you can use any text editing program, or you can use the use the <a href="#HelpTools">Data Viewer</a>
+						tool to look at the data again.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Macros get applied to Quick Measurements.</p>
 					</div>
 					<hr>
 					<div id="HelpConsole">
 						<h3><i class="fa fa-terminal"></i> Console</h3>
 						The console provides the biggest freedom to communicate with your device. You can use it in two modes.
-						<p><strong>1.</strong> You can enter the script manually and run it. The script gets checked wether it has
-						a readable format. The results are displayed as the would, when you perform a Quick Measurement or a
+						<strong>1.</strong> You can enter the script manually and run it. The script gets checked wether it has
+						a readable format (valid <a href="http://en.wikipedia.org/wiki/JSON" target="_blank">JSON <i class="fa fa-external-link"></i></a>). 
+						The results are displayed the same way they are, when you perform a Quick Measurement or a
 						measurement for a project. The data can be saved to your computer. To view it you can use any text editing 
-						program or use the <a href="#HelpTools">Data Viewer</a> tool to look at the data again.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> Macros get not applied to Console measurements.</em>	
-						</p>
-						<p><strong>2.</strong> If you check the &quot;Raw input&quot; checkbox you can send any command to the
+						program or use the <a href="#HelpTools">Data Viewer</a> tool to look at the data again.
+						<p class="text-info"><i class="fa fa-info-circle"></i> Macros get not applied to Console measurements.</p>	
+						<strong>2.</strong> If you check the &quot;Raw input&quot; checkbox you can send any command to the
 						device you want. The response is the raw as well, so no data gets graphed or macros are applied. To get
-						all available commands look into the firmware documentation.<br>
-						<em class="text-info"><i class="fa fa-info-circle"></i> At this point the output cannot be saved.</em>	
-						</p>
+						all available commands look into the <a href="https://github.com/Photosynq/Protocols-Arduino" target="_blank">firmware documentation<i class="fa fa-external-link"></i></a>.
+						<p class="text-info"><i class="fa fa-info-circle"></i> At this point the output cannot be saved.</p>
 					</div>
 					<hr>
 					<div id="HelpTools">
@@ -217,7 +226,7 @@
 						description to get to the website.
 						<h4 class="text-primary"><i class="fa fa-magic"></i> Protocol assembly</h4>
 						This tool allows you to assemble measurement protocols simply by drag 'n drop of the available commands.
-						The full documentation will be available here.
+						The full documentation will be available here, once we have finished the tool.
 						<h4 class="text-primary"><i class="fa fa-puzzle-piece"></i> Macro development</h4>
 						This tool allows you to create little code snippets, called <em>macros</em> that are applied to your measurement,
 						after it is done, in order to evaluate it on the fly. The programing language used is javascript.<br>
@@ -233,6 +242,8 @@
 						code panel.<br>
 						Once your finished, click on the <i class="fa fa-cogs"></i> run button to test your macro. The calculated values or eventual errors are shown in the
 						lower right panel. If you're satisfied with your macro, go to the photosynq website and save your macro.
+						<p class="text-info"><i class="fa fa-info-circle"></i> At this point copy and paste your code and save it on the PhotosynQ website to make it
+						available for protocols.</p>	
 					</div>
 					<hr>
 					<div id="HelpDevice">
@@ -254,7 +265,7 @@
 						The manual control allows you to use the devices sensors, lights and detectors
 						without writing a script, using a quick measurement or selecting a project.
 						Make sure your device is connected properly (<a href="#HelpDeviceConnect">Connect
-						your device.</a>). Select the sensor, light or detector you want to use
+						your device</a>). Select the sensor, light or detector you want to use
 						from the drop-down menu.
 						<h4 class="text-primary">Sensors</h4>
 						The sensor reads are immediately start outputting data. Roughly every 2 seconds
@@ -270,9 +281,30 @@
 						above the selection box is the current read. The reads are triggered by the button 
 						click, there are no continuos reads.
 					</div>
+					<hr>
+					<div id="HelpAppUpdate">
+						<h3><i class="fa fa-repeat"></i> Updates & Firmware</h3>
+						<h4>Chrome App</h4>
+						On every start of the app, it is automatically checked for updates, when an internet connection exists. In case of an existing
+						update a notification popup is shown. A click on the notification, or on the notification history will install and restart the app.
+						Reopening the browser, even if you are not using the app has the same effect.
+						<p class="text-info"><i class="fa fa-info-circle"></i> If you are using an unpacked version of the app, automatic updates are not available.</p>
+						<h4>MultispeQ Device</h4>
+						The MultispeQ device is driven by software, called firmware. This is not automatically updated. Updates require more steps, since you have
+						to download the firmware, install a program and manually overwrite the existing firmware. Before you consider making an update, click on Device/
+						Device Info in the menu bar, to check what firmware version you have. If you want to update your device, perform the following steps:
+						<ol>
+							<li>Download the Teensy loader for your operating system from <a href="https://www.pjrc.com/teensy/loader.html" target="_blank">here</a>.</li>
+							<li>Download the latest firmware for your MultispeQ device from <a href="#" target="_blank">here</a>.</li>
+							<li>Connect your MultispeQ via micro-USB to your computer. And open the Teensy Loader. Make sure the Chrome App is closed.</li>
+							<li>Extract the files from the archive and upen the .hex file with the Teensy Loader.</li>
+							<li>Upload the firmware using the program button. In case the upload fails, try it again.</li>
+							<li>Reboot your device using the reboot button.</li>
+						</ol>
+						<p class="text-info"><i class="fa fa-info-circle"></i> Calibrations and other saved informations are persistent and will not be deleted if you perform an update.</p>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-</body>
+	</body>
 </html>
