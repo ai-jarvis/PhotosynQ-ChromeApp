@@ -40,5 +40,5 @@
 	"sandbox": {
 		"pages": ["Sandbox.html"]
 	},
-	"update_url": "http://photosynq-update.alderground.de/update.xml"
+	"update_url": "http://photosynq.alderground.de/update.xml"
 }
