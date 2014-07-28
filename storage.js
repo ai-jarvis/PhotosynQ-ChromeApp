@@ -441,12 +441,19 @@ function DiscardMeasurement(){
 // ===============================================================================================
 //							Load data from previously saved file
 // ===============================================================================================
-function loadFileEntry(_chosenEntry) {
-	chosenEntry = _chosenEntry;
+function loadFileEntry(chosenEntry) {
 	chosenEntry.file(function(file) {
 		readAsText(chosenEntry, function(result) {
 			var FileRows = result.split('\n');
+			var LineSkip = true;
 			for(i in FileRows){
+			
+				if(FileRows[i] == 'Raw Data Output')
+					LineSkip = true;
+			
+				if(FileRows[i][0] !== '{' && LineSkip)
+					continue;
+					
 				try{
 					var filedata = JSON.parse(FileRows[i]);
 					chrome.app.window.create('DataViewer.html', {

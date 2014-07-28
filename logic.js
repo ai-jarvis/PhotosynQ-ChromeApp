@@ -522,8 +522,6 @@ onload = function() {
 			  WriteMessage('No file selected.','info');
 			  return;
 			}
-			// use local storage to retain access to this file
-			chrome.storage.local.set({'chosenFile': chrome.fileSystem.retainEntry(theEntry)});
 			loadFileEntry(theEntry);
 		  });
 	});
