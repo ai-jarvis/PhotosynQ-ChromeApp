@@ -714,7 +714,7 @@ onload = function() {
 		return (bval < aval) ? 1 : -1;    
 	}
 
-	// Filter Parameter
+	// Filter Parameter / Protocols
 	// =====================================================================
 	jQuery.expr[':'].contains = function(a, i, m) { 
 		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0; 
@@ -729,6 +729,18 @@ onload = function() {
 			$("#parameter_unused li").show();
 		return false;
 	});
+
+	$('#FilterProtocolsSingle, #FilterProtocolsMulti').on('keyup', function(){
+		var id = $(this).parent().next().attr('id');
+		if($(this).val() != ""){
+			$("#"+ id + " a").hide();
+			$("#"+ id + " a:contains('"+$(this).val()+"')").show();
+		}
+		else
+			$("#"+ id + " a").show();
+		return false;
+	});	
+	
 	
 	// Build click / hover events
 	// =====================================================================
