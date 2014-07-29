@@ -756,7 +756,13 @@ onload = function() {
 	var html = '';
 	for(fn in MenuItems){
 		html += '<li class="dropdown">'
-			+ '<a href="#" class="dropdown-toggle" data-toggle="dropdown">' + fn + ' <b class="caret"></b></a>'
+			+ '<a href="#" class="dropdown-toggle" data-toggle="dropdown" '
+			if(fn == 'Device')
+				html += 'title = "Get device information"'
+			else
+				html +=  'title = "Quick access to sensors and lights"'
+			html +=  '>' 
+			+ fn + ' <b class="caret"></b></a>'
 			+ '<ul class="dropdown-menu">'
 			for(btn in MenuItems[fn]){
 				if(MenuItems[fn][btn].type == 'button'){
