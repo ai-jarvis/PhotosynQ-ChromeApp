@@ -852,15 +852,12 @@ onload = function() {
 
 	// Window resize events
 	// =====================================================================
-	var bodyheight =$(window).height()-45
-	$("#MainDisplayContainer").height(bodyheight);
-	$("#parameter_used,#presets,#presets_second").height(bodyheight-400);
-	$("#parameter_unused").height(bodyheight-432);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-45;
 		$("#MainDisplayContainer").height(bodyheight);
-		$("#parameter_used,#presets,#presets_second").height(bodyheight-400);
-		$("#parameter_unused").height(bodyheight-432);
+		$("#parameter_unused,#presets,#presets_second").height(bodyheight-432);
+		$("#parameter_used").height(bodyheight-397);
+		$("#RawProtocol").height(bodyheight-371);
 	});
-
+	$(window).trigger('resize');
 }
