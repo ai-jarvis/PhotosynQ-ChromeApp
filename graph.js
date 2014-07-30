@@ -177,9 +177,6 @@ function plot(data){
 			container += '</div>';
 			container += '</div>';
 
-		
-			MacroArray[protocolID] = macro;
-
 			// Add container
 			$('#PlotsContainer').append(container);
 
@@ -303,8 +300,6 @@ window.addEventListener('message', function(event) {
 						$(v).children('td').attr('colspan','2');
 				});
 				
-				MacroArray[protocolID] = event.data.graph[repeat][protocolID];
-			
 				if(event.data.graph[repeat][protocolID].GraphType == 'line'){
 					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
 						 marker: { enabled: false}
@@ -333,6 +328,7 @@ window.addEventListener('message', function(event) {
 		}
 		
 	}
+	MacroArray = event.data.graph;
 });
 
 // Show alert, when measurement is done

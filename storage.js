@@ -254,65 +254,122 @@ function SaveDataToFile(){
 		  	$('#SaveQuickMeasurementToFile,#SaveConsoleMeasurementToFile').blur();
 			WriteMessage('File saved.','success');
 		  };
+
 		  if(ResultString !== null){
+
+			/* Keys to skip */
+			var skip = ['data_raw','HTML','Macro','GraphType','protocol_id','ConsoleInput']		
+	
+			/* Collect data for tables to display */
 			var readabledata = '';
+			var RawDataHeader = {};
+			var MacroDataHeader = {};
+			var RawDataProtocol = {};
+			var MaxRawDataLen = 0;
 			for(var i in ResultString['sample']){
-				for(var m in ResultString['sample'][i]){
-					readabledata += ResultString['sample'][i][m]['protocol_name']+'\n'
-					readabledata += '--------------------------------------------------------------------------\n';
-					for(var v in ResultString['sample'][i][m]){
-						if(v == 'time'){
-							readabledata += readable_time(parseInt(ResultString['sample'][i][m][v])) +'\n--\n';
-						}
-						readabledata += v+': '+ResultString['sample'][i][m][v]+'\n';
+				for(var v in ResultString['sample'][i]){
+					if(ResultString['sample'][i][v].data_raw !== undefined && ResultString['sample'][i][v].data_raw != ""){
+						if(RawDataHeader[v] === undefined)
+							RawDataHeader[v] = []
+						RawDataHeader[v].push('"#'+(+i+1)+'"');
+						if(RawDataProtocol[v] === undefined)
+							RawDataProtocol[v] = []
+						RawDataProtocol[v].push([i,v]);
+						if(MaxRawDataLen < ResultString['sample'][i][v].data_raw.length)
+							MaxRawDataLen = ResultString['sample'][i][v].data_raw.length
 					}
-					readabledata += '--\n';
-					if(MacroArray[m] !== undefined){
-						for(var v in MacroArray[m]){
-							readabledata += v+': '+MacroArray[m][v]+'\n';
-						}
+					if(i>0)
+						continue;
+					for(var_name in ResultString['sample'][i][v]){
+						if(MacroDataHeader[v] === undefined)
+							MacroDataHeader[v] = []
+						if(MacroDataHeader[v].indexOf(var_name) === -1)
+							MacroDataHeader[v].push(var_name);
 					}
-					readabledata += '\n\n';
+					for(var_name in MacroArray[i][v]){
+						if(MacroDataHeader[v] === undefined)
+							MacroDataHeader[v] = []
+						if(MacroDataHeader[v].indexOf(var_name) === -1)
+							MacroDataHeader[v].push(var_name);
+					}
 				}
 			}
 
-			readabledata += 'Data (tab delimited)\n'
-			readabledata += '--------------------------------------------------------------------------\n';
-			for(var m in ResultString['sample'][0]){
-				for(var v in ResultString['sample'][i][m]){
-					if(v == 'time'){
-							readabledata += 'Date & Time';
-							readabledata += '\ttime [ms]';
-					}
-					else if(v !== 'protocol_name')
-						readabledata += '\t'+v;
+			for(protocol in MacroDataHeader){
+				var protocol_id = ResultString['sample'][0][v].protocol_id || false
+				var protocol_name = 'Unknown'
+				if(protocol_id && _protocols[protocol_id])
+					protocol_name = _protocols[protocol_id].name || 'Unknown'
+				readabledata += 'Data for "'+ protocol_name +'" (tab delimited)\n'
+				readabledata += '--------------------------------------------------------------------------\n';
+				for(key in MacroDataHeader[protocol]){
+					if(skip.indexOf(MacroDataHeader[protocol][key]) !== -1)
+						continue;			
+					readabledata += MacroDataHeader[protocol][key]+'\t';
 				}
+				readabledata += '\n'
+		
+				for(i in ResultString['sample']){
+					for(key in MacroDataHeader[protocol]){
+						if(skip.indexOf(MacroDataHeader[protocol][key]) !== -1)
+							continue;	
+						if(MacroDataHeader[protocol][key] == 'time')
+							readabledata += (parseInt(ResultString['sample'][i][protocol][MacroDataHeader[protocol][key]]) - parseInt(ResultString.time)) + '\t'
+				
+						else if(ResultString['sample'][i][protocol][MacroDataHeader[protocol][key]] !== undefined)
+							readabledata += ResultString['sample'][i][protocol][MacroDataHeader[protocol][key]] + '\t'
+					
+						else if(MacroArray[i][protocol][MacroDataHeader[protocol][key]] !== undefined)
+							readabledata += MacroArray[i][protocol][MacroDataHeader[protocol][key]] + '\t'
+					}
+					readabledata += '\n'
+				}
+				readabledata += '\n'
 			}
 
-			readabledata +='\n'
-			for(var i in ResultString['sample']){
-				for(var m in ResultString['sample'][i]){
-					for(var v in ResultString['sample'][i][m]){
-						if(v == 'time'){
-							readabledata += readable_time(parseInt(ResultString['sample'][i][m][v]));
-							readabledata +='\t'+ (ResultString['sample'][i][m][v] - ResultString.time)
-						}
-						else if(v !== 'protocol_name')
-						readabledata += '\t'+ResultString['sample'][i][m][v];
-					}
-					if(MacroArray[m] !== undefined){
-						for(var v in MacroArray[m]){
-							var macroValue = new String(MacroArray[m][v]);
-							if(macroValue.match(/No macro available/g))
-								readabledata += '\t';
+	
+			/* Insert transposed raw traces */
+			if(MaxRawDataLen > 0){
+	
+				readabledata += 'Raw traces (tab delimited)\n'
+				readabledata += '--------------------------------------------------------------------------\n';
+
+				/* Add protocol names header */
+				for(j in RawDataProtocol){
+					var protocol_id = ResultString['sample'][0][j].protocol_id || false
+					var protocol_name = 'Unknown'
+					if(protocol_id && _protocols[protocol_id])
+						protocol_name = _protocols[protocol_id].name || 'Unknown'
+					readabledata += protocol_name +'\t'
+					for(k=0;k<RawDataHeader[j].length-1;k++)
+						readabledata +='\t';
+				}
+				readabledata +='\n'
+				
+				/* Add data_raw header */
+				for(j in RawDataProtocol)
+					readabledata += RawDataHeader[j].join('\t') + '\t';
+				readabledata +='\n'
+
+				/* Add transposed data_raw */
+				var line = [];
+				var point = ""
+				for(i=0;i<MaxRawDataLen;i++){
+					for(j in RawDataProtocol){
+						for(var k in RawDataProtocol[j]){
+							point = ResultString['sample'][RawDataProtocol[j][k][0]][RawDataProtocol[j][k][1]].data_raw[i];
+							if(point !== undefined)
+								line.push( ResultString['sample'][RawDataProtocol[j][k][0]][RawDataProtocol[j][k][1]].data_raw[i] )
 							else
-								readabledata += '\t'+macroValue;
+								line.push("");
 						}
+						readabledata += line.join('\t') + '\n';
+						line = [];
+						point = "";
 					}
-					readabledata += '\n';
 				}
+				readabledata +='\n'
 			}
-			readabledata += '\n';
 
 			if(ResultString.ConsoleInput !== undefined){
 				readabledata += 'Console Input\n'
@@ -321,11 +378,11 @@ function SaveDataToFile(){
 				readabledata += '\n\n';
 				delete ResultString.ConsoleInput;
 			}
-			
-			readabledata += 'Raw Data Output\n'
+	
+			readabledata += 'Device Output\n'
 			readabledata += '--------------------------------------------------------------------------\n';
 			readabledata += JSON.stringify(ResultString);
-		  	writer.write(new Blob([readabledata], {type: 'text/plain'}));
+			writer.write(new Blob([readabledata], {type: 'text/plain'}));
 		  }
 		  else
 		  	writer.write(new Blob(['Error receiving the data from the instrument.'], {type: 'text/plain'}));
