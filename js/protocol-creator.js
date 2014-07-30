@@ -73,8 +73,12 @@ onload = function() {
 		GenerateAndValidateScript();
 	});
 	
+	var idle;
 	$('#parameter_used').on('input','input, select', function(){
-		GenerateAndValidateScript();
+		clearTimeout(idle);
+		idle = setTimeout(function() {
+			GenerateAndValidateScript();
+		}, 300);
 	});
 	
 	$('#parameter_used').on('change','input[type="radio"]',function(){
@@ -262,8 +266,6 @@ onload = function() {
 			var html = '<li class="list-group-item " title="'+json[param].title+'" id="'+json[param].name+'"';
 				if(json[param].color !== undefined)
 					html += ' style="border-left:6px solid '+ json[param].color+'"';
-				else
-					html += ' style="border-left:6px solid #e1e1e1"';
 				html += '>'				
 				html +=  '<div class="form-group">'
 
@@ -401,7 +403,6 @@ onload = function() {
 	// =====================================================================
 	function GenerateSavedProtocolList(json){
 		$('.saveduserprotocols').remove();
-		console.log(json);
 		for(param_id in json){
 			var html = '<a class="list-group-item saveduserprotocols" '
 			html += 'data-link="user_'+param_id+'" '
@@ -423,21 +424,38 @@ onload = function() {
 		/** 
 		Steps to do:
 		Get measuring pulses
-		Get all measuring lights
+		Get all measuring lights -> meas_light
 		Get measuring light intensities
 		Get their intensities
 		Get actinic lights
 		Build traces
+		
+		get all lights
+		
+		meas_lights
+		act1_lights
+		act2_lights
+		all1_lights
+		all2_lights
+		act_background_light
+
+
+		
+		background
+		
 		**/
 		
 		var series = []
 		var series_environment =[];
+		var series_plotbands = [];
 		if(json.length > 0){
 			protocols_json = json;
 			var time = 0
 			var measurements = 1
 			var measurements_delay = 0
 			
+			
+			/* Extract the number of measurements and the measurement delay */
 			for(prot in protocols_json){
 				if(protocols_json[prot].measurements !== undefined && protocols_json[prot].measurements_delay !== undefined){
 					if(protocols_json[prot].measurements > measurements)
@@ -447,10 +465,14 @@ onload = function() {
 				}
 			}
 			
+			/* Loop through the measurements */
 			for(m=0;m<measurements;m++){
+			
+				/* Loop through the protocols in each measurement */
 				for(prot in protocols_json){
 					json = protocols_json[prot];
 					
+					/* Look for environmental measurements before the spectroscopic measurement */
 					if(json.environmental !== undefined && json.environmental){
 						var env_str = []
 						for(env in json.environmental){
@@ -475,68 +497,98 @@ onload = function() {
 							});
 						}
 					}
-					
+
+					/* Build the spectroscopic measurement */
 					for(i in json.pulses){
+					
+						/* Add plot bands */
+						if(i % 2 && i !== 0)
+						series_plotbands.push({
+							from: time,
+							to: time,
+							color: 'rgba(221, 221, 221, 0.12)'
+						});
 	
+						/* Build actinic light traces */
 						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
 					
-							var act_lights = [];
+							var p_act_lights = [];
 							if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
-								act_lights.push(json.act1_lights[i]);
+								p_act_lights.push(json.act1_lights[i]);
 							if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
-								act_lights.push(json.act2_lights[i]);					
+								p_act_lights.push(json.act2_lights[i]);					
 					
-							for(act_light in act_lights){
-								if(act_lights[act_light] == 0)
+							for(act_light in p_act_lights){
+								if(p_act_lights[act_light] == 0)
 									continue;
-								if(series[act_lights[act_light]] === undefined){
-									series[act_lights[act_light]] ={}
-									series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
-									series[act_lights[act_light]]['type'] =  'scatter'
-									series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
-									series[act_lights[act_light]]['data'] = []								
+								if(series[p_act_lights[act_light]] === undefined){
+									series[p_act_lights[act_light]] ={}
+									series[p_act_lights[act_light]]['name'] =  'Actinic light ('+p_act_lights[act_light]+')'
+									series[p_act_lights[act_light]]['type'] =  'scatter'
+									series[p_act_lights[act_light]]['color'] = light_colors[p_act_lights[act_light]].hex || '#333'
+									series[p_act_lights[act_light]]['data'] = []								
 								}				
-								series[act_lights[act_light]]['data'].push([time,0]);
-								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+								series[p_act_lights[act_light]]['data'].push([time,0]);
+								series[p_act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
 							}
 						}
 
-				
+						/* Build measuring light traces */
 						for(j=0;j< json.pulses[i]; j++){
-
-							if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
+							if(json.meas_lights !== undefined){
 								var lights = json.meas_lights[i];
+								console.log(lights)
 								for(light in lights){
+									var intensity =  0;
 									if(lights[light] == 0)
 										continue;
 									if(series[lights[light]] === undefined){
 										series[lights[light]] ={}
 										series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
 										series[lights[light]]['type'] =  'scatter'
-										series[lights[light]]['color'] = light_colors[lights[light]].hex
+										series[lights[light]]['color'] = light_colors[lights[light]].hex || '#333'
 										series[lights[light]]['data'] = []								
 									}
+									
+									/* Check which light intensity to look for */
+									if(meas_lights.indexOf(lights[light]) !== -1 && json.meas_intensities)
+										intensity = json.meas_intensities[i] || 0
+
+									else if(act_lights.indexOf(lights[light]) !== -1 && json.act_intensities)
+										intensity = json.act_intensities[i] || 0
+
+									else if(cal_lights.indexOf(lights[light]) !== -1 && json.cal_intensities)
+										intensity = json.cal_intensities[i] || 0
+
+
+									/* Add light on/off to trace */
 									series[lights[light]]['data'].push([time,0]);
-									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									series[lights[light]]['data'].push([time,intensity]);
 									time += json.pulsesize;	
-									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									series[lights[light]]['data'].push([time,intensity]);
 									series[lights[light]]['data'].push([time,0]);
 									time += json.pulsedistance;
 								}
 							}
 						}
-
+						
+						/* Build actinic light traces */
 						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
-							for(act_light in act_lights){
-								if(act_lights[act_light] == 0)
+							for(act_light in p_act_lights){
+								if(p_act_lights[act_light] == 0)
 									continue;
-								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
-								series[act_lights[act_light]]['data'].push([time,0]);
+								series[p_act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+								series[p_act_lights[act_light]]['data'].push([time,0]);
 							}
 						}
-
+						
+						if(i % 2 && i !== 0){
+							var lastband = series_plotbands.length - 1
+							series_plotbands[lastband].to = time;
+						}
 					}
 					
+					/* Look for environmental measurements after the spectroscopic measurement */
 					if(json.environmental !== undefined && json.environmental){
 						var env_str = []
 						for(env in json.environmental){
@@ -562,12 +614,15 @@ onload = function() {
 						}
 					}
 					
-					
 				}
+
+				/* add delay time to repeats */
 				time += measurements_delay;
 			}
 		}
 
+
+		/* Adding environmental parameters to the plot */
 		var series_final = [];
 		for(i in series)
 			series_final.push(series[i])
@@ -584,7 +639,9 @@ onload = function() {
 			series['marker']['enabled'] = true;
 			series_final.push(series);
 		}
-			
+		
+		console.log(series_final)
+		// Setup for the Script Graph //
 		$('#SingleScriptGraph').highcharts({
 			chart: {
 				zoomType: 'x',
@@ -611,7 +668,8 @@ onload = function() {
 				title: {
 					text: false
 				},
-				plotLines : series_environment
+				plotLines : series_environment,
+				plotBands: series_plotbands
 			}],
 			yAxis: [{
 				id:"inital",
@@ -803,8 +861,8 @@ onload = function() {
 				'protocol_json': protocol_json[0]
 			}
 			_userprotocols[protocol_id] = protocol_save;
-			GenerateSavedProtocolList(_userprotocols);
-			_event.source.postMessage({'protocol_save':protocol_save}, _event.origin);
+			//GenerateSavedProtocolList(_userprotocols);
+			//_event.source.postMessage({'protocol_save':protocol_save}, _event.origin);
 			$('#saveModal').modal('hide');
 		}
 		catch(e){}

@@ -10,9 +10,9 @@ var light_colors = {
 	15:{color:'orange',hex:'#f0ad4e'},
 	16:{color:'green',hex:'#5cb85c'},
 	11:{color:'red',hex:'#428bca'},
-	12:{color:'infrared',hex:'#e1e1e1'},
-	10:{color:'infrared',hex:'#e1e1e1'},
-	14:{color:'infrared',hex:'#e1e1e1'}
+	12:{color:'infrared',hex:'#dddddd'},
+	10:{color:'infrared',hex:'#dddddd'},
+	14:{color:'infrared',hex:'#dddddd'}
 }
 
 var parameters = [
