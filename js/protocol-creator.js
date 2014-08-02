@@ -3,11 +3,10 @@ onload = function() {
 	// =====================================================================
 	GenerateParameterList(parameters);
 	window.addEventListener('message', function(event) {
-		GeneratePresetList(event.data.db);
-		GenerateSavedProtocolList(event.data.user)
 		_presets = event.data.db;
-		_userprotocols = event.data.user
+		_macros = event.data.macros;
 		_event = event;
+		GeneratePresetList(event.data.db);
 	});
 	GenerateAndValidateScript();
 
@@ -61,6 +60,7 @@ onload = function() {
     		GenerateMultiScriptPlot();
     	}
     });
+    
     $( "#preset_sort" ).disableSelection();
 
 	// JSON building triggers
@@ -92,6 +92,7 @@ onload = function() {
 		$('#parameter_used li').appendTo("#parameter_unused");
 		$('#parameter_unused li .form-group div').hide()
 		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+		$('#SingleProtocolMacro').val('');
 		GenerateAndValidateScript();
 	});
 
@@ -394,8 +395,15 @@ onload = function() {
 			html += 'style="cursor:pointer" '
 			html += 'title="'+json[param_id].description+'">'
 			html += '<i class="fa fa-file-text"></i> '
-			html += json[param_id].name+'</a>'
+			html += json[param_id].name
+			html += '</a>'
 			$('#presets,#presets_second').append(html);
+		}
+		for(i in _macros){
+			html = '<option value="'+_macros[i].id+'" title="'+_macros[i].description+'">'
+			html += _macros[i].name
+			html += '</option>'
+			$('#SingleProtocolMacro').append(html)
 		}
 	}
 
@@ -537,7 +545,6 @@ onload = function() {
 						for(j=0;j< json.pulses[i]; j++){
 							if(json.meas_lights !== undefined){
 								var lights = json.meas_lights[i];
-								console.log(lights)
 								for(light in lights){
 									var intensity =  0;
 									if(lights[light] == 0)
@@ -640,7 +647,6 @@ onload = function() {
 			series_final.push(series);
 		}
 		
-		console.log(series_final)
 		// Setup for the Script Graph //
 		$('#SingleScriptGraph').highcharts({
 			chart: {
@@ -688,6 +694,11 @@ onload = function() {
 				verticalAlign: 'bottom'
 			},
 			plotOptions: {
+				series: {
+					animation: {
+						duration: 250
+					}
+				},
 				scatter:{
 					animation:true,
 					marker: {
@@ -754,11 +765,7 @@ onload = function() {
 		var MultiProtocol = []
 		$('#preset_sort li ').each(function(k,v){
 			var link = $(v).attr('data-link');
-			if(link.match(/user_/g)){
-				MultiProtocol.push(_userprotocols[link.substr(5)].protocol_json)
-			}
-			else
-				MultiProtocol.push(_presets[link].protocol_json)
+			MultiProtocol.push(_presets[link].protocol_json)
 		});
 		$('#RawProtocol').html(JSON.stringify(MultiProtocol, null, 3));
 		GenerateScriptPlot(MultiProtocol);
@@ -805,27 +812,23 @@ onload = function() {
 	$('#presets').on('click', 'a',function(){
 		$('a[href="#parameter_list"]').tab('show');
 		var link = $(this).attr('data-link');
-		if($(this).hasClass('saveduserprotocols'))
-			ImportScriptFromJSON(_userprotocols[link.substr(5)].protocol_json);
-		else
-			ImportScriptFromJSON(_presets[link].protocol_json);
+		ImportScriptFromJSON(_presets[link].protocol_json);
 		$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 		GenerateAndValidateScript();
+		$('#SingleProtocolMacro').val(_presets[link].macro_id);
 	});
 
 	$('#presets').on('hover', 'a',function(){
 		var link = $(this).attr('data-link');
 		$('#presets_info').empty();
-		if($(this).hasClass('saveduserprotocols')){
-			$('#presets_info').append('<legend>'+_userprotocols[link.substr(5)].name+'</legend>');
-			$('#presets_info').append(_userprotocols[link.substr(5)].description);
-			$('#presets_info').append('<p><button value="'+link.substr(5)+'" class="btn btn-danger" id="BtnDeleteUserScript">Delete</button><p>');
-		}else{
-			$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
-			$('#presets_info').append(_presets[link].description);
-		}
+		$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
+		$('#presets_info').append(_presets[link].description);
+		clearTimeout(idle);
+		idle = setTimeout(function() {
+			GenerateScriptPlot([_presets[link].protocol_json]);
+		}, 300);	
 	});	
-	
+
 	$('#ProtocoltoConsoleBtn').on('click', function(){
 		_event.source.postMessage({'protocol_to_console':$('#RawProtocol').text()}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
@@ -836,37 +839,10 @@ onload = function() {
 		chrome.app.window.get('mainwindow').focus();
 	});
 
-	$('#presets_info').on('click', '#BtnDeleteUserScript', function(){
-		var protocol_id = $(this).val();
-		_event.source.postMessage({'protocol_delete':protocol_id}, _event.origin);
-		delete _userprotocols[protocol_id]
-		GenerateSavedProtocolList(_userprotocols);
-		$('#presets_info').empty();
+	$('#parameter_list').on('click', function(){
+		$('#RawProtocol').text('')
+		GenerateMultiScriptPlot();
 	});
-	
-	$('#BtnSaveProtocol').on('click', function(){
-		var protocol_id = -1;
-		for(k in _userprotocols){
-			if(k > protocol_id)
-				protocol_id = k;
-		}
-		protocol_id++;
-		try {
-			var protocol_json = JSON.parse($('#RawProtocol').text());
-			var protocol_save = {
-				'description': $('#DescriptionSaveProtocol').val(),
-				'id': protocol_id,
-				'macro_id': false,
-				'name': $('#NameSaveProtocol').val(),
-				'protocol_json': protocol_json[0]
-			}
-			_userprotocols[protocol_id] = protocol_save;
-			//GenerateSavedProtocolList(_userprotocols);
-			//_event.source.postMessage({'protocol_save':protocol_save}, _event.origin);
-			$('#saveModal').modal('hide');
-		}
-		catch(e){}
-	});	
 	
 	$('body').on('click', '.dismiss-preset',function(){
 		var link = $(this).parent().attr('data-link');
@@ -893,6 +869,17 @@ onload = function() {
 		html += '<i class="fa fa-file-text"></i> '
 		html += $(this).contents(':not(span)').text()
 		html += '<button type="button" class="close dismiss-preset">&times;</button>'
+		html += '<select class="form-control input-sm pull-right" style="margin-top:-5px;margin-right:25px; width:175px">'
+		html += '<option value="" title="No macro is applied to protocol">No Macro</option>'
+		for(i in _macros){
+			html += '<option value="'+_macros[i].id+'" title="'+_macros[i].description+'"'
+			if(_presets[link].macro_id == _macros[i].id)
+				html += ' selected'
+			html += '>'
+			html += _macros[i].name
+			html += '</option>'	
+		}
+		html += '</select>'
 		html += '</li>'
 		$('#preset_sort').append(html)
 		if($('#presets_second a[data-link="'+link+'"] > span').length == 0){
@@ -918,4 +905,70 @@ onload = function() {
 		$("#RawProtocol").height(bodyheight-371);
 	});
 	$(window).trigger('resize');
+
+	// Load Script from file
+	// =====================================================================	
+	$('#ProtocolLoadBtn').on('click', function(e){
+		var accepts = [{
+			mimeTypes: ['text/*'],
+			extensions: ['txt']
+		}];
+		chrome.fileSystem.chooseEntry({type: 'openFile', accepts: accepts}, function(theEntry) {
+			if (!theEntry) {
+				//WriteMessage('No file selected.','info');
+				console.log('No file selected');
+				return;
+			}
+			readAsText(theEntry, function(result) { 
+				try{
+					json = JSON.parse(result);
+					$('#RawProtocol').html(JSON.stringify(json, null, 3));
+					var prot_count = 0;
+					for(i in json)
+						prot_count++;
+				
+					if(prot_count == 1){
+						ImportScriptFromJSON(json[0])
+						GenerateAndValidateScript();
+						GenerateScriptPlot(json);
+						$('a[href="#parameter_list"], a[href="#ConstructionTab"]').tab('show');
+					}
+					if(prot_count > 1){
+						GenerateScriptPlot(json);
+						$('a[href="#AssemblyTab"]').tab('show');
+					}
+				}			
+				catch(e){
+					console.log(e);
+				}
+			});
+		});
+	});
+	
+	// Save Script to file
+	// =====================================================================	
+	$('#ProtocolSaveBtn').on('click', function(e){
+		chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: 'PhotosynQ-Protocol.txt', accepts: [{extensions: ['txt']}] }, function(writableFileEntry) {
+			if(!writableFileEntry)
+				return;
+			writableFileEntry.createWriter(function(writer) {
+			  writer.onerror = errorHandler;
+			  writer.onwriteend = function(e) {
+				WriteMessage('File saved.','success');
+			  };
+			  var ProtocolToSave = $('#RawProtocol').text();
+			  if(ProtocolToSave !== ""){
+			  	try{
+			  		ProtocolToSave = JSON.parse(ProtocolToSave);
+			  		ProtocolToSave = JSON.stringify(ProtocolToSave);
+			  		writer.write(new Blob([ProtocolToSave], {type: 'text/plain'}));
+			  	}
+				catch(e){
+					console.log(e)
+				}
+			  }
+			}, errorHandler);
+		});
+	});
+	
 }

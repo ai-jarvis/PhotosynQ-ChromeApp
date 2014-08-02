@@ -14,6 +14,7 @@
 	<script src="js/math.js"></script>
 	<script src="js/initalvariables.js"></script>
 	<script src="js/protocol-creator.js"></script>
+	<script src="storage.js"></script>
 	<style>
 	body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
 	#ConstructionTab li {min-height:40px;}
@@ -50,24 +51,27 @@
 	<div class="panel panel-success" id="ScriptGraphContainer">
 		<div class="panel-heading">
 			<h4 class="panel-title">
-				<i class="fa fa-terminal"></i> Script
+				<i class="fa fa-terminal"></i> Protocol
 		
 			<div class="btn-group pull-right">
 			  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 				Action <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu" role="menu">
-				<li><a href="#" id="ProtocoltoConsoleBtn"><i class="fa fa-clipboard"></i> Copy to Console</a></li>
 				<li><a href="#" id="ProtocoltoConsoleRunBtn"><i class="fa fa-play"></i> Run</a></li>
-				<!--<li class="divider"></li>
-				<li><a href="#" id="ProtocolSaveBtn" data-toggle="modal" data-target="#saveModal"><i class="fa fa-save"></i> Save</a></li>-->
+				<li class="divider"></li>
+				<li><a href="#" id="ProtocolLoadBtn"><i class="fa fa-folder-open"></i> Open File</a></li>
+				<li><a href="#" id="ProtocolSaveBtn"><i class="fa fa-save"></i> Save File</a></li>
+				<li><a href="#" id="ProtocoltoConsoleBtn"><i class="fa fa-clipboard"></i> Copy to Console</a></li>
+				<li class="divider"></li>
+				<li><a href="#" id="ProtocolSavetoDBBtn" data-toggle="modal" data-target="#saveModal"><i class="fa fa-cloud-upload"></i> Save to PhotosynQ</a></li>
 			  </ul>
 			</div>
 			</h4>
 		</div>
 		<div style="height:220px; width:100%; padding:4px" id="SingleScriptGraph" class="panel-body"></div>
 	</div>
-
+	
 	<div class="tab-content panel panel-default">
 		<div class="tab-pane fade in active" id="ConstructionTab" style="padding:10px">
 			<div class="row">
@@ -98,8 +102,11 @@
 				<div class="col-md-7 col-sm-8">
 						<div class="panel panel-default" style="display:none">
 							<div class="panel-heading">
-								<h3 class="panel-title">Script Parameter 
-									<button class="btn btn-default btn-xs pull-right" id="parameter_clear">clear</button>
+								<h3 class="panel-title">Protocol Parameters
+									<button class="btn btn-default btn-xs pull-right" id="parameter_clear" title="Remove all parameters">clear</button>
+									<select class="form-control input-sm pull-right" style="width:200px;margin-top:-6px; margin-right:10px" id="SingleProtocolMacro">
+										<option value="No macro is applied to your script">No Macro</option>
+									</select>
 								</h3>
 							</div>
 							<div class="img-thumbnail text-muted center-block text-center" style="border-style:dashed; margin:10px 10px 10px 10px">drag &#39;n drop parameter here</div>
@@ -128,7 +135,7 @@
 				</div>
 				<div class="col-md-7 col-sm-6">
 					<ul id="preset_sort" class="list-group" style="min-height:40px; overflow-y:auto;"></ul>
-					<div class="img-thumbnail text-muted center-block text-center" style="margin:200px 10px 10px 10px;border-style:dashed;">click on protocols to add</div>
+					<div class="img-thumbnail text-muted center-block text-center" style="margin:200px 10px 10px 10px;border-style:dashed;">click on protocol to add</div>
 				</div>
 			</div>
 		</div>

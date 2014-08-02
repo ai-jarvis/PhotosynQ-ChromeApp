@@ -34,18 +34,10 @@ function plot(data){
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
 			var protocolname = 'Unknown protocol';
 			if(data[repeat][protocolID].protocol_id !== undefined){
-				if(data[repeat][protocolID].protocol_id.match(/(user_)/g)){
-					try{
-						protocolname = _userprotocols[data[repeat][protocolID].protocol_id].name;
-					}
-					catch(e){}
+				try{
+					protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
 				}
-				else{
-					try{
-						protocolname = _protocols[data[repeat][protocolID].protocol_id].name;
-					}
-					catch(e){}
-				}
+				catch(e){}
 			}
 			
 			// replace protocol names here
