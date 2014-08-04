@@ -30,12 +30,16 @@ onload = function() {
 		lineWrapping: true,
 		lineNumbers: true
 	});
-
+	
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	// Action performed when script is run
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	$('#TestMacroButton').on('click', function(){
 		$(this).blur();
+		if(_json === undefined || _json == ""){
+			toastr.warning('Please load a measurement file first')
+			return;
+		}
 		$('#MacroReturnContent .panel-body').empty();		// Empty MacroReturnContent if macro was tested before
 		var MacroOutHtml = ''								// Define Macro out variable
 		var code = MacroCodeContainer.getValue();
@@ -179,4 +183,21 @@ onload = function() {
 			}
 		}
 	});
+	
+	// Toastr Settings
+	//---------------------------------------------------------------
+	toastr.options = {
+		"closeButton": false,
+		"debug": false,
+		"positionClass": "toast-top-right",
+		"onclick": null,
+		"showDuration": "300",
+		"hideDuration": "1000",
+		"timeOut": "2000",
+		"extendedTimeOut": "1000",
+		"showEasing": "swing",
+		"hideEasing": "linear",
+		"showMethod": "fadeIn",
+		"hideMethod": "fadeOut"
+	}
 }
