@@ -400,7 +400,7 @@ onload = function() {
 			$('#presets,#presets_second').append(html);
 		}
 		for(i in _macros){
-			html = '<option value="'+_macros[i].id+'" title="'+_macros[i].description+'">'
+			html = '<option value="'+_macros[i].id+'" title="'+_macros[i].name+'">'
 			html += _macros[i].name
 			html += '</option>'
 			$('#SingleProtocolMacro').append(html)
@@ -762,7 +762,7 @@ onload = function() {
 	// Visualize multiple protocols
 	// =====================================================================
 	function GenerateMultiScriptPlot(){
-		var MultiProtocol = []
+		var MultiProtocol = [];
 		$('#preset_sort li ').each(function(k,v){
 			var link = $(v).attr('data-link');
 			MultiProtocol.push(_presets[link].protocol_json)
@@ -835,7 +835,18 @@ onload = function() {
 	});
 
 	$('#ProtocoltoConsoleRunBtn').on('click', function(){
-		_event.source.postMessage({'protocol_run':$('#RawProtocol').text()}, _event.origin);
+		var protocol_macro = []
+		if($('#ConstructionTab').parent().hasClass('active'))
+			if($('#SingleProtocolMacro').val() !== ""){
+				protocol_macro.push($('#SingleProtocolMacro').val());
+			}
+		}
+		else if($('#AssemblyTab').parent().hasClass('active')){
+			$('#preset_sort li ').each(function(k,v){
+				protocol_macro.push([$(v).attr('data-link'),$(v).children('select').val()]);
+			});
+		}
+		_event.source.postMessage({'protocol_run':$('#RawProtocol').text(), 'protocol_macro':protocol_macro}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
 
