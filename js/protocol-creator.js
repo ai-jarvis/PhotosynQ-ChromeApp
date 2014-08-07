@@ -106,15 +106,6 @@ onload = function() {
 		$('#ScriptGraphContainer .panel-title button').removeClass('disabled');
 		$('li').removeClass('has-error');
 
-		// Environmental parameter control
-		$('#parameter_used li').each(function(i,k){
-			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
-				if(json['environmental'] === undefined)
-					json['environmental'] = []
-				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
-			}
-		});
-
 		// Pulse parameter control
 		var arrpulseblocks = $('#parameter_used li input[name="pulses"]').val();
 		var pulseblocks = 0;
@@ -145,6 +136,16 @@ onload = function() {
 		
 		// Check and validate all other parameters
 		$('#parameter_used li').each(function(i,k){
+			
+			// Environmental parameter control
+			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
+				if(json['environmental'] === undefined)
+					json['environmental'] = []
+				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
+				return;
+			}
+			
+			// Spectroscopic / Measurement parameter control
 			var datatype = $(k).find( "input, select").attr('data-type');
 			var dataname = $(k).find( "input, select").attr('name');
 			var datainput = $(k).find( "input, select").val();
@@ -836,7 +837,7 @@ onload = function() {
 
 	$('#ProtocoltoConsoleRunBtn').on('click', function(){
 		var protocol_macro = []
-		if($('#ConstructionTab').parent().hasClass('active'))
+		if($('#ConstructionTab').parent().hasClass('active')){
 			if($('#SingleProtocolMacro').val() !== ""){
 				protocol_macro.push($('#SingleProtocolMacro').val());
 			}

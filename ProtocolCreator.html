@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>PhotosynQ Script Constructor</title>
+	<title>PhotosynQ Protocol Constructor</title>
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="css/font-awesome.min.css">
@@ -37,9 +37,9 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="ProtocolAssemblyNavBar">
 		<ul class="nav navbar-nav">
-			<li class="active"><a href="#ConstructionTab" data-toggle="tab"><i class="fa fa-file-text"></i> Single Script Construction</a></li>
-			<li><a href="#AssemblyTab" data-toggle="tab"><i class="fa fa-file-text"></i> Multiple Script Assembly</a></li>
-			<li><a href="#CodeTab" data-toggle="tab"><i class="fa fa-code"></i> Script Code</a></li>
+			<li class="active"><a href="#ConstructionTab" data-toggle="tab" title="Build a single protocol"><i class="fa fa-file-text"></i> Single Protocol Construction</a></li>
+			<li><a href="#AssemblyTab" data-toggle="tab" title="Assemble multiple protocols for a measurement"><i class="fa fa-file-text"></i> Multiple Protocol Assembly</a></li>
+			<li><a href="#CodeTab" data-toggle="tab" title="Protocol code generated"><i class="fa fa-code"></i> Protocol Code</a></li>
 		</ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -54,17 +54,17 @@
 				<i class="fa fa-terminal"></i> Protocol
 		
 			<div class="btn-group pull-right">
-			  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+			  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" title="Run / load / save protocols">
 				Action <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu" role="menu">
-				<li><a href="#" id="ProtocoltoConsoleRunBtn"><i class="fa fa-play"></i> Run</a></li>
+				<li><a href="#" id="ProtocoltoConsoleRunBtn" title="Copy protocol to Console and instantly run it"><i class="fa fa-play"></i> Run</a></li>
 				<li class="divider"></li>
-				<li><a href="#" id="ProtocolLoadBtn"><i class="fa fa-folder-open"></i> Open File</a></li>
-				<li><a href="#" id="ProtocolSaveBtn"><i class="fa fa-save"></i> Save File</a></li>
-				<li><a href="#" id="ProtocoltoConsoleBtn"><i class="fa fa-clipboard"></i> Copy to Console</a></li>
+				<li><a href="#" id="ProtocolLoadBtn" title="Load protocol from file"><i class="fa fa-folder-open"></i> Open File</a></li>
+				<li><a href="#" id="ProtocolSaveBtn" title="Save protocol to file"><i class="fa fa-save"></i> Save File</a></li>
+				<li><a href="#" id="ProtocoltoConsoleBtn" title="Copy protocol to Console in the main window"><i class="fa fa-clipboard"></i> Copy to Console</a></li>
 				<li class="divider"></li>
-				<li><a href="#" id="ProtocolSavetoDBBtn" data-toggle="modal" data-target="#saveModal"><i class="fa fa-cloud-upload"></i> Save to PhotosynQ</a></li>
+				<li><a href="#" id="ProtocolSavetoDBBtn" data-toggle="modal" data-target="#saveModal" title="Upload your protocol to PhotosynQ"><i class="fa fa-cloud-upload"></i> Save to PhotosynQ</a></li>
 			  </ul>
 			</div>
 			</h4>
@@ -77,21 +77,21 @@
 			<div class="row">
 				<div class="col-md-5 col-sm-4">
 					<ul class="nav nav-tabs nav-justified">
-					  <li class="active"><a href="#presets_list" data-toggle="tab"><i class="fa fa-file-text-o"></i> Preset Protocols</a></li>
-					  <li><a href="#parameter_list" data-toggle="tab"><i class="fa fa-wrench"></i> Build Protocol</a></li>
+					  <li class="active"><a href="#presets_list" data-toggle="tab" title="Protocols available from PhotosynQ"><i class="fa fa-file-text-o"></i> Preset Protocols</a></li>
+					  <li><a href="#parameter_list" data-toggle="tab"><i class="fa fa-wrench" title="Build protocol using drag 'n drop"></i> Build Protocol</a></li>
 					</ul>
 					<div class="tab-content">
 						<div class="tab-pane fade in active" id="presets_list">
 							<div class="input-group input-group-sm">
 								<span class="input-group-addon"><i class="fa fa-search"></i></span>
-								<input type="text" class="form-control" id="FilterProtocolsSingle" placeholder="Filter protocols">
+								<input type="text" class="form-control" id="FilterProtocolsSingle" placeholder="Filter protocols" title="Type query to filter protocol list">
 							</div>
 							<div id="presets" class="list-group" style="min-height:40px; overflow-y:auto;"></div>
 						</div>
 						<div class="tab-pane fade" id="parameter_list">
 							<div class="input-group input-group-sm">
 								<span class="input-group-addon"><i class="fa fa-search"></i></span>
-								<input type="text" class="form-control" id="FilterParameterInput" placeholder="Filter parameter">
+								<input type="text" class="form-control" id="FilterParameterInput" placeholder="Filter parameter" title="Type query to filter parameter list">
 							</div>
 							<div class="panel panel-default">
 								<ul id="parameter_unused" class="list-group form-horizontal" style="min-height:40px; overflow-y:auto;"></ul>
