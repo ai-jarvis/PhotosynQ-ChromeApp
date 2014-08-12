@@ -286,15 +286,17 @@ function SaveDataToFile(){
 						if(MacroDataHeader[v].indexOf(var_name) === -1)
 							MacroDataHeader[v].push(var_name);
 					}
-					for(var_name in MacroArray[i][v]){
-						if(MacroDataHeader[v] === undefined)
-							MacroDataHeader[v] = []
-						if(MacroDataHeader[v].indexOf(var_name) === -1)
-							MacroDataHeader[v].push(var_name);
+					if(MacroArray.length > 0){
+						for(var_name in MacroArray[i][v]){
+							if(MacroDataHeader[v] === undefined)
+								MacroDataHeader[v] = []
+							if(MacroDataHeader[v].indexOf(var_name) === -1)
+								MacroDataHeader[v].push(var_name);
+						}
 					}
 				}
 			}
-
+			
 			for(protocol in MacroDataHeader){
 				var protocol_id = ResultString['sample'][0][v].protocol_id || false
 				var protocol_name = 'Unknown'
@@ -326,7 +328,6 @@ function SaveDataToFile(){
 				}
 				readabledata += '\n'
 			}
-
 	
 			/* Insert transposed raw traces */
 			if(MaxRawDataLen > 0){
