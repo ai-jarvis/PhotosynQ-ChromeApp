@@ -137,7 +137,8 @@ var MenuItems = {
 		'icon': 'fa fa-info-circle',
 		'id': 'DeviceInfoBtn',
 		'command': '1007+',
-		'dialog': 'info'
+		'dialog': 'info',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -145,7 +146,8 @@ var MenuItems = {
 		'icon': 'icon-bat2',
 		'id': 'DeviceBattLevelBtn',
 		'command': '1004+',
-		'dialog': 'info'
+		'dialog': 'info',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -153,7 +155,8 @@ var MenuItems = {
 		'icon': 'fa fa-bar-chart-o',
 		'id': 'CalibrationInfoBtn',
 		'command': '1005+',
-		'dialog': 'info'
+		'dialog': 'info',
+		'size':''
 		},
 		{
 		'type': 'spacer'
@@ -164,7 +167,8 @@ var MenuItems = {
 		'icon': 'fa fa-power-off',
 		'id': 'DevicePowerOffBtn',
 		'command': '1001+',
-		'dialog': 'info'
+		'dialog': 'info',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -172,7 +176,8 @@ var MenuItems = {
 		'icon': 'fa fa-lightbulb-o',
 		'id': 'DeviceLightsOffBtn',
 		'command': '1003+',
-		'dialog': 'info'
+		'dialog': 'info',
+		'size':'sm'
 		}
 	],
 	'Manual Control': [
@@ -186,7 +191,8 @@ var MenuItems = {
 		'icon': 'fa fa-lightbulb-o',
 		'id': 'LightBtn',
 		'command': '101+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -194,7 +200,8 @@ var MenuItems = {
 		'icon': 'fa fa-lightbulb-o',
 		'id': 'LightRawBtn',
 		'command': '105+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -202,7 +209,8 @@ var MenuItems = {
 		'icon': 'fa fa-cloud',
 		'id': 'CO2Btn',
 		'command': '102+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -210,14 +218,16 @@ var MenuItems = {
 		'icon': 'fa fa-sun-o',
 		'id': 'TempBtn',
 		'command': '103+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},{
 		'type': 'button',
 		'title': 'Contactless temperature [&deg;C]',
 		'icon': 'fa fa-sun-o',
 		'id': 'CLessTempBtn',
 		'command': '106+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -225,7 +235,8 @@ var MenuItems = {
 		'icon': 'fa fa-tint',
 		'id': 'RelHumBtn',
 		'command': '104+',
-		'dialog': 'close'
+		'dialog': 'close',
+		'size':'sm'
 		},
 		{
 		'type': 'spacer'
@@ -241,23 +252,23 @@ var MenuItems = {
 		'id': 'ManualLights',
 		'command': [
 				{
-				'title': 'Measuring light 1 (main board)',
+				'title': 'Measuring light 15 (main board)',
 				'command': '15+'
 				},
 				{
-				'title': 'Measuring light 2 (main board)',
+				'title': 'Measuring light 16 (main board)',
 				'command': '16+'
 				},
 				{
-				'title': 'Measuring light 3 (add-on board)',
+				'title': 'Measuring light 11 (add-on board)',
 				'command': '11+'
 				},
 				{
-				'title': 'Measuring light 4 (add-on board)',
+				'title': 'Measuring light 12 (add-on board)',
 				'command': '12+'
 				},
 				{
-				'title': 'Actinic light 1 (main board)',
+				'title': 'Actinic light 20 (main board)',
 				'command': '20+'
 				},
 				{
@@ -265,11 +276,11 @@ var MenuItems = {
 				'command': '2+'
 				},
 				{
-				'title': 'Calibrating light 1 (main board)',
+				'title': 'Calibrating light 14 (main board)',
 				'command': '14+'
 				},
 				{
-				'title': 'Calibrating light 2 (add-on board)',
+				'title': 'Calibrating light 10 (add-on board)',
 				'command': '10+'
 				}
 			],
@@ -277,7 +288,8 @@ var MenuItems = {
 		'prompt_help': 'Set light intensity from 0-4095',
 		'button_label': 'On',
 		'button_behavior': 'toggle',
-		'dialog': 'prompt'
+		'dialog': 'prompt',
+		'size':'sm'
 		},
 		{
 		'type': 'button',
@@ -285,18 +297,19 @@ var MenuItems = {
 		'icon': 'fa fa-square',
 		'id': 'ManualDetectors',
 		'command': [{
-			'title': 'Detector 1 (main bord)',
+			'title': 'Detector 34 (main bord)',
 			'command': '34+'
 			},
 			{
-			'title': 'Detector 2 (add on bord)',
+			'title': 'Detector 35 (add on bord)',
 			'command': '35+'
 			}],
 		'prompt_label': 'Detection duration',
 		'prompt_help': 'Set detection duration 5-500 us',
 		'button_label': 'Read',
 		'button_behavior': 'click',
-		'dialog': 'prompt'
+		'dialog': 'prompt',
+		'size':'sm'
 		}
 	]
 }

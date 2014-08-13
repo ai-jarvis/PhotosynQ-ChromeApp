@@ -970,21 +970,26 @@ function MenubarFunction(item,itemid) {
 	var title = MenuItems[item][itemid].title;
 	var dialog = MenuItems[item][itemid].dialog;
 	var command = MenuItems[item][itemid].command;
+	var dialogsize = MenuItems[item][itemid].size;
 
 	$('#ModalDialogLabel').html(title);
 	$('#ModalDialogValue, #ModalDialogMsg, #ModalDialogSparkline,#ModalDialogForm').empty().hide();
-	$('#ModalDialog .modal-dialog').removeClass('modal-sm')
+	$('#ModalDialog .modal-dialog').removeClass('modal-sm modal-lg')
+
+	if(dialogsize == 'sm')
+		$('#ModalDialog .modal-dialog').addClass('modal-sm')
+
+	if(dialogsize == 'lg')
+		$('#ModalDialog .modal-dialog').addClass('modal-lg')
 
 	
 	if(dialog == 'static'){
 		MeasurementType = "MenuBarTest";
-		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 	}
 	
 	
 	if(dialog == 'prompt'){
 
-		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 		html = '<div class="form-group">'
 		html += '<select class="form-control" id="MenuPromtDialogSelect">'
 		for(i in command)
@@ -1051,14 +1056,12 @@ function MenubarFunction(item,itemid) {
 	
 	if(dialog == 'close'){
 		MeasurementType = "MenuBarMeasurement";
-		$('#ModalDialog .modal-dialog').addClass('modal-sm');
 		$('#ModalDialogSparkline').append('<span values="" style="margin-bottom:-20px;"></span>').show();
 	}
 	
 	
 	if(dialog == 'info'){
 		MeasurementType = "MenuBarInfo";
-		$('#ModalDialog .modal-dialog').addClass('modal-sm')
 	}
 	
 
