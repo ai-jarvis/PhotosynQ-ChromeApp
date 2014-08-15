@@ -18,6 +18,10 @@ function GetLocation(){
 			},
 			function(error){
 				WriteMessage(error.message,'danger');
+				_geolocation = false;
+				$('#CurrentLocationDisplayImg').empty();
+				$('#CurrentLocationDisplay').html('<small class="text-danger"><i class="fa fa-location-arrow"></i> Unknown</small>');
+				$('#CurrentLocationIndicator').addClass('text-muted').removeClass('fa-inverse').attr('title', 'Unknown location');
 			},
 			{
 			  enableHighAccuracy: true,
@@ -28,6 +32,10 @@ function GetLocation(){
 	}
 	else{
 		WriteMessage('You need to be online to identify your geo location.','warning');
+		_geolocation = false;
+		$('#CurrentLocationDisplayImg').empty();
+		$('#CurrentLocationDisplay').html('<small class="text-danger"><i class="fa fa-location-arrow"></i> Unknown</small>');
+		$('#CurrentLocationIndicator').addClass('text-muted').removeClass('fa-inverse').attr('title', 'Unknown location');
 	}
 	return false;
 }

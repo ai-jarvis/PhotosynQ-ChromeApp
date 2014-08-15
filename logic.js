@@ -238,7 +238,8 @@ function onCharRead(readInfo) {
 		if(MeasurementType == 'database'){
 			$('#SaveMeasurementToDB').show();
 			ResultString['user_answers'] = _given_answers;
-			ResultString['location'] = [_geolocation.latitude, _geolocation.longitude];
+			if(_geolocation)
+				ResultString['location'] = [_geolocation.latitude, _geolocation.longitude];
 		}
 		
 		if(MeasurementType == 'console' || (MeasurementType == 'quick')){
