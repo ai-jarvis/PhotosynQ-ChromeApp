@@ -37,9 +37,9 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="ProtocolAssemblyNavBar">
 		<ul class="nav navbar-nav">
-			<li class="active"><a href="#ConstructionTab" data-toggle="tab" title="Build a single protocol"><i class="fa fa-file-text"></i> Single Protocol Construction</a></li>
-			<li><a href="#AssemblyTab" data-toggle="tab" title="Assemble multiple protocols for a measurement"><i class="fa fa-file-text"></i> Multiple Protocol Assembly</a></li>
-			<li><a href="#CodeTab" data-toggle="tab" title="Protocol code generated"><i class="fa fa-code"></i> Protocol Code</a></li>
+			<li class="active"><a href="#ConstructionTab" data-toggle="tab" title="Build a single protocol"><i class="fa fa-file-text"></i> Single Protocol</a></li>
+			<li><a href="#AssemblyTab" data-toggle="tab" title="Assemble multiple protocols for a measurement"><i class="fa fa-file-text"></i> Multiple Protocols</a></li>
+			<li><a href="#CodeTab" data-toggle="tab" title="Protocol code generated"><i class="fa fa-code"></i> Code</a></li>
 		</ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -92,6 +92,9 @@
 							<div class="input-group input-group-sm">
 								<span class="input-group-addon"><i class="fa fa-search"></i></span>
 								<input type="text" class="form-control" id="FilterParameterInput" placeholder="Filter parameter" title="Type query to filter parameter list">
+								<div class="input-group-btn">
+									<button type="button" class="btn btn-default" id="BtnToggleAdvancedParameters" value="0" title="Advanced Parameters"><i class="fa fa-graduation-cap"></i></button>
+								</div>
 							</div>
 							<div class="panel panel-default">
 								<ul id="parameter_unused" class="list-group form-horizontal" style="min-height:40px; overflow-y:auto;"></ul>
@@ -104,9 +107,12 @@
 							<div class="panel-heading">
 								<h3 class="panel-title">Protocol Parameters
 									<button class="btn btn-default btn-xs pull-right" id="parameter_clear" title="Remove all parameters">clear</button>
-									<select class="form-control input-sm pull-right" style="width:200px;margin-top:-6px; margin-right:10px" id="SingleProtocolMacro">
-										<option value="" title="No macro is applied to your script">No Macro</option>
-									</select>
+									<div class="input-group pull-right" style="width:200px;margin-top:-6px; margin-right:10px">
+										<div class="input-group-addon"><i class="fa fa-puzzle-piece"></i></div>
+										<select class="form-control input-sm" id="SingleProtocolMacro" style="margin-left:-5px">
+											<option value="" title="No macro is applied to your script">No Macro</option>
+										</select>
+									</div>
 								</h3>
 							</div>
 							<div class="img-thumbnail text-muted center-block text-center" style="border-style:dashed; margin:10px 10px 10px 10px">drag &#39;n drop parameter here</div>

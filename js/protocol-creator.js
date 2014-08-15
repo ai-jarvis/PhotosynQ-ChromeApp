@@ -9,6 +9,13 @@ onload = function() {
 		GeneratePresetList(event.data.db);
 	});
 	GenerateAndValidateScript();
+	
+	
+	$('#parameter_used li label i , #parameter_unused li label i').tooltip({
+		placement:'top',
+		container: 'body'
+	});
+	
 
 	// Collapsable Icon Toggle
 	// =====================================================================  
@@ -36,7 +43,7 @@ onload = function() {
 			$('#parameter_used li .form-group div').show();
 			$('#parameter_used li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
 			$('#parameter_used').removeClass('bg-warning');
-			$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+			//$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 			$("#parameter_unused li").show();
 			$("#FilterParameterInput").val('');
 		}
@@ -49,7 +56,7 @@ onload = function() {
 		stop: function( event, ui ) {
 			$('#parameter_unused li .form-group div').hide();
 			$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12');
-			$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+			//$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
 			$("#parameter_unused li").show();
 			$("#FilterParameterInput").val('');
 		}
@@ -66,10 +73,35 @@ onload = function() {
 	// JSON building triggers
 	// =====================================================================
 	$( "#parameter_unused,#parameter_used" ).on( "sortstop", function( event, ui ) {
-		$('#'+$(this).attr('id')+' li').each(function(i,value){
-			if($(value).find('input, select').attr('data-group') == ui.item.find('input, select').attr('data-group') && $(value).find('input, select').attr('data-group') !== undefined && $(value).find('input, select').attr('data-group') !== "")
-				$(value).appendTo('#'+ui.item.parent().attr('id'));
-		});
+		var group = $(ui.item.context).attr('data-group');
+		var start = $(this).attr('id');
+		if(start == "parameter_unused"){
+			$('#'+start+' li[data-group="'+group+'"]').appendTo('#parameter_used');
+
+			if(group == 'actinic_const,actinic_var')
+				$('#act_background_light_intensity').appendTo('#parameter_used');
+
+			if(group == 'actinic_const' || group == 'actinic_var'){
+				$('#act_background_light').appendTo('#parameter_used');
+				
+				if($('#parameter_used #act_background_light_intensity').length > 0)
+					$('#tcs_to_act').appendTo('#parameter_unused');
+					
+				if($('#parameter_used #tcs_to_act').length > 0)
+					$('#act_background_light_intensity').appendTo('#parameter_unused');
+			}
+		}
+		else{
+			$('#'+start+' li[data-group="'+group+'"]').appendTo('#parameter_unused');
+			
+			if(group == 'actinic_const,actinic_var')
+				$('#act_background_light_intensity,#tcs_to_act').appendTo('#parameter_unused');
+				
+			if(group == 'actinic_const' || group == 'actinic_var'){
+				$('#act_background_light').appendTo('#parameter_unused');
+			}
+			
+		}
 		GenerateAndValidateScript();
 	});
 	
@@ -175,6 +207,19 @@ onload = function() {
 					$(k).addClass('has-error');
 				}
 			}
+			else if(datatype == 'array'){
+				var arr = datainput.split(',');
+				if(arr.length > 0)
+					json[dataname] = [];
+				for(i in arr){
+					var intval = parseInt(arr[i].trim());
+					json[dataname].push(intval);
+					if(isNaN(intval)){
+						validity = false;
+						$(k).addClass('has-error');
+					}
+				}
+			}
 			else if(datatype == 'array_def'){
 				var arr = datainput.split(',');
 				if(arr.length > 0)
@@ -265,15 +310,22 @@ onload = function() {
 	function GenerateParameterList(json){
 		for(param in json){
 
-			var html = '<li class="list-group-item " title="'+json[param].title+'" id="'+json[param].name+'"';
+			var html = '<li class="list-group-item " id="'+json[param].name+'"';
+				if(json[param].group !== '')
+					html +=  'data-group="'+json[param].group+'" '
 				if(json[param].color !== undefined)
 					html += ' style="border-left:6px solid '+ json[param].color+'"';
+				if(json[param].advanced !== undefined && json[param].advanced)
+					html += ' data-advanced="1"';
 				html += '>'				
 				html +=  '<div class="form-group">'
 
 				// Label
 				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">'
 				html +=  json[param].label
+				html +=  ' <i class="fa fa-info-circle text-muted" style="cursor:pointer" data-toggle="tooltip" data-placement="top" title="'
+				html +=  json[param].title
+				html +=  '"></i>'
 				html +=  '</label>'
 				
 				// input
@@ -282,8 +334,6 @@ onload = function() {
 					for(i=0; i< json[param].range.length; i++){
 						html += '<label class="radio-inline">'
 						html +=  '<input type="radio"'
-						if(json[param].group !== '')
-							html +=  'data-group="'+json[param].group+'" '
 						html +=  'name="'+json[param].name+'" '
 						html +=  'data-type="'+json[param].type+'" '
 						html +=  'value="'+json[param].range[i]+'" '
@@ -318,8 +368,6 @@ onload = function() {
 						html +=  '<input type="text" class="form-control"'
 					html +=  'name="'+json[param].name+'" '
 					html +=  'data-type="'+json[param].type+'" '
-					if(json[param].group !== '')
-						html +=  'data-group="'+json[param].group+'" '
 					html +=  'value="'+json[param].value+'" '
 					html +=  'placeholder="'+json[param].input_title+'" '
 					html +=  'title="'+json[param].input_title+'">'
@@ -335,8 +383,6 @@ onload = function() {
 					html += '<select class="form-control"'
 					html +=  'name="'+json[param].name+'" '
 					html +=  'data-type="'+json[param].type+'" '
-					if(json[param].group !== '')
-						html +=  'data-group="'+json[param].group+'" '
 					html += '>'
 
 					for(i=0; i< json[param].range.length; i++){
@@ -365,8 +411,6 @@ onload = function() {
 						html +=  '<input type="text" class="form-control"'
 						html +=  'name="'+json[param].name+'" '
 						html +=  'data-type="'+json[param].type+'" '
-						if(json[param].group !== '')
-							html +=  'data-group="'+json[param].group+'" '
 						html +=  'value="'+json[param].value[i].join(',')+'" '
 						html +=  'placeholder="'+json[param].range+'" '
 						html +=  'title="'+json[param].input_title+'">'
@@ -384,7 +428,7 @@ onload = function() {
 			$('#'+json[param].name+' .form-group div').hide()
 			$('#'+json[param].name+' .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 		}
-		$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+		$('#parameter_unused li[data-advanced="1"]').hide();
 	}
 
 	// Build presets list
@@ -534,7 +578,8 @@ onload = function() {
 									series[p_act_lights[act_light]] ={}
 									series[p_act_lights[act_light]]['name'] =  'Actinic light ('+p_act_lights[act_light]+')'
 									series[p_act_lights[act_light]]['type'] =  'scatter'
-									series[p_act_lights[act_light]]['color'] = light_colors[p_act_lights[act_light]].hex || '#333'
+									if(light_colors[p_act_lights[act_light]] !== undefined)
+										series[p_act_lights[act_light]]['color'] = light_colors[p_act_lights[act_light]].hex || '#333'
 									series[p_act_lights[act_light]]['data'] = []								
 								}				
 								series[p_act_lights[act_light]]['data'].push([time,0]);
@@ -814,7 +859,7 @@ onload = function() {
 		$('a[href="#parameter_list"]').tab('show');
 		var link = $(this).attr('data-link');
 		ImportScriptFromJSON(_presets[link].protocol_json);
-		$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+		//$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 		GenerateAndValidateScript();
 		$('#SingleProtocolMacro').val(_presets[link].macro_id);
 	});
@@ -837,19 +882,34 @@ onload = function() {
 
 	$('#ProtocoltoConsoleRunBtn').on('click', function(){
 		var protocol_macro = []
-		if($('#ConstructionTab').parent().hasClass('active')){
+		if($('a[href="#ConstructionTab"]').parent().hasClass('active')){
 			if($('#SingleProtocolMacro').val() !== ""){
 				protocol_macro.push($('#SingleProtocolMacro').val());
 			}
 		}
-		else if($('#AssemblyTab').parent().hasClass('active')){
+		else if($('a[href="#AssemblyTab"]').parent().hasClass('active')){
+
 			$('#preset_sort li ').each(function(k,v){
-				protocol_macro.push([$(v).attr('data-link'),$(v).children('select').val()]);
+				protocol_macro.push($(v).children('select').val());
 			});
 		}
 		_event.source.postMessage({'protocol_run':$('#RawProtocol').text(), 'protocol_macro':protocol_macro}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
+
+	$('#BtnToggleAdvancedParameters').on('click', function(){
+		if($(this).val() == 0){
+			$('#parameter_unused li[data-advanced="1"]').show();
+			$(this).val(1)
+			$(this).attr('title','Show advanced parameters')
+		}
+		else if($(this).val() == 1){
+			$('#parameter_unused li[data-advanced="1"]').hide();
+			$(this).val(0)
+			$(this).attr('title','Hide advanced parameters')
+		}
+	});
+	
 
 	$('#parameter_list').on('click', function(){
 		$('#RawProtocol').text('')
