@@ -13,7 +13,6 @@ onload = function() {
 	// =====================================================================
 	window.addEventListener('message', function(event) {
 		var filedata = event.data['filedata'];
-		_used_protocols = event.data['used_protocols'];
 		_protocols = event.data['protocols'];
 		_macros = event.data['macros'];
 		$('#FileName,#FileNameMini').append(event.data['file']);

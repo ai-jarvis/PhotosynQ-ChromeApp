@@ -20,8 +20,8 @@ var _experiments = [];
 var _macros = [];
 var _media = {};
 var _given_answers = [];
-var _used_protocols = [];
 var _terminate = false;
+var _consolemacros = false;
 
 // ===============================================================================================
 // 					Logic to read and process incoming data
@@ -194,6 +194,20 @@ function onCharRead(readInfo) {
 		
 			try {
 			  dataReadterm = JSON.parse(dataReadterm);
+			  
+				if(_consolemacros && MeasurementType == 'console'){
+					if(ResultString.sample !== undefined){
+						for(measurementID in ResultString.sample){
+							for(protocolID in ResultString.sample[measurementID]){
+								if(_consolemacros[protocolID] !== undefined){
+									ResultString.sample[measurementID][protocolID]['macro_id'] = _consolemacros[protocolID]
+								}
+							}
+						}
+					}
+					_consolemacros = false;
+				}			  
+			  
 			} catch (e) {
 				WriteMessage('Invalid results received from device.','danger');
 				return;
@@ -247,8 +261,21 @@ function onCharRead(readInfo) {
 			SelectedProject = null;
 		}
 
-		if(MeasurementType == 'console')
+		if(MeasurementType == 'console'){
 			ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
+			if(_consolemacros){
+				if(ResultString.sample !== undefined){
+					for(measurementID in ResultString.sample){
+						for(protocolID in ResultString.sample[measurementID]){
+							if(_consolemacros[protocolID] !== undefined){
+								ResultString.sample[measurementID][protocolID]['macro_id'] = _consolemacros[protocolID]
+							}
+						}
+					}
+				}
+				_consolemacros = false;
+			}
+		}
 
 		$('#PlotsContainer').empty();
 		$('#MeasurementMenu').show();
@@ -880,6 +907,7 @@ onload = function() {
 			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
 			try{
 				var protocol = JSON.parse(event.data.protocol_run.trim());
+				_consolemacros = false;
 				RunMeasurement(protocol,'console');
 			}
 			catch(e){
@@ -1113,9 +1141,7 @@ function DatabaseMeasurement() {
 		return false;
 	}
 	var protocol = [];
-	_used_protocols = [];
 	if(_experiments[SelectedProject].protocols_ids !== undefined){
-		_used_protocols = _experiments[SelectedProject].protocols_ids;
 		for(pIds in _experiments[SelectedProject].protocols_ids){
 			var pID = _experiments[SelectedProject].protocols_ids[pIds];
 			if(_protocols[pID].protocol_json !== undefined){
@@ -1150,8 +1176,6 @@ function QuickMeasurement() {
 		if(_protocols[QuickMeasurementProtocol] !== undefined)
 			protocol.push(_protocols[QuickMeasurementProtocol].protocol_json);
 	}
-	_used_protocols = [];
-	_used_protocols.push(QuickMeasurementProtocol);
 	RunMeasurement(protocol,'quick')
 	return;
 };

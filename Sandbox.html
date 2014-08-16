@@ -24,11 +24,33 @@ window.addEventListener('message', function(event) {
 	for(sampleID in event.data.sandbox.devicedata.sample){
 		for(measurementID in event.data.sandbox.devicedata.sample[sampleID]){
 
-			// Get Protocol_ID from measurement
-			var protocol_id = event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id;
+			// Required variables
+			var protocol_id = false;
+			var macro_name = false;
 			
-			// Get macro name from protocol_id
-			var macro_name = 'macro_'+protocol_lookup[protocol_id].macro_id;
+			// Get Protocol_ID from measurement
+			if(event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id !== undefined)
+				protocol_id = event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id;
+			
+			// If Protocol_ID doesn't exist look for macro_id
+			if(!protocol_id){
+				if(event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id !== undefined){
+					macro_name = 'macro_'+event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id;
+				}
+				else
+					continue;
+			}
+			// If Protocol_id exists look for macro_name
+			else if(protocol_id){
+				macro_name = 'macro_'+protocol_lookup[protocol_id].macro_id;
+				// Overwrite settings if macro_id exists at this point
+				if(event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id !== undefined)
+					macro_name = 'macro_'+event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id;
+			}
+			
+			// If macro_name is still false, continue
+			if(!macro_name)
+				continue;	
 
 			// JSON passed on to the macro
 			var protocol_data = event.data.sandbox.devicedata.sample[sampleID][measurementID];

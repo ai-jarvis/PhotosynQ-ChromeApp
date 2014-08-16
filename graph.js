@@ -72,15 +72,7 @@ function plot(data){
 	postData['macros'] = [];
 	postData['devicedata'] = data;
 	postData['protocols'] = [];
-
-	for(i in _used_protocols){
-		if(_protocols[_used_protocols[i]] === undefined)
-			continue;
-		postData['protocols'][_used_protocols[i]] = {'macro_id': _protocols[_used_protocols[i]].macro_id};
-		if(_protocols[_used_protocols[i]].macro_id !== '' && _macros[_protocols[_used_protocols[i]].macro_id] !== undefined)
-			postData['macros'][_protocols[_used_protocols[i]].macro_id] = _macros[_protocols[_used_protocols[i]].macro_id];
-	}
-
+	
 	MacroArray = [];
 
 	var cal = data;
@@ -91,6 +83,23 @@ function plot(data){
 	for(repeat in data){
 
 		for(protocolID in data[repeat]){
+		
+			// Add macros according to macro_id from console measurement
+			if(data[repeat][protocolID].macro_id !== undefined){
+				if(data[repeat][protocolID].macro_id !== '' && _macros[data[repeat][protocolID].macro_id] !== undefined)
+					postData['macros'][data[repeat][protocolID].macro_id] = _macros[data[repeat][protocolID].macro_id]
+			}
+
+			// Add macros according to macro_id from console measurement
+			if(data[repeat][protocolID].protocol_id !== undefined){
+				if(data[repeat][protocolID].protocol_id != "" && _protocols[data[repeat][protocolID].protocol_id] !== undefined){
+					if(_protocols[data[repeat][protocolID].protocol_id].macro_id !== undefined){
+						postData['protocols'][data[repeat][protocolID].protocol_id] = {'macro_id': _protocols[data[repeat][protocolID].protocol_id].macro_id};
+						if(_macros[_protocols[data[repeat][protocolID].protocol_id].macro_id] !== undefined)
+							postData['macros'][_protocols[data[repeat][protocolID].protocol_id].macro_id] = _macros[_protocols[data[repeat][protocolID].protocol_id].macro_id]
+					}
+				}
+			}
 
 			// initial variables in loop
 			var macro = {'HTML':'<span id="MacroOutput'+repeat+''+protocolID+'">No macro available</span>'};
