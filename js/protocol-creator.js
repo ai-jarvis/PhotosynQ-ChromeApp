@@ -3,14 +3,14 @@ onload = function() {
 	// =====================================================================
 	GenerateParameterList(parameters);
 	window.addEventListener('message', function(event) {
-		GeneratePresetList(event.data.db);
-		GenerateSavedProtocolList(event.data.user)
 		_presets = event.data.db;
-		_userprotocols = event.data.user
+		_macros = event.data.macros;
 		_event = event;
+		GeneratePresetList(event.data.db);
 	});
 	GenerateAndValidateScript();
-
+	
+	
 	// Collapsable Icon Toggle
 	// =====================================================================  
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -37,7 +37,9 @@ onload = function() {
 			$('#parameter_used li .form-group div').show();
 			$('#parameter_used li .control-label').removeClass('col-sm-12').addClass('col-sm-5');
 			$('#parameter_used').removeClass('bg-warning');
-			$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+			//$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+			$("#parameter_unused li").show();
+			$("#FilterParameterInput").val('');
 		}
 	}).disableSelection();
 
@@ -48,7 +50,9 @@ onload = function() {
 		stop: function( event, ui ) {
 			$('#parameter_unused li .form-group div').hide();
 			$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12');
-			$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+			//$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+			$("#parameter_unused li").show();
+			$("#FilterParameterInput").val('');
 		}
 	}).disableSelection();
 	
@@ -57,25 +61,58 @@ onload = function() {
     		GenerateMultiScriptPlot();
     	}
     });
+    
     $( "#preset_sort" ).disableSelection();
 
 	// JSON building triggers
 	// =====================================================================
 	$( "#parameter_unused,#parameter_used" ).on( "sortstop", function( event, ui ) {
-		$('#'+$(this).attr('id')+' li').each(function(i,value){
-			if($(value).find('input, select').attr('data-group') == ui.item.find('input, select').attr('data-group') && $(value).find('input, select').attr('data-group') !== undefined && $(value).find('input, select').attr('data-group') !== "")
-				$(value).appendTo('#'+ui.item.parent().attr('id'));
-		});
+		var group = $(ui.item.context).attr('data-group');
+		var start = $(this).attr('id');
+		if(start == ui.item.context.parentElement.id)
+			return;
+		
+		if(start == "parameter_unused"){
+			$('#'+start+' li[data-group="'+group+'"]').appendTo('#parameter_used');
+
+			if(group == 'actinic_const,actinic_var')
+				$('#act_background_light_intensity').appendTo('#parameter_used');
+
+			if(group == 'actinic_const' || group == 'actinic_var'){
+				$('#act_background_light').appendTo('#parameter_used');
+				
+				if($('#parameter_used #act_background_light_intensity').length > 0)
+					$('#tcs_to_act').appendTo('#parameter_unused');
+					
+				if($('#parameter_used #tcs_to_act').length > 0)
+					$('#act_background_light_intensity').appendTo('#parameter_unused');
+			}
+		}
+		else{
+			$('#'+start+' li[data-group="'+group+'"]').appendTo('#parameter_unused');
+			
+			if(group == 'actinic_const,actinic_var')
+				$('#act_background_light_intensity,#tcs_to_act').appendTo('#parameter_unused');
+				
+			if(group == 'actinic_const' || group == 'actinic_var'){
+				$('#act_background_light').appendTo('#parameter_unused');
+			}
+			
+		}
 		GenerateAndValidateScript();
 	});
 	
+	var idle;
 	$('#parameter_used').on('input','input, select', function(){
-		GenerateAndValidateScript();
+		clearTimeout(idle);
+		idle = setTimeout(function() {
+			GenerateAndValidateScript();
+		}, 300);
 	});
 	
 	$('#parameter_used').on('change','input[type="radio"]',function(){
 		GenerateAndValidateScript();
-	});	
+	});
 
 	// Clear Protocol Fields 
 	// =====================================================================
@@ -84,6 +121,7 @@ onload = function() {
 		$('#parameter_used li').appendTo("#parameter_unused");
 		$('#parameter_unused li .form-group div').hide()
 		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+		$('#SingleProtocolMacro').val('');
 		GenerateAndValidateScript();
 	});
 
@@ -96,15 +134,6 @@ onload = function() {
 		$('#ScriptGraphContainer').removeClass('panel-danger panel-success').addClass('panel-success');
 		$('#ScriptGraphContainer .panel-title button').removeClass('disabled');
 		$('li').removeClass('has-error');
-
-		// Environmental parameter control
-		$('#parameter_used li').each(function(i,k){
-			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
-				if(json['environmental'] === undefined)
-					json['environmental'] = []
-				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
-			}
-		});
 
 		// Pulse parameter control
 		var arrpulseblocks = $('#parameter_used li input[name="pulses"]').val();
@@ -136,6 +165,16 @@ onload = function() {
 		
 		// Check and validate all other parameters
 		$('#parameter_used li').each(function(i,k){
+			
+			// Environmental parameter control
+			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
+				if(json['environmental'] === undefined)
+					json['environmental'] = []
+				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
+				return;
+			}
+			
+			// Spectroscopic / Measurement parameter control
 			var datatype = $(k).find( "input, select").attr('data-type');
 			var dataname = $(k).find( "input, select").attr('name');
 			var datainput = $(k).find( "input, select").val();
@@ -163,6 +202,19 @@ onload = function() {
 				if(typeof json[dataname] !== 'string' || json[dataname].length === 0){
 					validity = false;
 					$(k).addClass('has-error');
+				}
+			}
+			else if(datatype == 'array'){
+				var arr = datainput.split(',');
+				if(arr.length > 0)
+					json[dataname] = [];
+				for(i in arr){
+					var intval = parseInt(arr[i].trim());
+					json[dataname].push(intval);
+					if(isNaN(intval)){
+						validity = false;
+						$(k).addClass('has-error');
+					}
 				}
 			}
 			else if(datatype == 'array_def'){
@@ -229,8 +281,7 @@ onload = function() {
 						}	
 					}
 				});
-				
-				
+
 				if(json[dataname].length === 0 || json[dataname].length != pulseblocks || $(k).find('input').length != pulseblocks){
 					validity = false;
 					$(k).addClass('has-error');
@@ -255,18 +306,23 @@ onload = function() {
 	function GenerateParameterList(json){
 		for(param in json){
 
-			var html = '<li class="list-group-item " title="'+json[param].title+'" id="'+json[param].name+'"';
+			var html = '<li class="list-group-item " id="'+json[param].name+'"';
+				if(json[param].group !== '')
+					html +=  'data-group="'+json[param].group+'" '
 				if(json[param].color !== undefined)
 					html += ' style="border-left:6px solid '+ json[param].color+'"';
-				else
-					html += ' style="border-left:6px solid #e1e1e1"';
+				if(json[param].advanced !== undefined && json[param].advanced)
+					html += ' data-advanced="1"';
 				html += '>'				
 				html +=  '<div class="form-group">'
 
 				// Label
-				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">'
-				html +=  json[param].label
-				html +=  '</label>'
+				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">';
+				html +=  json[param].label;
+				html +=  ' <i class="fa fa-info-circle text-muted" style="cursor:pointer" ';
+				html +=  'data-content="'+ json[param].title + '"';
+				html +=  '></i>';
+				html +=  '</label>';
 				
 				// input
 				if(json[param].input_type == 'radio'){
@@ -274,8 +330,6 @@ onload = function() {
 					for(i=0; i< json[param].range.length; i++){
 						html += '<label class="radio-inline">'
 						html +=  '<input type="radio"'
-						if(json[param].group !== '')
-							html +=  'data-group="'+json[param].group+'" '
 						html +=  'name="'+json[param].name+'" '
 						html +=  'data-type="'+json[param].type+'" '
 						html +=  'value="'+json[param].range[i]+'" '
@@ -310,8 +364,6 @@ onload = function() {
 						html +=  '<input type="text" class="form-control"'
 					html +=  'name="'+json[param].name+'" '
 					html +=  'data-type="'+json[param].type+'" '
-					if(json[param].group !== '')
-						html +=  'data-group="'+json[param].group+'" '
 					html +=  'value="'+json[param].value+'" '
 					html +=  'placeholder="'+json[param].input_title+'" '
 					html +=  'title="'+json[param].input_title+'">'
@@ -327,8 +379,6 @@ onload = function() {
 					html += '<select class="form-control"'
 					html +=  'name="'+json[param].name+'" '
 					html +=  'data-type="'+json[param].type+'" '
-					if(json[param].group !== '')
-						html +=  'data-group="'+json[param].group+'" '
 					html += '>'
 
 					for(i=0; i< json[param].range.length; i++){
@@ -357,8 +407,6 @@ onload = function() {
 						html +=  '<input type="text" class="form-control"'
 						html +=  'name="'+json[param].name+'" '
 						html +=  'data-type="'+json[param].type+'" '
-						if(json[param].group !== '')
-							html +=  'data-group="'+json[param].group+'" '
 						html +=  'value="'+json[param].value[i].join(',')+'" '
 						html +=  'placeholder="'+json[param].range+'" '
 						html +=  'title="'+json[param].input_title+'">'
@@ -376,7 +424,7 @@ onload = function() {
 			$('#'+json[param].name+' .form-group div').hide()
 			$('#'+json[param].name+' .control-label').removeClass('col-sm-5').addClass('col-sm-12')
 		}
-		$('#parameter_unused li').sort(SortParameterList).appendTo('#parameter_unused');
+		$('#parameter_unused li[data-advanced="1"]').hide();
 	}
 
 	// Build presets list
@@ -388,8 +436,15 @@ onload = function() {
 			html += 'style="cursor:pointer" '
 			html += 'title="'+json[param_id].description+'">'
 			html += '<i class="fa fa-file-text"></i> '
-			html += json[param_id].name+'</a>'
+			html += json[param_id].name
+			html += '</a>'
 			$('#presets,#presets_second').append(html);
+		}
+		for(i in _macros){
+			html = '<option value="'+_macros[i].id+'" title="'+_macros[i].name+'">'
+			html += _macros[i].name
+			html += '</option>'
+			$('#SingleProtocolMacro').append(html)
 		}
 	}
 
@@ -397,7 +452,6 @@ onload = function() {
 	// =====================================================================
 	function GenerateSavedProtocolList(json){
 		$('.saveduserprotocols').remove();
-		console.log(json);
 		for(param_id in json){
 			var html = '<a class="list-group-item saveduserprotocols" '
 			html += 'data-link="user_'+param_id+'" '
@@ -419,21 +473,38 @@ onload = function() {
 		/** 
 		Steps to do:
 		Get measuring pulses
-		Get all measuring lights
+		Get all measuring lights -> meas_light
 		Get measuring light intensities
 		Get their intensities
 		Get actinic lights
 		Build traces
+		
+		get all lights
+		
+		meas_lights
+		act1_lights
+		act2_lights
+		all1_lights
+		all2_lights
+		act_background_light
+
+
+		
+		background
+		
 		**/
 		
 		var series = []
 		var series_environment =[];
+		var series_plotbands = [];
 		if(json.length > 0){
 			protocols_json = json;
 			var time = 0
 			var measurements = 1
 			var measurements_delay = 0
 			
+			
+			/* Extract the number of measurements and the measurement delay */
 			for(prot in protocols_json){
 				if(protocols_json[prot].measurements !== undefined && protocols_json[prot].measurements_delay !== undefined){
 					if(protocols_json[prot].measurements > measurements)
@@ -443,10 +514,14 @@ onload = function() {
 				}
 			}
 			
+			/* Loop through the measurements */
 			for(m=0;m<measurements;m++){
+			
+				/* Loop through the protocols in each measurement */
 				for(prot in protocols_json){
 					json = protocols_json[prot];
 					
+					/* Look for environmental measurements before the spectroscopic measurement */
 					if(json.environmental !== undefined && json.environmental){
 						var env_str = []
 						for(env in json.environmental){
@@ -471,68 +546,98 @@ onload = function() {
 							});
 						}
 					}
-					
+
+					/* Build the spectroscopic measurement */
 					for(i in json.pulses){
+					
+						/* Add plot bands */
+						if(i % 2 && i !== 0)
+						series_plotbands.push({
+							from: time,
+							to: time,
+							color: 'rgba(221, 221, 221, 0.12)'
+						});
 	
+						/* Build actinic light traces */
 						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
 					
-							var act_lights = [];
+							var p_act_lights = [];
 							if(json.act1_lights[i] !== undefined && json.act1_lights[i] !== undefined)
-								act_lights.push(json.act1_lights[i]);
+								p_act_lights.push(json.act1_lights[i]);
 							if(json.act2_lights !== undefined && json.act2_lights[i] !== undefined)
-								act_lights.push(json.act2_lights[i]);					
+								p_act_lights.push(json.act2_lights[i]);					
 					
-							for(act_light in act_lights){
-								if(act_lights[act_light] == 0)
+							for(act_light in p_act_lights){
+								if(p_act_lights[act_light] == 0)
 									continue;
-								if(series[act_lights[act_light]] === undefined){
-									series[act_lights[act_light]] ={}
-									series[act_lights[act_light]]['name'] =  'Actinic light ('+act_lights[act_light]+')'
-									series[act_lights[act_light]]['type'] =  'scatter'
-									series[act_lights[act_light]]['color'] = light_colors[act_lights[act_light]].hex
-									series[act_lights[act_light]]['data'] = []								
+								if(series[p_act_lights[act_light]] === undefined){
+									series[p_act_lights[act_light]] ={}
+									series[p_act_lights[act_light]]['name'] =  'Actinic light ('+p_act_lights[act_light]+')'
+									series[p_act_lights[act_light]]['type'] =  'scatter'
+									if(light_colors[p_act_lights[act_light]] !== undefined)
+										series[p_act_lights[act_light]]['color'] = light_colors[p_act_lights[act_light]].hex || '#333'
+									series[p_act_lights[act_light]]['data'] = []								
 								}				
-								series[act_lights[act_light]]['data'].push([time,0]);
-								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+								series[p_act_lights[act_light]]['data'].push([time,0]);
+								series[p_act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
 							}
 						}
 
-				
+						/* Build measuring light traces */
 						for(j=0;j< json.pulses[i]; j++){
-
-							if(json.meas_intensities !== undefined && json.meas_lights !== undefined){
+							if(json.meas_lights !== undefined){
 								var lights = json.meas_lights[i];
 								for(light in lights){
+									var intensity =  0;
 									if(lights[light] == 0)
 										continue;
 									if(series[lights[light]] === undefined){
 										series[lights[light]] ={}
 										series[lights[light]]['name'] =  'Measuring light ('+lights[light]+')'
 										series[lights[light]]['type'] =  'scatter'
-										series[lights[light]]['color'] = light_colors[lights[light]].hex
+										series[lights[light]]['color'] = light_colors[lights[light]].hex || '#333'
 										series[lights[light]]['data'] = []								
 									}
+									
+									/* Check which light intensity to look for */
+									if(meas_lights.indexOf(lights[light]) !== -1 && json.meas_intensities)
+										intensity = json.meas_intensities[i] || 0
+
+									else if(act_lights.indexOf(lights[light]) !== -1 && json.act_intensities)
+										intensity = json.act_intensities[i] || 0
+
+									else if(cal_lights.indexOf(lights[light]) !== -1 && json.cal_intensities)
+										intensity = json.cal_intensities[i] || 0
+
+
+									/* Add light on/off to trace */
 									series[lights[light]]['data'].push([time,0]);
-									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									series[lights[light]]['data'].push([time,intensity]);
 									time += json.pulsesize;	
-									series[lights[light]]['data'].push([time,json.meas_intensities[i]]);
+									series[lights[light]]['data'].push([time,intensity]);
 									series[lights[light]]['data'].push([time,0]);
 									time += json.pulsedistance;
 								}
 							}
 						}
-
+						
+						/* Build actinic light traces */
 						if(json.act_intensities !== undefined && (json.act1_lights !== undefined || json.act2_lights !== undefined)){
-							for(act_light in act_lights){
-								if(act_lights[act_light] == 0)
+							for(act_light in p_act_lights){
+								if(p_act_lights[act_light] == 0)
 									continue;
-								series[act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
-								series[act_lights[act_light]]['data'].push([time,0]);
+								series[p_act_lights[act_light]]['data'].push([time,json.act_intensities[i]]);
+								series[p_act_lights[act_light]]['data'].push([time,0]);
 							}
 						}
-
+						
+						if(i % 2 && i !== 0){
+							var lastband = series_plotbands.length - 1
+							series_plotbands[lastband].to = time;
+						}
 					}
 					
+					/* Look for environmental measurements after the spectroscopic measurement */
 					if(json.environmental !== undefined && json.environmental){
 						var env_str = []
 						for(env in json.environmental){
@@ -558,12 +663,15 @@ onload = function() {
 						}
 					}
 					
-					
 				}
+
+				/* add delay time to repeats */
 				time += measurements_delay;
 			}
 		}
 
+
+		/* Adding environmental parameters to the plot */
 		var series_final = [];
 		for(i in series)
 			series_final.push(series[i])
@@ -580,7 +688,8 @@ onload = function() {
 			series['marker']['enabled'] = true;
 			series_final.push(series);
 		}
-			
+		
+		// Setup for the Script Graph //
 		$('#SingleScriptGraph').highcharts({
 			chart: {
 				zoomType: 'x',
@@ -607,7 +716,8 @@ onload = function() {
 				title: {
 					text: false
 				},
-				plotLines : series_environment
+				plotLines : series_environment,
+				plotBands: series_plotbands
 			}],
 			yAxis: [{
 				id:"inital",
@@ -626,6 +736,11 @@ onload = function() {
 				verticalAlign: 'bottom'
 			},
 			plotOptions: {
+				series: {
+					animation: {
+						duration: 250
+					}
+				},
 				scatter:{
 					animation:true,
 					marker: {
@@ -689,14 +804,10 @@ onload = function() {
 	// Visualize multiple protocols
 	// =====================================================================
 	function GenerateMultiScriptPlot(){
-		var MultiProtocol = []
+		var MultiProtocol = [];
 		$('#preset_sort li ').each(function(k,v){
 			var link = $(v).attr('data-link');
-			if(link.match(/user_/g)){
-				MultiProtocol.push(_userprotocols[link.substr(5)].protocol_json)
-			}
-			else
-				MultiProtocol.push(_presets[link].protocol_json)
+			MultiProtocol.push(_presets[link].protocol_json)
 		});
 		$('#RawProtocol').html(JSON.stringify(MultiProtocol, null, 3));
 		GenerateScriptPlot(MultiProtocol);
@@ -710,73 +821,102 @@ onload = function() {
 		return (bval < aval) ? 1 : -1;    
 	}
 
+	// Filter Parameter / Protocols
+	// =====================================================================
+	jQuery.expr[':'].contains = function(a, i, m) { 
+		return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0; 
+	};
+
+	$('#FilterParameterInput').on('keyup', function(){
+		if($(this).val() != ""){
+			$("#parameter_unused li").hide();
+			$("#parameter_unused li:contains('"+$(this).val()+"')").show();
+		}
+		else
+			$("#parameter_unused li").show();
+		return false;
+	});
+
+	$('#FilterProtocolsSingle, #FilterProtocolsMulti').on('keyup', function(){
+		var id = $(this).parent().next().attr('id');
+		if($(this).val() != ""){
+			$("#"+ id + " a").hide();
+			$("#"+ id + " a:contains('"+$(this).val()+"')").show();
+		}
+		else
+			$("#"+ id + " a").show();
+		return false;
+	});	
+	
+	
 	// Build click / hover events
 	// =====================================================================
 	$('#presets').on('click', 'a',function(){
 		$('a[href="#parameter_list"]').tab('show');
 		var link = $(this).attr('data-link');
-		if($(this).hasClass('saveduserprotocols'))
-			ImportScriptFromJSON(_userprotocols[link.substr(5)].protocol_json);
-		else
-			ImportScriptFromJSON(_presets[link].protocol_json);
-		$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
+		ImportScriptFromJSON(_presets[link].protocol_json);
+		//$('#parameter_used li').sort(SortParameterList).appendTo('#parameter_used');
 		GenerateAndValidateScript();
+		$('#SingleProtocolMacro').val(_presets[link].macro_id);
 	});
 
 	$('#presets').on('hover', 'a',function(){
 		var link = $(this).attr('data-link');
 		$('#presets_info').empty();
-		if($(this).hasClass('saveduserprotocols')){
-			$('#presets_info').append('<legend>'+_userprotocols[link.substr(5)].name+'</legend>');
-			$('#presets_info').append(_userprotocols[link.substr(5)].description);
-			$('#presets_info').append('<p><button value="'+link.substr(5)+'" class="btn btn-danger" id="BtnDeleteUserScript">Delete</button><p>');
-		}else{
-			$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
-			$('#presets_info').append(_presets[link].description);
-		}
+		$('#presets_info').append('<legend>'+_presets[link].name+'</legend>');
+		$('#presets_info').append(_presets[link].description);
+		clearTimeout(idle);
+		idle = setTimeout(function() {
+			GenerateScriptPlot([_presets[link].protocol_json]);
+		}, 300);	
 	});	
-	
+
 	$('#ProtocoltoConsoleBtn').on('click', function(){
 		_event.source.postMessage({'protocol_to_console':$('#RawProtocol').text()}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
 
 	$('#ProtocoltoConsoleRunBtn').on('click', function(){
-		_event.source.postMessage({'protocol_run':$('#RawProtocol').text()}, _event.origin);
+		var protocol_macro = []
+		if($('a[href="#ConstructionTab"]').parent().hasClass('active')){
+			if($('#SingleProtocolMacro').val() !== ""){
+				protocol_macro.push($('#SingleProtocolMacro').val());
+			}
+		}
+		else if($('a[href="#AssemblyTab"]').parent().hasClass('active')){
+
+			$('#preset_sort li ').each(function(k,v){
+				protocol_macro.push($(v).children('select').val());
+			});
+		}
+		_event.source.postMessage({'protocol_run':$('#RawProtocol').text(), 'protocol_macro':protocol_macro}, _event.origin);
 		chrome.app.window.get('mainwindow').focus();
 	});
 
-	$('#presets_info').on('click', '#BtnDeleteUserScript', function(){
-		var protocol_id = $(this).val();
-		_event.source.postMessage({'protocol_delete':protocol_id}, _event.origin);
-		delete _userprotocols[protocol_id]
-		GenerateSavedProtocolList(_userprotocols);
-		$('#presets_info').empty();
+	$('#BtnToggleAdvancedParameters').on('click', function(){
+		if($(this).val() == 0){
+			$('#parameter_unused li[data-advanced="1"]').show();
+			$(this).val(1)
+			$(this).attr('title','Show advanced parameters')
+		}
+		else if($(this).val() == 1){
+			$('#parameter_unused li[data-advanced="1"]').hide();
+			$(this).val(0)
+			$(this).attr('title','Hide advanced parameters')
+		}
 	});
 	
-	$('#BtnSaveProtocol').on('click', function(){
-		var protocol_id = -1;
-		for(k in _userprotocols){
-			if(k > protocol_id)
-				protocol_id = k;
-		}
-		protocol_id++;
-		try {
-			var protocol_json = JSON.parse($('#RawProtocol').text());
-			var protocol_save = {
-				'description': $('#DescriptionSaveProtocol').val(),
-				'id': protocol_id,
-				'macro_id': false,
-				'name': $('#NameSaveProtocol').val(),
-				'protocol_json': protocol_json[0]
-			}
-			_userprotocols[protocol_id] = protocol_save;
-			GenerateSavedProtocolList(_userprotocols);
-			_event.source.postMessage({'protocol_save':protocol_save}, _event.origin);
-			$('#saveModal').modal('hide');
-		}
-		catch(e){}
-	});	
+	$('#parameter_used li label i , #parameter_unused li label i').popover({
+		placement:'top',
+		container: 'body',
+		trigger: 'hover',
+		html: true
+	});
+	
+	$('#parameter_list').on('click', function(){
+		$('#RawProtocol').text('')
+		GenerateMultiScriptPlot();
+	});
 	
 	$('body').on('click', '.dismiss-preset',function(){
 		var link = $(this).parent().attr('data-link');
@@ -803,6 +943,17 @@ onload = function() {
 		html += '<i class="fa fa-file-text"></i> '
 		html += $(this).contents(':not(span)').text()
 		html += '<button type="button" class="close dismiss-preset">&times;</button>'
+		html += '<select class="form-control input-sm pull-right" style="margin-top:-5px;margin-right:25px; width:175px">'
+		html += '<option value="" title="No macro is applied to protocol">No Macro</option>'
+		for(i in _macros){
+			html += '<option value="'+_macros[i].id+'" title="'+_macros[i].description+'"'
+			if(_presets[link].macro_id == _macros[i].id)
+				html += ' selected'
+			html += '>'
+			html += _macros[i].name
+			html += '</option>'	
+		}
+		html += '</select>'
 		html += '</li>'
 		$('#preset_sort').append(html)
 		if($('#presets_second a[data-link="'+link+'"] > span').length == 0){
@@ -817,18 +968,96 @@ onload = function() {
 			$('#preset_sort').next('div').hide();
 		GenerateMultiScriptPlot();
 	});
+	
+
+	$('a[href="#ConstructionTab"]').on('show.bs.tab', function (e) {
+		$('.dismiss-preset').click();
+	});
+
+	$('a[href="#AssemblyTab"]').on('show.bs.tab', function (e) {
+		$('#parameter_used li').appendTo("#parameter_unused");
+		$('#parameter_unused li .form-group div').hide()
+		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+		$('#SingleProtocolMacro').val('');
+		GenerateScriptPlot([{}]);
+		GenerateAndValidateScript();
+	});
+
 
 	// Window resize events
 	// =====================================================================
-	var bodyheight =$(window).height()-52
-	$("#MainDisplayContainer").height(bodyheight);
-	$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
-	$("#RawProtocol,#preset_sort").height(bodyheight-369);
 	$(window).resize(function() {
-		bodyheight = $(window).height()-52;
+		bodyheight = $(window).height()-45;
 		$("#MainDisplayContainer").height(bodyheight);
-		$("#parameter_used,#presets,#parameter_unused,#presets_second").height(bodyheight-400);
-		$("#RawProtocol,#preset_sort").height(bodyheight-369);
+		$("#parameter_unused,#presets,#presets_second").height(bodyheight-432);
+		$("#parameter_used").height(bodyheight-397);
+		$("#RawProtocol").height(bodyheight-371);
 	});
+	$(window).trigger('resize');
 
+	// Load Script from file
+	// =====================================================================	
+	$('#ProtocolLoadBtn').on('click', function(e){
+		var accepts = [{
+			mimeTypes: ['text/*'],
+			extensions: ['txt']
+		}];
+		chrome.fileSystem.chooseEntry({type: 'openFile', accepts: accepts}, function(theEntry) {
+			if (!theEntry) {
+				//WriteMessage('No file selected.','info');
+				console.log('No file selected');
+				return;
+			}
+			readAsText(theEntry, function(result) { 
+				try{
+					json = JSON.parse(result);
+					$('#RawProtocol').html(JSON.stringify(json, null, 3));
+					var prot_count = 0;
+					for(i in json)
+						prot_count++;
+				
+					if(prot_count == 1){
+						ImportScriptFromJSON(json[0])
+						GenerateAndValidateScript();
+						GenerateScriptPlot(json);
+						$('a[href="#parameter_list"], a[href="#ConstructionTab"]').tab('show');
+					}
+					if(prot_count > 1){
+						$('a[href="#CodeTab"]').tab('show');
+						$('#RawProtocol').html(JSON.stringify(json, null, 3));
+						GenerateScriptPlot(json);
+					}
+				}			
+				catch(e){
+					console.log(e);
+				}
+			});
+		});
+	});
+	
+	// Save Script to file
+	// =====================================================================	
+	$('#ProtocolSaveBtn').on('click', function(e){
+		chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: 'PhotosynQ-Protocol.txt', accepts: [{extensions: ['txt']}] }, function(writableFileEntry) {
+			if(!writableFileEntry)
+				return;
+			writableFileEntry.createWriter(function(writer) {
+			  writer.onerror = errorHandler;
+			  writer.onwriteend = function(e) {
+				WriteMessage('File saved.','success');
+			  };
+			  var ProtocolToSave = $('#RawProtocol').text();
+			  if(ProtocolToSave !== ""){
+			  	try{
+			  		ProtocolToSave = JSON.parse(ProtocolToSave);
+			  		ProtocolToSave = JSON.stringify(ProtocolToSave);
+			  		writer.write(new Blob([ProtocolToSave], {type: 'text/plain'}));
+			  	}
+				catch(e){
+					console.log(e)
+				}
+			  }
+			}, errorHandler);
+		});
+	});
 }

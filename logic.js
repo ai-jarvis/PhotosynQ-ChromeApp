@@ -892,7 +892,7 @@ onload = function() {
 			minWidth: 1000
 		}, function (ProtocolWindow){
 			ProtocolWindow.contentWindow.addEventListener('load', function(e) {
-				ProtocolWindow.contentWindow.postMessage({'db':_protocols,'user':_userprotocols}, '*');
+				ProtocolWindow.contentWindow.postMessage({'db':_protocols,'macros':_macros}, '*');
 			});
 		});	
 	}
@@ -907,7 +907,7 @@ onload = function() {
 			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
 			try{
 				var protocol = JSON.parse(event.data.protocol_run.trim());
-				_consolemacros = false;
+				_consolemacros = event.data.protocol_macro;
 				RunMeasurement(protocol,'console');
 			}
 			catch(e){
@@ -916,23 +916,10 @@ onload = function() {
 		}
 		if(event.data.protocol_save !== undefined){
 			try {
-				var userpID = event.data.protocol_save.id
-				_userprotocols[userpID] = event.data.protocol_save;
-				SaveToStorage('cached_userprotocols',_userprotocols, function(){
-					GetProtocolsFromCache();		
-				});
-			}
-			catch(e){
-				WriteMessage('Protocol has format','danger');
-			}
-		}
-		if(event.data.protocol_delete !== undefined){
-			try {
-				var userpID = event.data.protocol_delete
-				delete _userprotocols[userpID]
-				SaveToStorage('cached_userprotocols',_userprotocols, function(){
-					GetProtocolsFromCache();		
-				});
+				//event.data.protocol_save;
+				//if(DatabaseAddEditProtocol(token,email,protocol)){
+				//	GetProtocolsFromDB(token,email)
+				//}
 			}
 			catch(e){
 				WriteMessage('Protocol has format','danger');
