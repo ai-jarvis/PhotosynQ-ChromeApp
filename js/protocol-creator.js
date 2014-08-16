@@ -1023,8 +1023,9 @@ onload = function() {
 						$('a[href="#parameter_list"], a[href="#ConstructionTab"]').tab('show');
 					}
 					if(prot_count > 1){
+						$('a[href="#CodeTab"]').tab('show');
+						$('#RawProtocol').html(JSON.stringify(json, null, 3));
 						GenerateScriptPlot(json);
-						$('a[href="#AssemblyTab"]').tab('show');
 					}
 				}			
 				catch(e){
