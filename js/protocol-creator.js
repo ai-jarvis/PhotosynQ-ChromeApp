@@ -968,6 +968,21 @@ onload = function() {
 			$('#preset_sort').next('div').hide();
 		GenerateMultiScriptPlot();
 	});
+	
+
+	$('a[href="#ConstructionTab"]').on('show.bs.tab', function (e) {
+		$('.dismiss-preset').click();
+	});
+
+	$('a[href="#AssemblyTab"]').on('show.bs.tab', function (e) {
+		$('#parameter_used li').appendTo("#parameter_unused");
+		$('#parameter_unused li .form-group div').hide()
+		$('#parameter_unused li .control-label').removeClass('col-sm-5').addClass('col-sm-12')
+		$('#SingleProtocolMacro').val('');
+		GenerateScriptPlot([{}]);
+		GenerateAndValidateScript();
+	});
+
 
 	// Window resize events
 	// =====================================================================

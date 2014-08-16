@@ -695,7 +695,9 @@ onload = function() {
 		}
 		if(event.data.protocol_run !== undefined){
 			$('#ConsoleProtocolContent').val(event.data.protocol_run);
-			ConsoleMeasurement();
+			console.log(event.data.protocol_macro)
+
+	//		ConsoleMeasurement();
 		}
 		if(event.data.protocol_save !== undefined){
 			try {
