@@ -19,8 +19,8 @@ var light_colors = {
 var parameters = [
 	{
 	'name':'light_intensity',
-	'label':'Light intensity [&mu;mol s<sup>-1</sup> m<sup>2</sup>]',
-	'title':'Measure current light intensity in PAR',
+	'label':'Light intensity [&micro;E s<sup>-1</sup> m<sup>2</sup>]',
+	'title':'Measure current light intensity in PAR. Range from 0 to &micro;E s<sup>-1</sup> m<sup>2</sup>. Accuracy: ±',
 	'type':'int',
 	'group':'',
 	'range': [0,1],
@@ -33,7 +33,7 @@ var parameters = [
 	{
 	'name':'relative_humidity',
 	'label':'Relative Humidity [%]',
-	'title':'Measure current relative humidity in %',
+	'title':'Measure current relative humidity in percent. Range: 5 to 95 %. Accuracy: ±2 %.',
 	'type':'int',
 	'group':'',
 	'range': [0,1],
@@ -45,8 +45,8 @@ var parameters = [
 	},
 	{
 	'name':'temperature',
-	'label':'Ambient Temperature [&deg;C]',
-	'title':'Measure current temperature in degrees Celsius',
+	'label':'Ambient Temperature in [&deg;C]',
+	'title':'Measure current ambient temperature in degrees Celsius. Range: -30 to 90 °C. Accuracy: ±1 °C.',
 	'type':'int',
 	'group':'',
 	'range': [0,1],
@@ -59,7 +59,7 @@ var parameters = [
 	{
 	'name':'co2',
 	'label':'CO<sub>2</sub> [ppm]',
-	'title':'Measure Carbon-dioxide concentration in parts per million',
+	'title':'Measure Carbon-dioxide concentration in parts per million. Range: 400 to 2000 ppm. Accuracy: ±70 ppm ± 3% of reading.',
 	'type':'int',
 	'group':'',
 	'range': [0,1],
@@ -86,7 +86,7 @@ var parameters = [
 	{	
 	'name':'pulsesize',
 	'label':'Duration of measuring pulses',
-	'title':'Duration of measuring pulses in us',
+	'title':'Duration of measuring pulses in &micro;s. Range: 5-100 &micro;s',
 	'type':'int',
 	'group':'main',
 	'color':'#5cb85c',
@@ -101,7 +101,7 @@ var parameters = [
 	{	
 	'name':'pulsedistance',
 	'label':'Time between measuring pulses',
-	'title':'Time between measuring pulses in us',
+	'title':'Time between measuring pulses in &micro;s. Range: 1000-10000000 &micro;s',
 	'type':'int',
 	'group':'main',
 	'color':'#5cb85c',
@@ -116,7 +116,7 @@ var parameters = [
 	{	
 	'name':'pulses',
 	'label':'Pulse sets',
-	'title':'Pulse sets, and number of pulses in each set',
+	'title':'Pulse sets, and number of pulses in each set. Range: 0-5000',
 	'type':'array',
 	'group':'main',
 	'color':'#3c763d',
@@ -131,7 +131,7 @@ var parameters = [
 	{	
 	'name':'meas_lights',
 	'label':'Pulsed lights',
-	'title':'Pin number for pulsed lights',
+	'title':'Pin number for pulsed lights. Pins: '+all_lights.join(', '),
 	'type':'arrayarray_def',
 	'group':'main',
 	'color':'#5cb85c',
@@ -205,7 +205,7 @@ var parameters = [
 	{	
 	'name':'act1_lights',
 	'label':'Non-pulsed set of lights #1',
-	'title':'Pins for non-pulsed lights #1',
+	'title':'Pins for non-pulsed lights #1. Pins: '+meas_act_lights.join(', '),
 	'type':'array_def',
 	'group':'',
 	'range_type':'int_list',
@@ -219,7 +219,7 @@ var parameters = [
 	{	
 	'name':'act2_lights',
 	'label':'Non-pulsed set of lights #2',
-	'title':'Pins for non-pulsed lights #2',
+	'title':'Pins for non-pulsed lights #2. Pins: '+meas_act_lights.join(', '),
 	'type':'array_def',
 	'group':'',
 	'range_type':'int_list',
@@ -233,7 +233,7 @@ var parameters = [
 	{	
 	'name':'alt1_lights',
 	'label':'Non-pulsed set of lights #3',
-	'title':'Pins for non-pulsed lights #3',
+	'title':'Pins for non-pulsed lights #3. Pins: '+meas_act_lights.join(', '),
 	'type':'array_def',
 	'group':'',
 	'range_type':'int_list',
@@ -247,7 +247,7 @@ var parameters = [
 	{	
 	'name':'alt2_lights',
 	'label':'Non-pulsed set of lights #4',
-	'title':'Pins for non-pulsed lights #4',
+	'title':'Pins for non-pulsed lights #4. Pins: '+meas_act_lights.join(', '),
 	'type':'array_def',
 	'group':'',
 	'range_type':'int_list',
@@ -277,7 +277,7 @@ var parameters = [
 	{
 	'name':'act_background_light',
 	'label':'Background light',
-	'title':'Background light pin (stays on between protocols and measurements)',
+	'title':'Background light pin (stays on between protocols and measurements). Pins: '+act_lights.join(', '),
 	'type':'int',
 	'group':'actinic_const,actinic_var',
 	'color':'#f0ad4e',
@@ -308,7 +308,7 @@ var parameters = [
 	{	
 	'name':'measurements',
 	'label':'Measurement repeats',
-	'title':'Number of times to repeat entire measurement',
+	'title':'Number of times to repeat entire measurement. Range: 0-100000 repeats.',
 	'type':'int',
 	'group':'measurements',
 	'color':'#428bca',
@@ -323,7 +323,7 @@ var parameters = [
 	{	
 	'name':'measurements_delay',
 	'label':'Measurement delay',
-	'title':'Delay between measurements in seconds',
+	'title':'Delay between measurements in seconds. Range between 0-100000 seconds.',
 	'type':'float',
 	'group':'measurements',
 	'color':'#428bca',
@@ -338,7 +338,7 @@ var parameters = [
 	{	
 	'name':'protocols',
 	'label':'Protocol repeats',
-	'title':'Number of times to repeat protocol',
+	'title':'Number of times to repeat protocol. Range: 0-100000 repeats.',
 	'type':'int',
 	'group':'protocol',
 	'color':'#2d6ca2',
@@ -353,7 +353,7 @@ var parameters = [
 	{	
 	'name':'protocols_delay',
 	'label':'Protocol delay',
-	'title':'Delay between protocols in seconds',
+	'title':'Delay between protocols in seconds. Range: 0-100000 seconds.',
 	'type':'int',
 	'group':'protocol',
 	'color':'#2d6ca2',
@@ -368,7 +368,7 @@ var parameters = [
 	{	
 	'name':'averages',
 	'label':'Protocol internal averages',
-	'title':'Number of times to repeat a protocol to produce a single averaged protocol output',
+	'title':'Number of times to repeat a protocol to produce a single averaged protocol output. Range: 0-30 averages.',
 	'type':'int',
 	'group':'averages',
 	'color':'#5bc0de',
@@ -383,7 +383,7 @@ var parameters = [
 	{	
 	'name':'averages_delay',
 	'label':'Delay between protocol internal averages',
-	'title':'Delay between Protocol internal averages in seconds',
+	'title':'Delay between Protocol internal averages in seconds. Range: 0-100000 seconds.',
 	'type':'float',
 	'group':'averages',
 	'color':'#5bc0de',
@@ -399,7 +399,7 @@ var parameters = [
 	{	
 	'name':'analog_averages',
 	'label':'Internal averages by detector',
-	'title':'Number of times detector internally averages (keep to 1)',
+	'title':'Number of times detector internally averages (keep to 1). Range: 0-30 averages.',
 	'type':'int',
 	'group':'admin',
 	'range_type':'int_range',
@@ -530,7 +530,7 @@ var parameters = [
 	{	
 	'name':'get_ir_baseline',
 	'label':'Infrared offset',
-	'title':'Include infrared offset slope and y-intercept saved on device for a specific pin',
+	'title':'Include infrared offset slope and y-intercept saved on device for a specific pin. Pins: '+all_pins.join(', '),
 	'type':'array',
 	'group':'',
 	'range':all_pins,
@@ -556,7 +556,7 @@ var parameters = [
 	{	
 	'name':'get_lights_cal',
 	'label':'PAR conversion factor for light',
-	'title':'Include PAR conversion factor saved on device for a specific pin',
+	'title':'Include PAR conversion factor saved on device for a specific pin. Pins: '+all_pins.join(', '),
 	'type':'array',
 	'group':'',
 	'range':all_pins,
@@ -569,7 +569,7 @@ var parameters = [
 	{	
 	'name':'get_blank_cal',
 	'label':'Blank for transmittance',
-	'title':'Include blank detector value saved on device for a specific pin',
+	'title':'Include blank detector value saved on device for a specific pin. Pins: '+all_pins.join(', '),
 	'type':'array',
 	'group':'',
 	'range':all_pins,
@@ -582,7 +582,7 @@ var parameters = [
 	{	
 	'name':'get_other_cal',
 	'label':'User saved calibration values',
-	'title':'Include user defined calibration value saved on device for a specific pin',
+	'title':'Include user defined calibration value saved on device for a specific pin. Range: '+all_pins.join(', '),
 	'type':'array',
 	'group':'',
 	'range':all_pins,

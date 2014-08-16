@@ -11,12 +11,6 @@ onload = function() {
 	GenerateAndValidateScript();
 	
 	
-	$('#parameter_used li label i , #parameter_unused li label i').tooltip({
-		placement:'top',
-		container: 'body'
-	});
-	
-
 	// Collapsable Icon Toggle
 	// =====================================================================  
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -75,6 +69,9 @@ onload = function() {
 	$( "#parameter_unused,#parameter_used" ).on( "sortstop", function( event, ui ) {
 		var group = $(ui.item.context).attr('data-group');
 		var start = $(this).attr('id');
+		if(start == ui.item.context.parentElement.id)
+			return;
+		
 		if(start == "parameter_unused"){
 			$('#'+start+' li[data-group="'+group+'"]').appendTo('#parameter_used');
 
@@ -115,7 +112,7 @@ onload = function() {
 	
 	$('#parameter_used').on('change','input[type="radio"]',function(){
 		GenerateAndValidateScript();
-	});	
+	});
 
 	// Clear Protocol Fields 
 	// =====================================================================
@@ -284,8 +281,7 @@ onload = function() {
 						}	
 					}
 				});
-				
-				
+
 				if(json[dataname].length === 0 || json[dataname].length != pulseblocks || $(k).find('input').length != pulseblocks){
 					validity = false;
 					$(k).addClass('has-error');
@@ -321,12 +317,12 @@ onload = function() {
 				html +=  '<div class="form-group">'
 
 				// Label
-				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">'
-				html +=  json[param].label
-				html +=  ' <i class="fa fa-info-circle text-muted" style="cursor:pointer" data-toggle="tooltip" data-placement="top" title="'
-				html +=  json[param].title
-				html +=  '"></i>'
-				html +=  '</label>'
+				html +=  '<label class="col-sm-5 control-label" style="font-weight:normal">';
+				html +=  json[param].label;
+				html +=  ' <i class="fa fa-info-circle text-muted" style="cursor:pointer" ';
+				html +=  'data-content="'+ json[param].title + '"';
+				html +=  '></i>';
+				html +=  '</label>';
 				
 				// input
 				if(json[param].input_type == 'radio'){
@@ -910,7 +906,13 @@ onload = function() {
 		}
 	});
 	
-
+	$('#parameter_used li label i , #parameter_unused li label i').popover({
+		placement:'top',
+		container: 'body',
+		trigger: 'hover',
+		html: true
+	});
+	
 	$('#parameter_list').on('click', function(){
 		$('#RawProtocol').text('')
 		GenerateMultiScriptPlot();
@@ -1042,5 +1044,4 @@ onload = function() {
 			}, errorHandler);
 		});
 	});
-	
 }
