@@ -449,7 +449,7 @@ function plottransient(data){
 	if(TransientChart.series.length === 0){
 		TransientChart.get('inital').remove();
 		for(evkey in jsondata){
-			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2'){
+			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
 				var yAxis = { // Secondary yAxis
 					id: evkey,
 					title: {
@@ -476,7 +476,7 @@ function plottransient(data){
 			lookupSeries[TransientChart.series[i].name] = parseInt(i);
 			
 		for(evkey in jsondata){
-			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2'){
+			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
 				if(lookupSeries[evkey] !== undefined && jsondata[evkey] !== undefined)
 					TransientChart.series[lookupSeries[evkey]].addPoint([(jsondata['time']-initalTime),jsondata[evkey]],false);
 			}
@@ -604,7 +604,7 @@ function plottransientFast(data){
 
 			if(TransientFastPlotOptions.series.length === 0){
 				for(evkey in jsondata){
-					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2'){
+					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
 						var yAxis = { // Secondary yAxis
 							id: evkey,
 							title: {
@@ -631,7 +631,7 @@ function plottransientFast(data){
 					lookupSeries[TransientFastPlotOptions.series[i].name] = parseInt(i);
 			
 				for(evkey in jsondata){
-					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2'){
+					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
 						if(lookupSeries[evkey] !== undefined && jsondata[evkey] !== undefined)
 							TransientFastPlotOptions.series[lookupSeries[evkey]].data.push([(jsondata['time']-iniTime),jsondata[evkey]]);
 					}

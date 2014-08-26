@@ -494,6 +494,15 @@ onload = function() {
 		
 		**/
 		
+		// Total pulses
+		var pulses = 0
+		for(i in json){
+			pulses += MathMEAN(json[i].pulses);
+		}
+		
+		if(pulses > 10000 || isNaN(pulses))
+			return false;
+			
 		var series = []
 		var series_environment =[];
 		var series_plotbands = [];
