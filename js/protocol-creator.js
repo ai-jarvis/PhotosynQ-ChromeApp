@@ -500,7 +500,7 @@ onload = function() {
 			pulses += MathMEAN(json[i].pulses);
 		}
 		
-		if(pulses > 10000 || isNaN(pulses))
+		if(pulses > 10000)
 			return false;
 			
 		var series = []

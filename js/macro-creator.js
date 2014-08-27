@@ -45,16 +45,18 @@ onload = function() {
 		var code = MacroCodeContainer.getValue();
 		var protocol = $('#ProtocolToTest').val();
 		if(_json.sample[0][protocol].protocol_id !== undefined)
-			_json.sample[0][protocol].protocol_id = 0;
+			_json.sample[0][protocol].protocol_id = 1;
 		else
-			_json.sample[0][protocol]['protocol_id'] = 0;
+			_json.sample[0][protocol]['protocol_id'] = 1;
 		
 		var postData = {}
 		postData['macros'] = {}
 		postData['protocols'] = {};
-		postData['macros'][0] = {'id':0,'javascript_code':code,'name':'Test Macro','slug':'test_macro'};
+		postData['macros'][1] = {'id':1,'javascript_code':code,'name':'Test Macro','slug':'test_macro'};
 		postData['devicedata'] = {'sample':[[_json.sample[0][protocol]]]};
-		postData['protocols'][0] = {'macro_id':0};
+		postData['protocols'][1] = {'macro_id':1};
+		
+		console.log(postData)
 		
 		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
 		return false;
@@ -165,6 +167,11 @@ onload = function() {
 			if(event.data.graph.error !== undefined){
 				$('#MacroReturnContent .panel-body').html('<strong>Error:</strong> '+event.data.graph.error);	// Add error message
 				$('#MacroReturnContent').removeClass('panel-default').addClass('panel-danger');	// Change panel color to red
+			}
+			if($.isEmptyObject(event.data.graph)){
+				$('#MacroReturnContent .panel-body').html('<strong>Nothing returned</strong> ');	// Add error message
+				$('#MacroReturnContent').removeClass('panel-default').addClass('panel-danger');	// Change panel color to red
+				return;
 			}
 			var MacroOut = event.data.graph[0][0];
 			var MacroOutHtml = '';
