@@ -74,8 +74,10 @@ function plot(data){
 	postData['protocols'] = [];
 	
 	MacroArray = [];
-
+	
 	var cal = data;
+	var containercount = 0;
+	
 	data = data['sample'];
 
 	// Loop through array from data.js
@@ -83,7 +85,9 @@ function plot(data){
 	for(repeat in data){
 
 		for(protocolID in data[repeat]){
-		
+			
+			containercount++;	
+				
 			// Add macros according to macro_id from console measurement
 			if(data[repeat][protocolID].macro_id !== undefined){
 				if(data[repeat][protocolID].macro_id !== '' && _macros[data[repeat][protocolID].macro_id] !== undefined)
@@ -240,6 +244,11 @@ function plot(data){
 		}
 	}
 
+	if(containercount == 1){
+		$('#PlotsContainer > div').removeClass().addClass('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+		$(window).resize();
+	}
+
 	// Send data to sandbox or clean up no macro message
 	// ===============================================================================================
 	if( postData['protocols'].length > 0){
@@ -264,7 +273,7 @@ window.addEventListener('message', function(event) {
 			if(event.data.graph[repeat][protocolID] !== undefined){
 				// Add macro html output to graph info container
 				var simpleHTML ='';
-				var HTML = '<tr class="macroout">';
+				var HTML = '<tr class="macroout warning">';
 				var col = 1;
 				for(key in event.data.graph[repeat][protocolID]){
 					if(key == 'GraphType' || key == 'HTML' || key == 'Macro')
@@ -272,7 +281,7 @@ window.addEventListener('message', function(event) {
 					else{
 						simpleHTML +='<div class="col-md-3 text-center">'
 						if(col % 2 && col !== 1)
-							HTML += '</tr><tr class="macroout">';
+							HTML += '</tr><tr class="macroout warning">';
 						HTML += '<td style="width:50%">';
 						HTML += '<em class="text-muted">';
 						if(replacements[key] != undefined){

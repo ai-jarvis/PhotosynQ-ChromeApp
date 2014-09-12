@@ -70,6 +70,26 @@ function LoadAuthentificationFromStorage() {
 	});
 }
 
+
+function LoadMuteNotificationFromStorage(){
+	chrome.storage.local.get('MuteNotifications', function(result){
+		if(result['MuteNotifications'] !== undefined){
+			_muteMessages = result['MuteNotifications'];
+			if(!_muteMessages){
+				$('#MuteAllNotifications small').html('<i class="fa fa-toggle-on"></i> Show popup notifications');
+			}
+			else if(_muteMessages){
+				$('#MuteAllNotifications small').html('<i class="fa fa-toggle-off"></i> Show popup notifications');
+			}
+		}
+		else{
+			var store = {}; 
+			store['MuteNotifications'] = _muteMessages;
+			chrome.storage.local.set(store);
+		}
+	});
+}
+
 // ===============================================================================================
 //						Load media from storage
 // ===============================================================================================
@@ -255,7 +275,7 @@ function SaveDataToFile(){
 			WriteMessage('File saved.','success');
 		  };
 
-		  if(ResultString !== null){
+		  		  if(ResultString !== null){
 
 			/* Keys to skip */
 			var skip = ['data_raw','HTML','Macro','GraphType','protocol_id','ConsoleInput']		
@@ -286,14 +306,26 @@ function SaveDataToFile(){
 						if(MacroDataHeader[v].indexOf(var_name) === -1)
 							MacroDataHeader[v].push(var_name);
 					}
-					if(MacroArray.length > 0){
-						for(var_name in MacroArray[i][v]){
-							if(MacroDataHeader[v] === undefined)
-								MacroDataHeader[v] = []
-							if(MacroDataHeader[v].indexOf(var_name) === -1)
-								MacroDataHeader[v].push(var_name);
-						}
+					for(var_name in MacroArray[i][v]){
+						if(MacroDataHeader[v] === undefined)
+							MacroDataHeader[v] = []
+						if(MacroDataHeader[v].indexOf(var_name) === -1)
+							MacroDataHeader[v].push(var_name);
 					}
+				}
+			}
+			
+			readabledata += 'Measurement\n'
+			readabledata += '--------------------------------------------------------------------------\n';			
+			readabledata += 'Recorded: ' + new Date(ResultString.time).toLocaleString()+ '\n'
+			readabledata +=  '\n'
+
+			
+			if(ResultString.notes !== undefined){
+				if(ResultString.notes != ""){
+					readabledata += 'Notes\n'
+					readabledata += '--------------------------------------------------------------------------\n';			
+					readabledata += ResultString.notes+ '\n\n'
 				}
 			}
 			
@@ -348,9 +380,10 @@ function SaveDataToFile(){
 				readabledata +='\n'
 				
 				/* Add data_raw header */
+				var RawDataHeaders = []
 				for(j in RawDataProtocol)
-					readabledata += RawDataHeader[j].join('\t') + '\t';
-				readabledata +='\n'
+					RawDataHeaders.push(RawDataHeader[j].join('\t'));
+				readabledata += RawDataHeaders.join('\t') + '\n'
 
 				/* Add transposed data_raw */
 				var line = [];
@@ -360,14 +393,14 @@ function SaveDataToFile(){
 						for(var k in RawDataProtocol[j]){
 							point = ResultString['sample'][RawDataProtocol[j][k][0]][RawDataProtocol[j][k][1]].data_raw[i];
 							if(point !== undefined)
-								line.push( ResultString['sample'][RawDataProtocol[j][k][0]][RawDataProtocol[j][k][1]].data_raw[i] )
+								line.push( point )
 							else
 								line.push("");
 						}
-						readabledata += line.join('\t') + '\n';
-						line = [];
-						point = "";
 					}
+					readabledata += line.join('\t') + '\n';
+					line = [];
+					point = "";
 				}
 				readabledata +='\n'
 			}

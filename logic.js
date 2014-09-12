@@ -22,6 +22,7 @@ var _media = {};
 var _given_answers = [];
 var _terminate = false;
 var _consolemacros = false;
+var _muteMessages = false;
 
 // ===============================================================================================
 // 					Logic to read and process incoming data
@@ -475,6 +476,22 @@ onload = function() {
 		$('#CheckBoxRememberAnswers').prop('checked', false); 
 	});
 
+	$('#MuteAllNotifications').on('click', function(){
+		var store = {}
+		if(!_muteMessages){
+			$('#MuteAllNotifications small').html('<i class="fa fa-toggle-off"></i> Show popup notifications');
+			_muteMessages = true;
+			store['MuteNotifications'] = _muteMessages;
+			chrome.storage.local.set(store);
+		}
+		else if(_muteMessages){
+			$('#MuteAllNotifications small').html('<i class="fa fa-toggle-on"></i> Show popup notifications');
+			_muteMessages = false
+			store['MuteNotifications'] = _muteMessages;
+			chrome.storage.local.set(store);
+		}
+	});
+
 	// Events when port is changed
 	// ===============================================================================================
 	$('.preventClose').click(function(event){
@@ -755,8 +772,9 @@ onload = function() {
 	});
 
 
-	// Initial port fetching
+	// Initial app settings
 	// ===============================================================================================
+	LoadMuteNotificationFromStorage();
 	fetchPorts();
 
 	// Check if internet connection exists
@@ -1124,7 +1142,7 @@ function DatabaseMeasurement() {
 		}
 	});
 	if(no_answers){
-		WriteMessage('<i class="fa fa-exclamation-triangle"></i> Please answer all questions first','danger');
+		WriteMessage('Please answer all questions first','danger');
 		return false;
 	}
 	var protocol = [];
@@ -1150,7 +1168,7 @@ function DatabaseMeasurement() {
 function QuickMeasurement() {
 	var QuickMeasurementProtocol = $('#QuickMeasurementTab .list-group .active').attr('data-value');
 	if(QuickMeasurementProtocol === undefined){
-		WriteMessage('Select a protocol first','info');
+		WriteMessage('Select a protocol first','warning');
 		return;
 	}
 
@@ -1282,6 +1300,8 @@ function WriteMessage(text,type){
 	  "showMethod": "fadeIn",
 	  "hideMethod": "fadeOut"
 	}
+	if(!_muteMessages)
+		show = false;
 	
 	var notificationbtn = $('#NotificationHistory').prev().find('.fa-bell');
 	if(!notificationbtn.hasClass('fa-inverse'))
@@ -1289,22 +1309,24 @@ function WriteMessage(text,type){
 	
 	html = '<li style="padding:2px 15px 2px 15px">'
 	if(type == 'info'){
-		toastr.info(text)
 		html += '<i class="fa fa-info-circle text-info" style="margin-right:10px;"></i>'
+		if(!_muteMessages)
+			toastr.info(text)
 	}
 	if(type == 'warning'){
-		toastr.warning(text)
 		html += '<i class="fa fa-exclamation-circle text-warning" style="margin-right:10px;"></i>'
+		toastr.warning(text)
 	}
 	if(type == 'danger'){
-		toastr.error(text)
 		html += '<i class="fa fa-exclamation-triangle text-danger" style="margin-right:10px;"></i>'
 		if(!notificationbtn.next().hasClass('fa-circle'))
 			notificationbtn.parent().append('<i class="fa fa-circle text-danger" style="position:absolute; margin-left:-7px; margin-top:-2px"></i>');
+		toastr.error(text)
 	}
 	if(type == 'success'){
-		toastr.success(text)
 		html += '<i class="fa fa-check-square text-success" style="margin-right:10px;"></i>'
+		if(!_muteMessages)
+			toastr.success(text)
 	}
 	html += '<span class="text-muted">'+text+'</span>'
 	html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
@@ -1312,6 +1334,10 @@ function WriteMessage(text,type){
 	html += '<li class="divider"></li>'
 	$('#NotificationHistory li ul').prepend(html);
 	$('.toast-top-right').css('top','55px');
+	
+	notificationbtn.addClass("faa-ring animated").delay(1000).queue(function(){
+		$(this).removeClass("faa-ring animated").dequeue();
+	});
 }
 
 
