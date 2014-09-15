@@ -306,11 +306,15 @@ function SaveDataToFile(){
 						if(MacroDataHeader[v].indexOf(var_name) === -1)
 							MacroDataHeader[v].push(var_name);
 					}
-					for(var_name in MacroArray[i][v]){
-						if(MacroDataHeader[v] === undefined)
-							MacroDataHeader[v] = []
-						if(MacroDataHeader[v].indexOf(var_name) === -1)
-							MacroDataHeader[v].push(var_name);
+					if(MacroArray[i] !== undefined){
+						if( MacroArray[i][v] !== undefined){
+							for(var_name in MacroArray[i][v]){
+								if(MacroDataHeader[v] === undefined)
+									MacroDataHeader[v] = []
+								if(MacroDataHeader[v].indexOf(var_name) === -1)
+									MacroDataHeader[v].push(var_name);
+							}
+						}
 					}
 				}
 			}
