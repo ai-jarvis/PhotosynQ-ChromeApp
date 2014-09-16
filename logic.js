@@ -20,7 +20,6 @@ var _experiments = [];
 var _macros = [];
 var _media = {};
 var _given_answers = [];
-var _terminate = false;
 var _consolemacros = false;
 var _muteMessages = false;
 
@@ -184,59 +183,10 @@ function onCharRead(readInfo) {
 				
 			}
 		}
-		catch(e){}
-
-
-		if(_terminate){
-			dataReadterm = dataRead.trim();
-			if(dataRead.slice(-1) == ',')
-				dataReadterm = dataRead.slice(0, (dataRead.length-2));
-			dataReadterm += ']]}';
-		
-			try {
-			  dataReadterm = JSON.parse(dataReadterm);
-			  
-				if(_consolemacros && MeasurementType == 'console'){
-					if(ResultString.sample !== undefined){
-						for(measurementID in ResultString.sample){
-							for(protocolID in ResultString.sample[measurementID]){
-								if(_consolemacros[protocolID] !== undefined){
-									ResultString.sample[measurementID][protocolID]['macro_id'] = _consolemacros[protocolID]
-								}
-							}
-						}
-					}
-					_consolemacros = false;
-				}			  
-			  
-			} catch (e) {
-				WriteMessage('Invalid results received from device.','danger');
-				return;
-			}			
-			dataSave = dataReadterm;				
-	
-			if(MeasurementType == 'console'){
-				ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
-			}
-			
-			EnableInputs();
-			MeasurementType = null;
-			ResultString = dataReadterm;
-			WriteMessage('Protocol done.','success');
-			$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
-			
-			$('#PlotsContainer').empty();
-			$('#MeasurementMenu').show();
-			chrome.power.releaseKeepAwake();
-			plot(dataReadterm);
-			setStatus('MultiSpeQ Ready','success');
-			dataRead = '';
-			dataReadterm = '';
-		}
-		
+		catch(e){}	
 	}
 
-	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null && !_terminate){
+	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
 		dataRead = dataRead.trim();
 		try {
 		  dataRead = JSON.parse(dataRead);
@@ -1277,9 +1227,10 @@ function RunMeasurement(protocol,mtype){
 // ===============================================================================================
 function TerminateMeasurement(){
 	$('#TerminateMeasurement').blur();
-	$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
-	_terminate = true;
-	EnableInputs();
+	chrome.serial.send(connectionId, str2ab("-1-1+"), function(){
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		EnableInputs();
+	});
 }
 
 // ===============================================================================================
