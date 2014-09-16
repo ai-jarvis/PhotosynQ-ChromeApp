@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/bootstrap-theme.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/toastr.css" media="all" rel="stylesheet" type="text/css">
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/math.js"></script>
+	<script src="js/toastr.min.js"></script>
+	<script src="logic_multi.js"></script>
+	<script src="storage.js"></script>
+	<style>
+		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-static-top" role="navigation" style="margin-bottom:0px">
+	  <div class="container-fluid">
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<a class="navbar-brand" href="#"><i class="fa fa-tasks"></i> Multiple Devices</a>
+	  </div><!-- /.container-fluid -->
+	</nav>
+	<div class="container-fluid" id="MainDisplayContainer" style="padding:5px; overflow:hidden; overflow-y: auto;">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+					<table class="table table-striped" id="DeviceControlTable">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Device</th>
+								<th>Measurement</th>
+								<th>Status</th>
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+				</table>
+					<div class="panel-footer">
+						<button class="btn btn-default btn-xs pull-right"><i class="fa fa-play"></i> All</button>
+						<button class="btn btn-default btn-xs" id="BtnAddDevice"><i class="fa fa-plus"></i></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<!-- Modal for results -->
+<div class="modal fade" id="ModalResults">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Results <small>Device #</small></h4>
+      </div>
+      <div class="modal-body" style="max-height:300px; overflow:hidden; overflow-y: auto;">
+        <p>One fine body&hellip;</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"><i class="fa fa-cloud-upload"></i> Keep</button>
+        <button type="button" class="btn btn-default"><i class="fa fa-save"></i> Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-trash-o"></i> Discard</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Modal for connection -->
+<div class="modal fade" id="ModalMeasurement">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+         <h4 class="modal-title">Quick Measurement <small>Device #</small></h4>
+      </div>
+      <div class="modal-body" style="padding:1px;">
+		<input type="text" class="form-control input-sm" id="FilterProtocolList" placeholder="Filter Scripts">
+      </div>
+      <div class="list-group" style="height:250px; overflow-y:scroll" id="MeasurementProtocolList">
+      </div>      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="BtnApplyProtocol">Use</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Modal for connection -->
+<div class="modal fade" id="ModalProject">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Project <small>Device #</small></h4>
+      </div>
+      <div class="modal-body">
+        <p>One fine body&hellip;</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Connect</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Modal for connection -->
+<div class="modal fade" id="ModalConnection">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Connection <small>Device #</small></h4>
+      </div>
+      <div class="modal-body">
+        <select class="form-control input-sm" id="ModalProjectPorts">
+        </select>
+		<span class="help-block">Already used ports are disabled</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="BtnRefreshPorts"><i class="fa fa-refresh"></i></button>
+        <button type="button" class="btn btn-primary" id="BtnConnectDevice">Connect</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+</body>
+</html>

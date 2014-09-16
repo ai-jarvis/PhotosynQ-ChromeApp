@@ -846,6 +846,25 @@ onload = function() {
 		OpenProtocolCreator();
 	});
 
+	// Open multiple devices
+	// ===============================================================================================
+	document.getElementById('MultipleDevices').addEventListener('click', function(e){
+		chrome.app.window.create('MultipleDevices.html', {
+			id: "multipledevices",
+			bounds: {
+				top: 0,
+				left: 0,
+				width: 1024,
+				height: 720
+			},
+			minHeight: 680,
+			minWidth: 1000
+		}, function (MacroWindow){
+			MacroWindow.contentWindow.addEventListener('load', function(e) {
+				MacroWindow.contentWindow.postMessage({'macros':_macros,'protocols':_protocols,'projects':_experiments}, '*');
+			});
+		});
+	});
 
 	function OpenProtocolCreator(){
 		chrome.app.window.create('ProtocolCreator.html', {
