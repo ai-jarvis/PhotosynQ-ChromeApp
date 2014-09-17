@@ -2,26 +2,25 @@
 // 					Initial Parameters
 // ===============================================================================================
 var connectionId = -1;
-var deviceConnected = false;
-var port_os;
-var port_path;
-var MeasurementType = null;
-var QuickMeasurementProtocol, QuickMeasurement, ResultString, MacroArray, ProtocolArray;
-var ShowTansientgraph = true;
-var dataRead = '';
-var dataSave = '';
-var protocol;
-var SelectedProject = null;
+var QuickMeasurementProtocol, QuickMeasurement, ResultString, MacroArray, ProtocolArray, protocol;
+var _deviceConnected = false;
+var _port_os;
+var _port_path;
+var _MeasurementType = null;
+var _ShowTansientgraph = true;
+var _dataRead = '';
+var _SelectedProject = null;
 var _authentication;
 var _geolocation = false;
 var _protocols = {};
 var _userprotocols = {};
-var _experiments = [];
+var _projects = [];
 var _macros = [];
 var _media = {};
 var _given_answers = [];
 var _consolemacros = false;
 var _muteMessages = false;
+var _apiURL = "http://photosynq.venturit.org/api/v1/";
 
 // ===============================================================================================
 // 					Logic to read and process incoming data
@@ -35,7 +34,7 @@ function onCharRead(readInfo) {
     	
 	var str = ab2str(readInfo.data);
 
-	if(MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console'){
+	if(_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console'){
 		try{
 			str = str.replace(new RegExp('{', 'gi'), '{"time": '+ new Date().getTime() +', ');
 			str = str.replace(new RegExp('^{', 'gi'), '{"time_offset": '+ new Date().getTimezoneOffset() +', ');
@@ -46,31 +45,31 @@ function onCharRead(readInfo) {
 	}
 
 	console.log(str);
-	dataRead += str;
+	_dataRead += str;
 
-	if(dataRead.match(/(MultispeQ Ready\r\n)/gi)){
+	if(_dataRead.match(/(MultispeQ Ready\r\n)/gi)){
 		setStatus("MultispeQ Ready",'success');
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success').parent().attr('title','Device connected to port '+port_path);
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success').parent().attr('title','Device connected to port '+_port_path);
 		var SaveConnection = {}
-		SaveConnection["os"] = port_os;
-		SaveConnection["path"] = port_path;
+		SaveConnection["os"] = _port_os;
+		SaveConnection["path"] = _port_path;
 		SaveToStorage('com_port',SaveConnection, function(){});
-		deviceConnected = true;
-		dataRead = '';
-		MeasurementType = 'BackgroundBatteryCheck';
+		_deviceConnected = true;
+		_dataRead = '';
+		_MeasurementType = 'BackgroundBatteryCheck';
 		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 		$('#ConnectBtn').button('complete');
 		return;
 	}
 
-	if(MeasurementType == 'BackgroundBatteryCheck'){
+	if(_MeasurementType == 'BackgroundBatteryCheck'){
 			try{
-				var info = JSON.parse(dataRead);
+				var info = JSON.parse(_dataRead);
 				for(key in info){
 					if (key == 'batt_level')
 						BatteryLevel(info[key], false);
-						MeasurementType = false;
-						dataRead = '';
+						_MeasurementType = false;
+						_dataRead = '';
 				}
 			}
 			catch(e){}
@@ -78,15 +77,15 @@ function onCharRead(readInfo) {
 	}
 
 	
-	if(MeasurementType == 'MenuBarMeasurement'){
-		if(dataRead.match(/(\s?{[\d\w\s\":]*\[)([\d\.]*)(\,)/g) !== null){
-			var passedValue = dataRead.replace(/(\s?{[\d\w\s\":]*\[)/g, '');
+	if(_MeasurementType == 'MenuBarMeasurement'){
+		if(_dataRead.match(/(\s?{[\d\w\s\":]*\[)([\d\.]*)(\,)/g) !== null){
+			var passedValue = _dataRead.replace(/(\s?{[\d\w\s\":]*\[)/g, '');
 			passedValue = passedValue.replace(/\,/g, '');
-			dataRead = '';
+			_dataRead = '';
 		}
-		else if(dataRead.match(/(\,)/g)){
-			var passedValue = dataRead.replace(/\,/g, '');
-			dataRead = '';
+		else if(_dataRead.match(/(\,)/g)){
+			var passedValue = _dataRead.replace(/\,/g, '');
+			_dataRead = '';
 		}
 		$("#ModalDialogValue").fadeOut(100, function() {
 		  $(this).text(passedValue).fadeIn();
@@ -116,9 +115,9 @@ function onCharRead(readInfo) {
 		return;
 	}
 
-	if(MeasurementType == 'MenuBarInfo'){
+	if(_MeasurementType == 'MenuBarInfo'){
 			try{
-				var info = JSON.parse(dataRead);
+				var info = JSON.parse(_dataRead);
 				for(key in info){
 					if(key == 'response')
 						$('#ModalDialogMsg').show().append(info[key]+'<br>');
@@ -126,8 +125,8 @@ function onCharRead(readInfo) {
 						BatteryLevel(info[key],true);
 					else if(key == 'pwr_off'){
 						$('#ModalDialogMsg').show().append('<span class="text-primary">Device powered off</span>');
-						dataRead = '';
-						MeasurementType = 'BackgroundBatteryCheck';
+						_dataRead = '';
+						_MeasurementType = 'BackgroundBatteryCheck';
 						chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 					}
 					else
@@ -138,27 +137,27 @@ function onCharRead(readInfo) {
 		return;
 	}
 
-	if(MeasurementType == 'MenuBarRead'){
-		if(dataRead.match(/\,/g)){
+	if(_MeasurementType == 'MenuBarRead'){
+		if(_dataRead.match(/\,/g)){
 			$('#ModalDialogMsg').hide();
-			var passedValue = dataRead.replace(/(\d*\.?\d*\]})|(\,)/g, '');
+			var passedValue = _dataRead.replace(/(\d*\.?\d*\]})|(\,)/g, '');
 			$('#ModalDialogMsg').html('<p><span class="text-muted">Last read:</span> '+ passedValue+'</p>').fadeIn();
 			chrome.serial.send(connectionId, str2ab('-1+'), function(){
-				dataRead = '';
+				_dataRead = '';
 			});
 		}
 		return;
 	}
 
-	if(dataRead.match(/({\"pwr_off":"HIGH\"}\r\n)/gi)){
-		dataRead = '';
-		MeasurementType = 'BackgroundBatteryCheck';
+	if(_dataRead.match(/({\"pwr_off":"HIGH\"}\r\n)/gi)){
+		_dataRead = '';
+		_MeasurementType = 'BackgroundBatteryCheck';
 		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 		return;
 	}
 
 
-	if(MeasurementType == 'consoleraw'){
+	if(_MeasurementType == 'consoleraw'){
 		try{
 			$('#PlotsContainer').append(str.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2'));
 			return
@@ -167,18 +166,18 @@ function onCharRead(readInfo) {
 	}
 
 	/** Add str to local memory **/
-	SaveOutputToStorage(dataRead);
+	SaveOutputToStorage(_dataRead);
 		
-	$('#RawOutputTextarea').text(dataRead);
+	$('#RawOutputTextarea').text(_dataRead);
 		
-	if(str.match(/(\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
+	if(str.match(/(\r\n)/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
 
 		ProgressBar((parseInt($('#MeasurementProgress').attr('data-step'))+1), $('#MeasurementProgress').attr('data-total'));
 		try{
-			var pos = dataRead.lastIndexOf('{');
-			var testeded = dataRead.slice(pos);
+			var pos = _dataRead.lastIndexOf('{');
+			var testeded = _dataRead.slice(pos);
 			testeded = testeded.split("\r\n");
-			if($('#MeasurementProgress').attr('data-total') > 5 && ShowTansientgraph){
+			if($('#MeasurementProgress').attr('data-total') > 5 && _ShowTansientgraph){
 				plottransient(testeded[0]);
 				
 			}
@@ -186,33 +185,32 @@ function onCharRead(readInfo) {
 		catch(e){}	
 	}
 
-	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
-		dataRead = dataRead.trim();
+	if(_dataRead.match(/(\r\n\r\n)$/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
+		_dataRead = _dataRead.trim();
 		try {
-		  dataRead = JSON.parse(dataRead);
+		  _dataRead = JSON.parse(_dataRead);
 		} catch (e) {
 			WriteMessage('Invalid results received from device.','danger');
 			return;
 		}			
-		dataSave = dataRead;
 		EnableInputs();
-		ResultString = dataRead;
+		ResultString = _dataRead;
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 		WriteMessage('Protocol done.','success');
 
-		if(MeasurementType == 'database'){
+		if(_MeasurementType == 'database'){
 			$('#SaveMeasurementToDB').show();
 			ResultString['user_answers'] = _given_answers;
 			if(_geolocation)
 				ResultString['location'] = [_geolocation.latitude, _geolocation.longitude];
 		}
 		
-		if(MeasurementType == 'console' || (MeasurementType == 'quick')){
+		if(_MeasurementType == 'console' || (_MeasurementType == 'quick')){
 			$('#SaveMeasurementToFile').show();
-			SelectedProject = null;
+			_SelectedProject = null;
 		}
 
-		if(MeasurementType == 'console'){
+		if(_MeasurementType == 'console'){
 			ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
 			if(_consolemacros){
 				if(ResultString.sample !== undefined){
@@ -231,10 +229,10 @@ function onCharRead(readInfo) {
 		$('#PlotsContainer').empty();
 		$('#MeasurementMenu').show();
 		chrome.power.releaseKeepAwake();
-		plot(dataRead);
+		plot(_dataRead);
 		setStatus('MultiSpeQ Ready','success');
-		dataRead = '';
-		MeasurementType = null;
+		_dataRead = '';
+		_MeasurementType = null;
 	}	
 } 
   
@@ -243,7 +241,7 @@ function onCharRead(readInfo) {
 // ===============================================================================================
 chrome.serial.onReceive.addListener(onCharRead);
 chrome.runtime.getPlatformInfo(function(info) {
-		port_os = info.os;
+		_port_os = info.os;
 });
 
 // ===============================================================================================
@@ -316,7 +314,7 @@ function buildPortPicker(ports) {
     }
     $('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
     setStatus('Not connected','info');
-    deviceConnected = false;
+    _deviceConnected = false;
   };
   
   
@@ -328,7 +326,7 @@ function buildPortPicker(ports) {
 chrome.serial.onReceiveError.addListener(function(e){
 	if(e.error == 'device_lost'){
 		connectionId = -1;
-		deviceConnected = false;
+		_deviceConnected = false;
      	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
 		setStatus('Not connected','info');
 		console.log(e.error)
@@ -343,7 +341,7 @@ chrome.serial.onReceiveError.addListener(function(e){
 function openSelectedPort() {
 	var portPicker = document.getElementById('port-picker');
 	var selectedPort = portPicker.options[portPicker.selectedIndex].value;
-	port_path = selectedPort;
+	_port_path = selectedPort;
 	chrome.serial.connect(selectedPort, {bitrate: 115200}, onConnect);
 }
 
@@ -402,11 +400,11 @@ onload = function() {
 		if(!$(this).hasClass('active')){
 			SelectProject($(this).attr('data-value'));
 			$('#SubNavigation a[href="#ProjectMeasurementTab"]').tab('show');
-			SelectedProject = $('#ProjectListTab .list-group .active').attr('data-value');
+			_SelectedProject = $('#ProjectListTab .list-group .active').attr('data-value');
 		}
 		else{
 			DiscardMeasurement();
-			SelectedProject = null;
+			_SelectedProject = null;
 		}
 	});
 	
@@ -414,7 +412,7 @@ onload = function() {
 		$(this).blur();
 		$('#ProjectList a').removeClass('active');
 		DiscardMeasurement();
-		SelectedProject = null;
+		_SelectedProject = null;
 		$('#CheckBoxRememberAnswers').prop('checked', false); 
 		$('#SubNavigation a[href="#ProjectTab"]').tab('show');
 	});
@@ -422,7 +420,7 @@ onload = function() {
 	$('#SubNavigation a[href="#ProjectTab"]').on('click',function(){
 		$('#ProjectList a').removeClass('active');
 		DiscardMeasurement();
-		SelectedProject = null;
+		_SelectedProject = null;
 		$('#CheckBoxRememberAnswers').prop('checked', false); 
 	});
 
@@ -467,7 +465,7 @@ onload = function() {
 			    	$('#DeviceConnectionState').removeClass().addClass('fa fa-times text-danger').parent().attr('title','Not connected');
 					setStatus('Not connected','info');
 					$('#ConnectBtn').blur().button('reset');
-					deviceConnected = false;
+					_deviceConnected = false;
 				});
 				return;
 			}
@@ -501,8 +499,8 @@ onload = function() {
 	
 	document.getElementById('DiscardMeasurement').addEventListener('click', function(){
 		DiscardMeasurement();
-		if(SelectedProject)
-			SelectProject(SelectedProject);
+		if(_SelectedProject)
+			SelectProject(_SelectedProject);
 	});
 
 	// Nav bar events
@@ -527,7 +525,7 @@ onload = function() {
 		if(e.shiftKey) {
        		chrome.storage.local.clear(function(){
  				DatabaseSignOff();
- 				chrome.storage.local.getBytesInUse('cached_experiments', function(response){
+ 				chrome.storage.local.getBytesInUse('cached_projects', function(response){
 					$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 				});
  				chrome.storage.local.getBytesInUse(['cached_protocols','cached_userprotocols'], function(response){
@@ -939,7 +937,7 @@ function SendLongStrings(string){
 // 						Run functions from the menu bar
 // ===============================================================================================
 function MenubarFunction(item,itemid) {
-	if(connectionId == -1 || !deviceConnected){
+	if(connectionId == -1 || !_deviceConnected){
 		WriteMessage('MultispeQ device not connected', 'danger');
 		return;
 	}
@@ -968,7 +966,7 @@ function MenubarFunction(item,itemid) {
 
 	
 	if(dialog == 'static'){
-		MeasurementType = "MenuBarTest";
+		_MeasurementType = "MenuBarTest";
 	}
 	
 	
@@ -1010,7 +1008,7 @@ function MenubarFunction(item,itemid) {
 				}
 			}
 			if(MenuItems[item][itemid].button_behavior == 'click'){
-				MeasurementType = "MenuBarRead";
+				_MeasurementType = "MenuBarRead";
 				chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogSelect').val()+'+'), function(){
 					chrome.serial.send(connectionId, str2ab($('#MenuPromtDialogInput').val()+'+'), function(){
 						chrome.serial.send(connectionId, str2ab($('-1+')), function(){});	
@@ -1039,17 +1037,17 @@ function MenubarFunction(item,itemid) {
 	
 	
 	if(dialog == 'close'){
-		MeasurementType = "MenuBarMeasurement";
+		_MeasurementType = "MenuBarMeasurement";
 		$('#ModalDialogSparkline').append('<span values="" style="margin-bottom:-20px;"></span>').show();
 	}
 	
 	
 	if(dialog == 'info'){
-		MeasurementType = "MenuBarInfo";
+		_MeasurementType = "MenuBarInfo";
 	}
 	
 
-	if (connectionId != -1 && deviceConnected){
+	if (connectionId != -1 && _deviceConnected){
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 		$('#ModalDialog').modal('show');
 		if(dialog !== 'prompt'){
@@ -1065,7 +1063,7 @@ function MenubarFunction(item,itemid) {
 
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
 		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
-		MeasurementType = false;
+		_MeasurementType = false;
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 		chrome.power.releaseKeepAwake();
 	});
@@ -1078,7 +1076,7 @@ function MenubarFunction(item,itemid) {
 // ===============================================================================================
 function DatabaseMeasurement() {
 	$('#DatabaseMeasurement').blur();
-	if(SelectedProject === null){
+	if(_SelectedProject === null){
 		WriteMessage('Please select a project first','warning');
 		return;
 	}
@@ -1096,9 +1094,9 @@ function DatabaseMeasurement() {
 		return false;
 	}
 	var protocol = [];
-	if(_experiments[SelectedProject].protocols_ids !== undefined){
-		for(pIds in _experiments[SelectedProject].protocols_ids){
-			var pID = _experiments[SelectedProject].protocols_ids[pIds];
+	if(_projects[_SelectedProject].protocols_ids !== undefined){
+		for(pIds in _projects[_SelectedProject].protocols_ids){
+			var pID = _projects[_SelectedProject].protocols_ids[pIds];
 			if(_protocols[pID].protocol_json !== undefined){
 				if(_protocols[pID].protocol_json !== ''){
 					protocol.push(_protocols[pID].protocol_json);
@@ -1148,9 +1146,9 @@ function ConsoleMeasurement() {
 	if($('#ConsoleProtocolRaw').is(':checked')){
 		DiscardMeasurement();
 		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-		MeasurementType = 'consoleraw';
+		_MeasurementType = 'consoleraw';
 		SendLongStrings(ConsoleProtocol+'!');
-		dataRead = '';
+		_dataRead = '';
 		return;
 	}
 	
@@ -1170,7 +1168,7 @@ function ConsoleMeasurement() {
 // ===============================================================================================
 function RunMeasurement(protocol,mtype){
 	// Check Connection
-	if (connectionId == -1 || !deviceConnected){
+	if (connectionId == -1 || !_deviceConnected){
 		WriteMessage('MultispeQ device not connected','danger');
 		return;
 	}
@@ -1199,22 +1197,22 @@ function RunMeasurement(protocol,mtype){
 	$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
 	ResultString = null;
 	MacroArray = null;
-	MeasurementType = mtype;
-	dataRead = '';
+	_MeasurementType = mtype;
+	_dataRead = '';
 	DisableInputs();
 	chrome.power.requestKeepAwake('system');
 	SendLongStrings(protocol_string+'!');
 	$('#TransientPlotsContainer').css('min-height','55%');
 	var protocol_total = protocol.length;
 	var protocol_measurements = 1;
-	ShowTansientgraph = true;
+	_ShowTansientgraph = true;
 	for(m in protocol){
 		if(protocol[m].measurements !== undefined){
 			if(protocol[m].measurements > protocol_measurements)
 				protocol_measurements = protocol[m].measurements;
 		}
-		if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1 && ShowTansientgraph)
-			ShowTansientgraph = false;
+		if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1 && _ShowTansientgraph)
+			_ShowTansientgraph = false;
 	}
 	protocol_total *= protocol_measurements;
 	ProgressBar(1, protocol_total);
@@ -1227,7 +1225,7 @@ function RunMeasurement(protocol,mtype){
 // ===============================================================================================
 function TerminateMeasurement(){
 	$('#TerminateMeasurement').blur();
-	chrome.serial.send(connectionId, str2ab("-1-1+"), function(){
+	chrome.serial.send(connectionId, str2ab("-1+-1+"), function(){
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
 		EnableInputs();
 	});
@@ -1331,6 +1329,33 @@ function remove(arr, item) {
           }
       }
   }
+
+
+
+// ===============================================================================================
+//							Discard measurement and remove all plots
+// ===============================================================================================
+function DiscardMeasurement(){
+	chrome.power.releaseKeepAwake();
+	EnableInputs();
+	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
+	$('#PlotsContainer,#TransientPlotsContainer').empty();
+	$('#TransientPlotsContainer').css('min-height','0px');
+	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
+	if(connectionId != -1 && _deviceConnected)
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+	ProgressBar(0, 0);
+	$(window).trigger('resize');
+	_MeasurementType = null;
+	ProtocolArray = null;
+	QuickMeasurementProtocol = null;
+	QuickMeasurement = null;
+	ResultString = null;
+	MacroArray = null;
+	serialBuffer = '';
+	_dataRead = '';
+	RemoveFromStorage('measurement_tmp');
+}
 
 
 function BatteryLevel(batt_level,dialog){

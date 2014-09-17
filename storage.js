@@ -21,8 +21,6 @@ function SaveOutputToStorage(data){
     chrome.storage.local.set(jsonfile);
 }
 
-
-
 // ===============================================================================================
 //						Save measurement temporarily to local storage
 // ===============================================================================================
@@ -38,7 +36,6 @@ function GetOutputFROMStorage(){
 function RemoveFromStorage(id) {
 	chrome.storage.local.remove(id, function(){});
 }
-
 
 // ===============================================================================================
 //						Load authentication from storage for automatic login
@@ -58,7 +55,11 @@ function LoadAuthentificationFromStorage() {
 			$('#DatabaseSignedInUser').text(_authentication.name)
 			$('#DatabaseSignedInEmail').text(_authentication.email)
 			$('#DatabaseSignInForm').hide();
-			$('#DatabaseSignedInLink').attr('href','http://photosynq.venturit.net/users/'+_authentication.name.toLowerCase());
+			$('#DatabaseSignedInLink').attr('href',_authentication.user.profile_url);
+			DatabaseGetImage('avatar',_authentication.user.thumb_url,function(img){
+				$('#LoginUserAvatar').attr('src',img.src);
+				console.log(img.src);
+			});
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 			GetMacrosFromDB(_authentication.auth_token,_authentication.email);
@@ -70,7 +71,9 @@ function LoadAuthentificationFromStorage() {
 	});
 }
 
-
+// ===============================================================================================
+//						Load notification settings from storage
+// ===============================================================================================
 function LoadMuteNotificationFromStorage(){
 	chrome.storage.local.get('MuteNotifications', function(result){
 		if(result['MuteNotifications'] !== undefined){
@@ -132,18 +135,17 @@ function LoadPortNameFromStorage() {
 	
 }
 
-
 // ===============================================================================================
 //					Set up question/answers and variables when project is selected
 // ===============================================================================================
 function SelectProject(id) {
 	DiscardMeasurement();
-	chrome.storage.local.get('cached_experiments', function(response){
-		if(response['cached_experiments'] !== undefined){
+	chrome.storage.local.get('cached_projects', function(response){
+		if(response['cached_projects'] !== undefined){
 			try {
-				var experiments = JSON.parse(response['cached_experiments']);
+				var experiments = JSON.parse(response['cached_projects']);
 			} catch (e) {
-				RemoveFromStorage('cached_experiments');
+				RemoveFromStorage('cached_projects');
 				WriteMessage('Stored projects have the wrong format.','danger');
 				return;
 			}				
@@ -153,52 +155,56 @@ function SelectProject(id) {
 				/** Add project title **/
 				var html = '<div class="col-md-12"><legend>'+experiments[id].name+'</legend></div>';
 				
+				/** Adding project directions and description **/
+				html += '<div class="col-md-7 col-lg-8">'
+					+'<blockquote style="font-size:14px">'+experiments[id].directions_to_collaborators+'</blockquote>'
+					+'<h4>About</h4>'
+					+'<div class="text-justify">'
+					+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
+					+ experiments[id].description
+					+'</div>'
+				+'</div>';
+
 				/** Add project lead and link to website **/
-				html += '<div class="col-md-8">'
+				html += '<div class="col-md-5 col-lg-4">'
 					+'<div class="media">'
 					+'<a href="http://photosynq.venturit.net/users/'+experiments[id].lead.slug+'" class="pull-left" id="LeadAvatar" target="_blank"></a>'
 					+'<div class="media-body">'
 					+'<h4 class="media-heading">'+experiments[id].lead.name+'</h4>'
-					+ experiments[id].lead.email
+					+'<small class="text-muted">'
+					+'<i class="fa fa-envelope-o"></i> '+experiments[id].lead.email
+					+'<br>'
+					+'<i class="fa fa-map-marker"></i> '+experiments[id].lead.institute
+					+'</small>'
+					+'</div>'
+					+'<div class="row" style="margin-top:10px">'
+					+'<div class="col-md-6 text-center"><h4 class="text-primary">'+experiments[id].lead.data_count+'<br><small>Measurements</small></h4></div>'
+					+'<div class="col-md-6 text-center"><h4 class="text-primary">'+ new Date(experiments[id].lead.updated_at).toLocaleDateString()+'<br><small>Latest Activity</small></h4></div>'
+					+'<div class="col-md-12"><hr></div>'
+					+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
+						+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project</a>'
+					+'</div>'
+					+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
+						+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'/explore_data" target="_blank">Explore data</a>'
 					+'</div>'
 					+'</div>'
 					+'</div>'
-					+'<div class="col-md-4">'
-					+'<a class="btn btn-default btn-sm" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project on website</a>'
-					+'</div>'
-
-				/** Adding project directions **/
-				html += '<div class="col-md-12">'
 					+'<hr>'
-					+'<h4>Measurement directions</h4>'
-					+'<p class="bg-warning">'+experiments[id].directions_to_collaborators+'</p>'
-					+'</div>';
-
-				/** Add project description **/
-				html += '<div class="col-md-12">'
-					+'<hr>'
-					+'<h4>About</h4>'
-					+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
-					+ experiments[id].description
-					+'</div>'
 					
-				/** Add scripts and descriptions **/
-				html += '<div class="col-md-12">'
-					+'<hr>'
-					+'<h4>Protocols</h4>'
+					/** Add scripts and descriptions **/
+					html += '<h4>Protocols</h4>'
 					+'<dl>'
 					for(ii in experiments[id].protocols_ids){
 						html += '<dt>'+_protocols[experiments[id].protocols_ids[ii]].name+'</dt>';
-						html += '<dd class="text-muted">'+_protocols[experiments[id].protocols_ids[ii]].description+'</dd>';
+						html += '<dd class="text-muted"><small>'+_protocols[experiments[id].protocols_ids[ii]].description+'</small></dd>';
 					}
 					html += '</dl>'
-					+'</div>';
-				
+				html += '</div>';
+
 				$('#PlotsContainer').append(html);
 				
 				DatabaseGetImage('project',experiments[id].medium_image_url,function(img){
-					$('#ImageSpacer').html(img.img);
-					$('#ImageSpacer img').addClass('img-thumbnail')
+					$('#ImageSpacer').replaceWith('<img src="'+img.src+'" class="pull-left" style="padding-right:10px; width:40%">');
 				});
 				DatabaseGetImage('avatar',experiments[id].image_file_name,function(img){
 					$('#LeadAvatar').html(img.img);
@@ -209,7 +215,7 @@ function SelectProject(id) {
 				if($('#CheckBoxRememberAnswers:checked').length == 1)
 					return
 
-				SelectedProject = experiments[id].id;
+				_SelectedProject = experiments[id].id;
 				var html = '';
 				// Set up User Questions here...
 				for(question in experiments[id].custom_fields){
@@ -232,7 +238,7 @@ function SelectProject(id) {
 			}
 		}
 		else{
-			SelectedProject = null;
+			_SelectedProject = null;
 			WriteMessage('Project couldn\'t be loaded.','info')
 		}
 	});
@@ -506,32 +512,6 @@ function readable_time(currentdate){
 	return readableDate.toLocaleString()+timezone;	
 }
 
-
-// ===============================================================================================
-//							Discard measurement and remove all plots
-// ===============================================================================================
-function DiscardMeasurement(){
-	chrome.power.releaseKeepAwake();
-	EnableInputs();
-	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
-	$('#PlotsContainer,#TransientPlotsContainer').empty();
-	$('#TransientPlotsContainer').css('min-height','0px');
-	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
-	if(connectionId != -1 && deviceConnected)
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
-	ProgressBar(0, 0);
-	$(window).trigger('resize');
-	MeasurementType = null;
-	ProtocolArray = null;
-	QuickMeasurementProtocol = null;
-	QuickMeasurement = null;
-	ResultString = null;
-	MacroArray = null;
-	_terminate = false;
-	serialBuffer = '';
-	dataRead = '';
-	RemoveFromStorage('measurement_tmp');
-}
 
 // ===============================================================================================
 //							Load data from previously saved file

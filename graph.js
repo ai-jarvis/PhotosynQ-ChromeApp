@@ -361,7 +361,7 @@ function plottransient(data){
 	var timeOffset = new Date();
 	timeOffset = timeOffset.getTimezoneOffset();
 
-	initalTime = dataRead.match(/(\"time\": )(\d{13})/i);
+	initalTime = _dataRead.match(/(\"time\": )(\d{13})/i);
 	initalTime = parseInt(initalTime[2]);
 
 

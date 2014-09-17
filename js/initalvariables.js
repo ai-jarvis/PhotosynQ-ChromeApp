@@ -174,7 +174,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Power off lights only',
-		'icon': 'fa fa-lightbulb-o',
+		'icon': 'fa fa-toggle-off',
 		'id': 'DeviceLightsOffBtn',
 		'command': '1003+',
 		'dialog': 'info',
@@ -189,7 +189,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Light [PAR]',
-		'icon': 'fa fa-lightbulb-o',
+		'icon': 'fa fa-area-chart',
 		'id': 'LightBtn',
 		'command': '101+',
 		'dialog': 'close',
@@ -198,7 +198,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Light [raw signal]',
-		'icon': 'fa fa-lightbulb-o',
+		'icon': 'fa fa-area-chart',
 		'id': 'LightRawBtn',
 		'command': '105+',
 		'dialog': 'close',
@@ -207,7 +207,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'CO<sub>2</sub> [ppm]',
-		'icon': 'fa fa-cloud',
+		'icon': 'fa fa-area-chart',
 		'id': 'CO2Btn',
 		'command': '102+',
 		'dialog': 'close',
@@ -216,7 +216,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Temperature [&deg;C]',
-		'icon': 'fa fa-sun-o',
+		'icon': 'fa fa-area-chart',
 		'id': 'TempBtn',
 		'command': '103+',
 		'dialog': 'close',
@@ -224,7 +224,7 @@ var MenuItems = {
 		},{
 		'type': 'button',
 		'title': 'Contactless temperature [&deg;C]',
-		'icon': 'fa fa-sun-o',
+		'icon': 'fa fa-area-chart',
 		'id': 'CLessTempBtn',
 		'command': '106+',
 		'dialog': 'close',
@@ -233,7 +233,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Relative Humidity [%]',
-		'icon': 'fa fa-tint',
+		'icon': 'fa fa-area-chart',
 		'id': 'RelHumBtn',
 		'command': '104+',
 		'dialog': 'close',
@@ -249,7 +249,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Switch lights on/off',
-		'icon': 'fa fa-lightbulb-o',
+		'icon': 'fa fa-toggle-on',
 		'id': 'ManualLights',
 		'command': [
 				{
@@ -295,7 +295,7 @@ var MenuItems = {
 		{
 		'type': 'button',
 		'title': 'Get detector read',
-		'icon': 'fa fa-square',
+		'icon': 'fa fa-area-chart',
 		'id': 'ManualDetectors',
 		'command': [{
 			'title': 'Detector 34 (main bord)',

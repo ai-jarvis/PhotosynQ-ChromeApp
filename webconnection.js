@@ -11,7 +11,7 @@ function DatabaseSignIn(){
 		return false;
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "http://photosynq.venturit.net/api/v1/sign_in.json", true);
+	xhr.open("POST", _apiURL+"sign_in.json", true);
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	var params = 'user[email]='+document.getElementById('SignInEmail').value+'&user[password]='+document.getElementById('SignInPassword').value;
 	xhr.send(params);
@@ -38,7 +38,13 @@ function DatabaseSignIn(){
 				$('#DatabaseSignedInUser').text(response['name'])
 				$('#DatabaseSignedInEmail').text(response['email'])
 				$('#DatabaseSignInForm').hide();
-				$('#DatabaseSignedInLink').attr('href','http://photosynq.venturit.net/users/'+response['name'].toLowerCase());
+				$('#DatabaseSignedInLink').attr('href',response.user.profile_url);
+				DatabaseGetImage('avatar',response.user.thumb_url,function(img){
+					$('#LoginUserAvatar').attr('src',img.src);
+					console.log(img.src);
+				});
+				
+				
 				GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 				GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 				GetMacrosFromDB(_authentication.auth_token,_authentication.email);
@@ -57,7 +63,7 @@ function DatabaseSignOff(){
 		return false;
 	}
 	var xhr = new XMLHttpRequest();
-	xhr.open("DELETE", "http://photosynq.venturit.net/api/v1/sign_out.json", true);
+	xhr.open("DELETE", _apiURL+"sign_out.json", true);
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
@@ -88,27 +94,27 @@ function DatabaseSignOff(){
 // 								Get Projects From Cache
 // ===============================================================================================
 function GetProjectsFromCache(){
-	chrome.storage.local.get('cached_experiments', function(response){
-		if(response['cached_experiments'] !== undefined){
+	chrome.storage.local.get('cached_projects', function(response){
+		if(response['cached_projects'] !== undefined){
 			try {
-				_experiments = JSON.parse(response['cached_experiments']);
+				_projects = JSON.parse(response['cached_projects']);
 			} catch (e) {
-				RemoveFromStorage('cached_experiments');
+				RemoveFromStorage('cached_projects');
 				WriteMessage('Cached projects have wrong format','danger');
 				return;
 			}
 
 			$('#ProjectList').empty();	
-			for(var i in _experiments){
-				var html = '<a href="#" class="list-group-item" data-value="'+_experiments[i].id+'" style="min-height:88px;">';
-				html += '<img class="media-object pull-left" data-url="'+_experiments[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
-				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_experiments[i].name+'</h5>';
-				html += '<small class="list-group-item-text">'+_experiments[i].description+'</small>';
+			for(var i in _projects){
+				var html = '<a href="#" class="list-group-item" data-value="'+_projects[i].id+'" style="min-height:88px;">';
+				html += '<img class="media-object pull-left" data-url="'+_projects[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
+				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_projects[i].name+'</h5>';
+				html += '<small class="list-group-item-text">'+_projects[i].description+'</small>';
 				html += '</a>';
 				$('#ProjectList').append(html);
 				
-				if(_experiments[i].medium_image_url != '/images/medium/missing.png'){
-					DatabaseGetImage('project',_experiments[i].medium_image_url,function(img){
+				if(_projects[i].medium_image_url != '/images/medium/missing.png'){
+					DatabaseGetImage('project',_projects[i].medium_image_url,function(img){
 						$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', $(img.img).attr('src'))
 					});
 				}
@@ -118,7 +124,7 @@ function GetProjectsFromCache(){
 				$('#ProjectTab .list-group a').length
 			);
 
-			chrome.storage.local.getBytesInUse('cached_experiments', function(response){
+			chrome.storage.local.getBytesInUse('cached_projects', function(response){
 				$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 			});
 		}
@@ -135,16 +141,16 @@ function GetProjectsFromDB(token,email){
 	if(navigator.onLine && (token != null && email != null)){
 		$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud').addClass('fa-cloud-download');
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "http://photosynq.venturit.net/api/v1/projects.json?user_token="+token+"&user_email="+email, true);
+		xhr.open("GET", _apiURL+"projects.json?user_token="+token+"&user_email="+email, true);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xhr.send();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
-					_experiments = {};
+					_projects = {};
 					for(i in tmp){
-						_experiments[tmp[i].id] = {
+						_projects[tmp[i].id] = {
 							'id':tmp[i].id,
 							'name':tmp[i].name,
 							'custom_fields':tmp[i].custom_fields,
@@ -166,7 +172,7 @@ function GetProjectsFromDB(token,email){
 					WriteMessage(''+tmp.error,'danger');
 					return;
 				}
-				SaveToStorage('cached_experiments',_experiments,function(){
+				SaveToStorage('cached_projects',_projects,function(){
 					GetProjectsFromCache();
 				});
 				WriteMessage('Experiment list updated','info');
@@ -244,7 +250,7 @@ function GetProtocolsFromDB(token,email){
 	if(navigator.onLine && (token != null && email != null)){
 		$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud').addClass('fa-cloud-download');
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "http://photosynq.venturit.net/api/v1/protocols.json?user_token="+token+"&user_email="+email, true);
+		xhr.open("GET", _apiURL+"protocols.json?user_token="+token+"&user_email="+email, true);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xhr.send();
 		xhr.onreadystatechange = function() {
@@ -315,7 +321,7 @@ function GetMacrosFromCache(){
 function GetMacrosFromDB(token,email){
 	$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud').addClass('fa-cloud-download');
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "http://photosynq.venturit.net/api/v1/macros.json?user_token="+token+"&user_email="+email, true);
+	xhr.open("GET", _apiURL+"macros.json?user_token="+token+"&user_email="+email, true);
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	xhr.send();
 	xhr.onreadystatechange = function() {
@@ -355,7 +361,7 @@ function GetMacrosFromDB(token,email){
 function DatabaseAddDataToProject(){
 	var token = _authentication.auth_token;
 	var email = _authentication.email
-	var project_id = SelectedProject;
+	var project_id = _SelectedProject;
 	var data = ResultString;
 	if(!navigator.onLine && (token != null && email != null && project_id != null && data != '')){
 		PushDataToStorage(email,project_id,data)
@@ -363,7 +369,7 @@ function DatabaseAddDataToProject(){
 	if(navigator.onLine && (token != null && email != null && project_id != null && data != '')){
 		$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud').addClass('fa-cloud-upload');
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST", "http://photosynq.venturit.net/api/v1/projects/"+project_id+"/data.json", true);
+		xhr.open("POST", _apiURL+"projects/"+project_id+"/data.json", true);
 		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		var params = {"user_token":token, "user_email":email, "data": data};
 		try{
@@ -432,7 +438,7 @@ function PushDataToStorage(email,project_id,data){
 // ===============================================================================================
 function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "http://photosynq.venturit.net/api/v1/projects/"+cacheProjectID+"/data.json", true);
+	xhr.open("POST", _apiURL+"projects/"+cacheProjectID+"/data.json", true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	var params = {"user_token":token, "user_email":email, "data": experiment_data[email][cacheProjectID][i]};
 	try{
@@ -547,7 +553,7 @@ function DatabaseGetImage(location,url,callback){
 		return;
 	}
 	if(_media[location] !== undefined && _media[location][url] !== undefined){
-		callback({'img':'<img src="'+_media[location][url]+'">','url':url});
+		callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
 	}	
 	else{
 		var xhr = new XMLHttpRequest();
@@ -556,7 +562,7 @@ function DatabaseGetImage(location,url,callback){
 			if (xhr.readyState == 4 && xhr.status == 200){
 				if(xhr.response !== null && xhr.response !== undefined){
 					SaveImgToLocalStorage(location,url,window.URL.createObjectURL(xhr.response));
-					callback({'img':'<img src="'+window.URL.createObjectURL(xhr.response)+'">','url':url});
+					callback({'img':'<img src="'+window.URL.createObjectURL(xhr.response)+'">','url':url, 'src':window.URL.createObjectURL(xhr.response)});
 				}
 			}
 		}
@@ -564,16 +570,3 @@ function DatabaseGetImage(location,url,callback){
 		xhr.send();
 	}
 };
-
-
-// ===============================================================================================
-//									Sort dropdown menu
-// ===============================================================================================
-function sortingAZ(a,b) {
-	if (a.text > b.text) 
-		return 1;
-	else if (a.text < b.text) 
-		return -1;
-	else 
-		return 0
-}
