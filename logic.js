@@ -1363,7 +1363,7 @@ function BatteryLevel(batt_level,dialog){
 	$("#BatteryStatusIndicator").removeClass();
 	if((batt_level[0] - batt_level[1]) < 0.1){
 		state = 'USB Power Only'
-		$('#BatteryStatusIndicator').addClass('text-info').addClass('icon-bat-charge').attr('title',state);
+		$('#BatteryStatusIndicator').addClass('fa-inverse').addClass('icon-bat-charge').attr('title',state);
 	}
 	else if(batt_level[1] < 5 && batt_level[0] > 7){
 		state = 'Low quality batteries, replace with NiMh or Li'
@@ -1380,15 +1380,15 @@ function BatteryLevel(batt_level,dialog){
 		}
 		if(batt_level[0] > 6.6 && batt_level[0] < 7.1){
 			state = 'Batteries are low'
-			$('#BatteryStatusIndicator').addClass('text-danger').addClass('icon-bat2').attr('title',state);
+			$('#BatteryStatusIndicator').addClass('fa-inverse').addClass('icon-bat2').attr('title',state);
 		}
 		if(batt_level[0] >= 7.1 && batt_level[0] < 7.6){
 			state = 'Batteries are OK'
-			$('#BatteryStatusIndicator').addClass('text-success').addClass('icon-bat3').attr('title',state);
+			$('#BatteryStatusIndicator').addClass('fa-inverse').addClass('icon-bat3').attr('title',state);
 		}
 		if(batt_level[0] >= 7.6){
 			state = 'Batteries are good'
-			$('#BatteryStatusIndicator').addClass('text-success').addClass('icon-bat4').attr('title',state);
+			$('#BatteryStatusIndicator').addClass('fa-inverse').addClass('icon-bat4').attr('title',state);
 		}
 	}
 	if(dialog)
