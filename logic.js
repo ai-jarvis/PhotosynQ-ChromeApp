@@ -400,7 +400,6 @@ onload = function() {
 		if(!$(this).hasClass('active')){
 			SelectProject($(this).attr('data-value'));
 			$('#SubNavigation a[href="#ProjectMeasurementTab"]').tab('show');
-			_SelectedProject = $('#ProjectListTab .list-group .active').attr('data-value');
 		}
 		else{
 			DiscardMeasurement();
@@ -1083,9 +1082,9 @@ function DatabaseMeasurement() {
 	
 	var no_answers = false;
 	_given_answers = [];
-	$('#UserAnswers select option:selected').each(function(i,k){
-		_given_answers.push($(k).attr('value'));
-		if($(k).attr('value') === ""){
+	$('#UserAnswers [id^="answer_"]').each(function(i,k){
+		_given_answers.push($(k).val());
+		if($(k).val() === ""){
 			no_answers = true;
 		}
 	});
@@ -1305,7 +1304,7 @@ function ProgressBar(step, total){
 //						Disable all buttons and input fields
 // ===============================================================================================
 function DisableInputs(){
-	$( "button, input[type='button'], select, input[type='checkbox'], textarea" ).prop( "disabled", true );
+	$( "button, input[type='button'], select, input[type='checkbox'], textarea, #UserAnswers input" ).prop( "disabled", true );
 	$('#SubNavigation li').addClass('disabled');
 	$('#TerminateMeasurement, #ShowOutputBtn, #RawOutputTextarea').prop( "disabled", false );
 	$('#RawOutputTextarea').hide();
@@ -1316,7 +1315,7 @@ function DisableInputs(){
 //						Enable all buttons and input fields
 // ===============================================================================================
 function EnableInputs(){
-	$( "button, input[type='button'], select, input[type='checkbox'], textarea" ).prop( "disabled", false );
+	$( "button, input[type='button'], select, input[type='checkbox'], textarea, #UserAnswers input" ).prop( "disabled", false );
 	$('#SubNavigation li').removeClass('disabled');
 	$('#TerminateMeasurementMenu').hide();
 }

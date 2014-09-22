@@ -129,7 +129,7 @@ function GetProjectsFromCache(){
 			});
 		}
 		else{
-			WriteMessage('No Experiments cached. Connect to the internet to update your list.','warning')
+			WriteMessage('No projects cached. Connect to the internet to update your list.','warning')
 		}
 	});
 }
@@ -148,6 +148,7 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
+					console.log(tmp);
 					_projects = {};
 					for(i in tmp){
 						_projects[tmp[i].id] = {
@@ -175,7 +176,7 @@ function GetProjectsFromDB(token,email){
 				SaveToStorage('cached_projects',_projects,function(){
 					GetProjectsFromCache();
 				});
-				WriteMessage('Experiment list updated','info');
+				WriteMessage('Project list updated','info');
 				$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-download').addClass('fa-cloud');
 			}
 		}

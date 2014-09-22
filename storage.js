@@ -140,108 +140,105 @@ function LoadPortNameFromStorage() {
 // ===============================================================================================
 function SelectProject(id) {
 	DiscardMeasurement();
-	chrome.storage.local.get('cached_projects', function(response){
-		if(response['cached_projects'] !== undefined){
-			try {
-				var experiments = JSON.parse(response['cached_projects']);
-			} catch (e) {
-				RemoveFromStorage('cached_projects');
-				WriteMessage('Stored projects have the wrong format.','danger');
-				return;
-			}				
-			if(experiments[id] !== undefined){
-				$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-				
-				/** Add project title **/
-				var html = '<div class="col-md-12"><legend>'+experiments[id].name+'</legend></div>';
-				
-				/** Adding project directions and description **/
-				html += '<div class="col-md-7 col-lg-8">'
-					+'<blockquote style="font-size:14px">'+experiments[id].directions_to_collaborators+'</blockquote>'
-					+'<h4>About</h4>'
-					+'<div class="text-justify">'
-					+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
-					+ experiments[id].description
-					+'</div>'
-				+'</div>';
+	if(_projects[id] !== undefined){
+		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+		
+		/** Add project title **/
+		var html = '<div class="col-md-12"><legend>'+_projects[id].name+'</legend></div>';
+		
+		/** Adding project directions and description **/
+		html += '<div class="col-md-7 col-lg-8">'
+			+'<blockquote style="font-size:14px">'+_projects[id].directions_to_collaborators+'</blockquote>'
+			+'<h4>About</h4>'
+			+'<div class="text-justify">'
+			+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
+			+ _projects[id].description
+			+'</div>'
+		+'</div>';
 
-				/** Add project lead and link to website **/
-				html += '<div class="col-md-5 col-lg-4">'
-					+'<div class="media">'
-					+'<a href="http://photosynq.venturit.net/users/'+experiments[id].lead.slug+'" class="pull-left" id="LeadAvatar" target="_blank"></a>'
-					+'<div class="media-body">'
-					+'<h4 class="media-heading">'+experiments[id].lead.name+'</h4>'
-					+'<small class="text-muted">'
-					+'<i class="fa fa-envelope-o"></i> '+experiments[id].lead.email
-					+'<br>'
-					+'<i class="fa fa-map-marker"></i> '+experiments[id].lead.institute
-					+'</small>'
-					+'</div>'
-					+'<div class="row" style="margin-top:10px">'
-					+'<div class="col-md-6 text-center"><h4 class="text-primary">'+experiments[id].lead.data_count+'<br><small>Measurements</small></h4></div>'
-					+'<div class="col-md-6 text-center"><h4 class="text-primary">'+ new Date(experiments[id].lead.updated_at).toLocaleDateString()+'<br><small>Latest Activity</small></h4></div>'
-					+'<div class="col-md-12"><hr></div>'
-					+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
-						+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'" target="_blank">View project</a>'
-					+'</div>'
-					+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
-						+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+experiments[id].slug+'/explore_data" target="_blank">Explore data</a>'
-					+'</div>'
-					+'</div>'
-					+'</div>'
-					+'<hr>'
-					
-					/** Add scripts and descriptions **/
-					html += '<h4>Protocols</h4>'
-					+'<dl>'
-					for(ii in experiments[id].protocols_ids){
-						html += '<dt>'+_protocols[experiments[id].protocols_ids[ii]].name+'</dt>';
-						html += '<dd class="text-muted"><small>'+_protocols[experiments[id].protocols_ids[ii]].description+'</small></dd>';
-					}
-					html += '</dl>'
-				html += '</div>';
+		/** Add project lead and link to website **/
+		html += '<div class="col-md-5 col-lg-4">'
+			+'<div class="media">'
+			+'<a href="http://photosynq.venturit.net/users/'+_projects[id].lead.slug+'" class="pull-left" id="LeadAvatar" target="_blank"></a>'
+			+'<div class="media-body">'
+			+'<h4 class="media-heading">'+_projects[id].lead.name+'</h4>'
+			+'<small class="text-muted">'
+			+'<i class="fa fa-envelope-o"></i> '+_projects[id].lead.email
+			+'<br>'
+			+'<i class="fa fa-map-marker"></i> '+_projects[id].lead.institute
+			+'</small>'
+			+'</div>'
+			+'<div class="row" style="margin-top:10px">'
+			+'<div class="col-md-6 text-center"><h4 class="text-primary">'+_projects[id].lead.data_count+'<br><small>Measurements</small></h4></div>'
+			+'<div class="col-md-6 text-center"><h4 class="text-primary">'+ new Date(_projects[id].lead.updated_at).toLocaleDateString()+'<br><small>Latest Activity</small></h4></div>'
+			+'<div class="col-md-12"><hr></div>'
+			+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
+				+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+_projects[id].slug+'" target="_blank">View project</a>'
+			+'</div>'
+			+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
+				+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+_projects[id].slug+'/explore_data" target="_blank">Explore data</a>'
+			+'</div>'
+			+'</div>'
+			+'</div>'
+			+'<hr>'
+			
+			/** Add scripts and descriptions **/
+			html += '<h4>Protocols</h4>'
+			+'<dl>'
+			for(ii in _projects[id].protocols_ids){
+				html += '<dt>'+_protocols[_projects[id].protocols_ids[ii]].name+'</dt>';
+				html += '<dd class="text-muted"><small>'+_protocols[_projects[id].protocols_ids[ii]].description+'</small></dd>';
+			}
+			html += '</dl>'
+		html += '</div>';
 
-				$('#PlotsContainer').append(html);
+		$('#PlotsContainer').append(html);
+		
+		DatabaseGetImage('project',_projects[id].medium_image_url,function(img){
+			$('#ImageSpacer').replaceWith('<img src="'+img.src+'" class="pull-left" style="padding-right:10px; width:40%">');
+		});
+		DatabaseGetImage('avatar',_projects[id].image_file_name,function(img){
+			$('#LeadAvatar').html(img.img);
+		});
+
+		$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
+		
+		if($('#CheckBoxRememberAnswers:checked').length == 1)
+			return
+
+		_SelectedProject = _projects[id].id;
+		var html = '';
+		// Set up User Questions here...
+		for(question in _projects[id].custom_fields){
+			if(_projects[id].custom_fields[question].label == "")
+				continue;
+			if(_projects[id].custom_fields[question].value_type == 1 && _projects[id].custom_fields[question].value !== ""){
+				html += '<div class="form-group">';
+				html += '<label for="answer_'+_projects[id].custom_fields[question].id+'">'+_projects[id].custom_fields[question].label+'</label>';
+				html += '<select class="form-control" id="answer_'+_projects[id].custom_fields[question].id+'">'
+				html += '<option value="">Your answer</option>';
+				var values = _projects[id].custom_fields[question].value.split(',');
 				
-				DatabaseGetImage('project',experiments[id].medium_image_url,function(img){
-					$('#ImageSpacer').replaceWith('<img src="'+img.src+'" class="pull-left" style="padding-right:10px; width:40%">');
-				});
-				DatabaseGetImage('avatar',experiments[id].image_file_name,function(img){
-					$('#LeadAvatar').html(img.img);
-				});
-
-				$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
-				
-				if($('#CheckBoxRememberAnswers:checked').length == 1)
-					return
-
-				_SelectedProject = experiments[id].id;
-				var html = '';
-				// Set up User Questions here...
-				for(question in experiments[id].custom_fields){
-					if(experiments[id].custom_fields[question].value !== ""){
-						html += '<div class="form-group">';
-						html += '<label for="answer_'+experiments[id].custom_fields[question].id+'">'+experiments[id].custom_fields[question].label+'</label>';
-						html += '<select class="form-control" id="answer_'+experiments[id].custom_fields[question].id+'">'
-						html += '<option value="">Your answer</option>';
-						var values = experiments[id].custom_fields[question].value.split(',');
-						
-						for(answerstring in values){
-							if(values[answerstring].trim().length > 0)
-								html += '<option value="'+values[answerstring].trim()+'">'+values[answerstring].trim()+'</option>';
-						}
-						html += '</select>';
-						html += '</div>';
-					}
+				for(answerstring in values){
+					if(values[answerstring].trim().length > 0)
+						html += '<option value="'+values[answerstring].trim()+'">'+values[answerstring].trim()+'</option>';
 				}
-				$('#UserAnswers').html(html);
+				html += '</select>';
+				html += '</div>';
+			}
+			else if(_projects[id].custom_fields[question].value_type == 2){
+				html += '<div class="form-group">';
+				html += '<label for="answer_'+_projects[id].custom_fields[question].id+'">'+_projects[id].custom_fields[question].label+'</label>';
+				html += '<input type="text" class="form-control" id="answer_'+_projects[id].custom_fields[question].id+'" placeholder="Your answer" maxlength="100">'
+				html += '</div>';
 			}
 		}
-		else{
-			_SelectedProject = null;
-			WriteMessage('Project couldn\'t be loaded.','info')
-		}
-	});
+		$('#UserAnswers').html(html);
+	}
+	else{
+		_SelectedProject = null;
+		WriteMessage('Project not found.','danger');
+	}
 };
 
 
