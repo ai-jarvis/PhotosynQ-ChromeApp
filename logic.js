@@ -618,6 +618,20 @@ onload = function() {
 		$('.toast-top-right').css('top','55px');	
 	}
 
+	// Settings and initializing CodeMirror for Console
+	// =====================================================================
+	ConsoleProtocolContent = CodeMirror(document.getElementById('ConsoleProtocolContent'),{
+		value: "",
+		mode:  "javascript",
+		lineWrapping: true,
+		lineNumbers: false
+	});
+
+	$('#SubNavigation a[href="#ConsoleTab"]').on('shown.bs.tab', function () {
+		ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
+	});
+
+
 	// Filter Parameter
 	// =====================================================================
 	jQuery.expr[':'].contains = function(a, i, m) { 
@@ -674,7 +688,8 @@ onload = function() {
 	$("#MainDisplayContainer").height(bodyheight);
 	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
 	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
-	$('#ConsoleProtocolContent').height(bodyheight-213);
+	$('#ConsoleProtocolContent').height(bodyheight-154);
+	ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
 	$(window).resize(function() {
 		bodyheight = $(window).height()-84;
 		$("#MainDisplayContainer").height(bodyheight);
@@ -683,7 +698,8 @@ onload = function() {
 			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
 		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
-		$('#ConsoleProtocolContent').height(bodyheight-213);
+		$('#ConsoleProtocolContent').height(bodyheight-154);
+		ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
 	});
 
 	// Menu toggle events
@@ -788,7 +804,6 @@ onload = function() {
 			}
 		}
 	}
-
 	
 	// Get updates from database/file, auto login
 	// ===============================================================================================
@@ -864,11 +879,13 @@ onload = function() {
 
 	window.addEventListener('message', function(event) {
 		if(event.data.protocol_to_console !== undefined){
-			$('#ConsoleProtocolContent').val(event.data.protocol_to_console);
+			//$('#ConsoleProtocolContent').val(event.data.protocol_to_console);
+			ConsoleProtocolContent.setValue(event.data.protocol_to_console);
 			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
 		}
 		if(event.data.protocol_run !== undefined){
-			$('#ConsoleProtocolContent').val(event.data.protocol_run);
+			//$('#ConsoleProtocolContent').val(event.data.protocol_run);
+			ConsoleProtocolContent.setValue(event.data.protocol_run);
 			$('#SubNavigation a[href="#ConsoleTab"]').tab('show');
 			try{
 				var protocol = JSON.parse(event.data.protocol_run.trim());
@@ -1137,7 +1154,7 @@ function QuickMeasurement() {
 // 						Logic run if Console Measurement is started
 // ===============================================================================================
 function ConsoleMeasurement() {
-	ConsoleProtocol = $('#ConsoleProtocolContent').val();
+	ConsoleProtocol = ConsoleProtocolContent.getValue(); //$('#ConsoleProtocolContent').val();
 	if(ConsoleProtocol == ''){
 		WriteMessage('Console is empty...','danger');
 		return;

@@ -7,6 +7,7 @@
 	<link href="css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css">
 	<link href="css/font-awesome-animation.min.css" media="all" rel="stylesheet" type="text/css">
 	<link href="css/PhotosynQ.css" media="all" rel="stylesheet" type="text/css">
+	<link href="css/codemirror.css" media="all" rel="stylesheet" type="text/css">
 	<link href="css/toastr.css" media="all" rel="stylesheet" type="text/css">
 	<script src="backwardscompatibility.js"></script>
 	<script src="js/jquery.min.js"></script>
@@ -17,6 +18,8 @@
 	<script src="js/initalvariables.js"></script>
 	<script src="js/toastr.min.js"></script>
 	<script src="js/jquery.sparkline.min.js"></script>
+	<script src="js/codemirror/codemirror.js"></script>
+	<script src="js/codemirror/javascript.js"></script>
 	<script src="graph.js"></script>
 	<script src="location.js"></script>
 	<script src="storage.js"></script>
@@ -26,6 +29,7 @@
 		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
 
 		body > #container {margin-top:-5px; padding:0px 10px 10px 10px;}
+			
 	</style>
 </head>
 <body>
@@ -231,10 +235,8 @@
 					<div class="panel-heading">
 						<h4 class="panel-title">Console</h4>
 					</div>
-					<div class="panel-body">
-						<div class="form-group">
-							<textarea id="ConsoleProtocolContent" class="form-control" style="resize: none;"></textarea>
-						</div>
+					<div class="panel-body" id="ConsoleProtocolContent" style="padding:0px">
+						
 					</div>
 					<div class="panel-footer">
 						<button id="ConsoleMeasurement" value="send" class="btn btn-xs btn-success" title="Submit your measurement protocol / data"><i class="fa fa-play"></i> Start</button>

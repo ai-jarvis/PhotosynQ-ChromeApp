@@ -58,7 +58,6 @@ function LoadAuthentificationFromStorage() {
 			$('#DatabaseSignedInLink').attr('href',_authentication.user.profile_url);
 			DatabaseGetImage('avatar',_authentication.user.thumb_url,function(img){
 				$('#LoginUserAvatar').attr('src',img.src);
-				console.log(img.src);
 			});
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);

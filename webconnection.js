@@ -41,7 +41,6 @@ function DatabaseSignIn(){
 				$('#DatabaseSignedInLink').attr('href',response.user.profile_url);
 				DatabaseGetImage('avatar',response.user.thumb_url,function(img){
 					$('#LoginUserAvatar').attr('src',img.src);
-					console.log(img.src);
 				});
 				
 				
@@ -148,7 +147,6 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
-					console.log(tmp);
 					_projects = {};
 					for(i in tmp){
 						_projects[tmp[i].id] = {
