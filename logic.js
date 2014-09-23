@@ -364,6 +364,13 @@ onload = function() {
 	document.getElementById('QuickMeasurement').addEventListener('click', QuickMeasurement);
 	document.getElementById('ConsoleMeasurement').addEventListener('click', ConsoleMeasurement);
 	document.getElementById('TerminateMeasurement').addEventListener('click', TerminateMeasurement);
+	document.getElementById('SkipWaitBtn').addEventListener('click', function(e){
+		$('#SkipWaitBtn').blur().prop('disabled',true);
+		chrome.serial.send(connectionId, str2ab('-1+'), function(){
+			$('#SkipWaitBtn').prop('disabled',false);
+		});
+	});
+	
 	document.getElementById('ShowOutputBtn').addEventListener('click', function(e){ 
 		$('#ShowOutputBtn').blur();
 		$('#RawOutputTextarea').toggle(); 
@@ -624,11 +631,12 @@ onload = function() {
 		value: "",
 		mode:  "javascript",
 		lineWrapping: true,
-		lineNumbers: false
+		lineNumbers: true
 	});
 
 	$('#SubNavigation a[href="#ConsoleTab"]').on('shown.bs.tab', function () {
 		ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
+		ConsoleProtocolContent.focus();
 	});
 
 
@@ -665,7 +673,6 @@ onload = function() {
 		);
 		return false;
 	});
-
 
 	$('#QuickMeasurementTab .list-group, #ProjectTab .list-group').on('click', 'a', function(){
 		if($(this).hasClass('active'))
@@ -1323,7 +1330,7 @@ function ProgressBar(step, total){
 function DisableInputs(){
 	$( "button, input[type='button'], select, input[type='checkbox'], textarea, #UserAnswers input" ).prop( "disabled", true );
 	$('#SubNavigation li').addClass('disabled');
-	$('#TerminateMeasurement, #ShowOutputBtn, #RawOutputTextarea').prop( "disabled", false );
+	$('#TerminateMeasurement, #ShowOutputBtn, #RawOutputTextarea, #SkipWaitBtn').prop( "disabled", false );
 	$('#RawOutputTextarea').hide();
 	$('#TerminateMeasurementMenu').show();
 }

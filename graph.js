@@ -310,29 +310,31 @@ window.addEventListener('message', function(event) {
 						$(v).children('td').attr('colspan','2');
 				});
 				
-				if(event.data.graph[repeat][protocolID].GraphType == 'line'){
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						 marker: { enabled: false}
-					});
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						lineWidth: 4
-					});
-				}
-				if(event.data.graph[repeat][protocolID].GraphType == 'points'){
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						 marker: { enabled: true}
-					});
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						lineWidth: 0
-					});
-				}
-				if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						 marker: { enabled: true}
-					});
-					$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
-						lineWidth: 4
-					});
+				if($('#plotRawData'+repeat+''+protocolID).length > 0){
+					if(event.data.graph[repeat][protocolID].GraphType == 'line'){
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							 marker: { enabled: false}
+						});
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							lineWidth: 4
+						});
+					}
+					if(event.data.graph[repeat][protocolID].GraphType == 'points'){
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							 marker: { enabled: true}
+						});
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							lineWidth: 0
+						});
+					}
+					if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							 marker: { enabled: true}
+						});
+						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
+							lineWidth: 4
+						});
+					}
 				}
 			}
 		}
