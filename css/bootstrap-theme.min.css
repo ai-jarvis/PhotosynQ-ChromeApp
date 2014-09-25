@@ -41,3 +41,65 @@
 .nav-justified > li > a > i {
 	font-size: 18px
 }
+
+/*body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;} */
+
+@font-face {
+  font-family: 'Open Sans Regular';
+  src:url('fonts/OpenSans-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Open Sans Semibold';
+  src:url('fonts/OpenSans-Semibold.ttf');
+}
+
+body {
+	background-image:none;
+	margin:0px;
+	padding:0px;
+	color:#71747a;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: #494d57
+}
+
+.navbar-inverse {
+  background: -webkit-linear-gradient(left,rgba(68,189,120,1),rgba(177,199,91,1));
+  background: -o-linear-gradient(right,rgba(68,189,120,1),rgba(177,199,91,1));
+  background: -moz-linear-gradient(right,rgba(68,189,120,1),rgba(177,199,91,1));
+  background: linear-gradient(to right, rgba(68,189,120,1),rgba(177,199,91,1));
+  border:none;
+}
+
+.navbar-inverse .navbar-text {
+	color:#fff
+}
+
+.navbar-inverse .navbar-nav > .open > a:focus,
+.navbar-inverse .navbar-nav > .open > a:hover, 
+.navbar-inverse .navbar-nav > .open > a{
+	background-color: rgba(0,0,0,.1)
+}
+
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-nav > li > a,
+.navbar-inverse .navbar-nav > .active > a {
+	text-shadow: none;
+	color:#fff;
+}
+
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:focus,
+.navbar-inverse .navbar-nav > .active > a:hover {
+	background-image: none;
+	background-color: rgba(0,0,0,.1);
+	box-shadow: none;
+}
+
+legend { color:#3094db; font-weight:bold }
+
+label { color:#494d57 }

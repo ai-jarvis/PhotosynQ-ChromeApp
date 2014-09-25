@@ -20,7 +20,7 @@ var _media = {};
 var _given_answers = [];
 var _consolemacros = false;
 var _muteMessages = false;
-var _apiURL = "http://photosynq.venturit.org/api/v1/";
+var _apiURL = "http://photosynq.venturit.net/api/v1/";
 
 // ===============================================================================================
 // 					Logic to read and process incoming data
@@ -702,7 +702,7 @@ onload = function() {
 		$("#MainDisplayContainer").height(bodyheight);
 		$("#MainDisplayContainer > .panel-body").height(bodyheight-40);
 		if($("#MainDisplayContainer .panel-footer").is(":visible"))
-			$("#MainDisplayContainer > .panel-body").height(bodyheight-85);
+			$("#MainDisplayContainer > .panel-body").height(bodyheight-68);
 		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
 		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
 		$('#ConsoleProtocolContent').height(bodyheight-154);
@@ -1161,7 +1161,7 @@ function QuickMeasurement() {
 // 						Logic run if Console Measurement is started
 // ===============================================================================================
 function ConsoleMeasurement() {
-	ConsoleProtocol = ConsoleProtocolContent.getValue(); //$('#ConsoleProtocolContent').val();
+	ConsoleProtocol = ConsoleProtocolContent.getValue();
 	if(ConsoleProtocol == ''){
 		WriteMessage('Console is empty...','danger');
 		return;
@@ -1169,6 +1169,7 @@ function ConsoleMeasurement() {
 	if($('#ConsoleProtocolRaw').is(':checked')){
 		DiscardMeasurement();
 		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+		$('#MainDisplayContainer .panel-body').prop('contenteditable', true);
 		_MeasurementType = 'consoleraw';
 		SendLongStrings(ConsoleProtocol+'!');
 		_dataRead = '';
@@ -1361,6 +1362,7 @@ function remove(arr, item) {
 function DiscardMeasurement(){
 	chrome.power.releaseKeepAwake();
 	EnableInputs();
+	$('#MainDisplayContainer .panel-body').prop('contenteditable', false);
 	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');

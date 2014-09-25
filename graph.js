@@ -149,7 +149,7 @@ function plot(data){
 			var col = 1;
 			HTML += '<tr>';
 			for(values in data[repeat][protocolID]){
-				if($.inArray(values, variablehidephone) == -1){
+				if(ToExclude.indexOf(values) == -1){
 					if(col % 2 && col !== 1)
 						HTML += '</tr><tr>';
 					HTML += '<td style="width:50%">';

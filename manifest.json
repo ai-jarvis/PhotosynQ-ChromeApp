@@ -36,6 +36,7 @@
 		"http://photosynq.venturit.net/*",
 		"http://photosynq.venturit.org/*",
 		"http://s3.amazonaws.com/photosynq/*",
+		"https://photosynq.s3.amazonaws.com/*",
 		"http://export.highcharts.com/*"
 	],
 	"sandbox": {

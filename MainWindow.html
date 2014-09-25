@@ -26,10 +26,7 @@
 	<script src="webconnection.js"></script>
 	<script src="logic.js"></script>
 	<style>
-		body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
-
 		body > #container {margin-top:-5px; padding:0px 10px 10px 10px;}
-			
 	</style>
 </head>
 <body>
@@ -52,6 +49,8 @@
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" title="Tools to explore and generate experiments">Tools <b class="caret"></b></a>
 				<ul class="dropdown-menu">
 					<li><a href="#" id="DataViewBtn" title="View previously recorded measurements"><i class="fa fa-eye"></i> Data Viewer</a></li>
+					<li class="divider"></li>
+					<li class="dropdown-header">Development</li>
 					<li><a href="#" id="BuiltYourQuickMeasurement" title="Build new measurement protocols"><i class="fa fa-magic"></i> Protocol Assembly</a></li>
 					<li><a href="#" id="BuiltYourMacro"><i class="fa fa-puzzle-piece" title="Develop macros to evaluate measurements"></i> Macro Development</a></li>
 				</ul>
@@ -112,7 +111,7 @@
 						<div id="DatabaseSignedIn" style="display:none;">
 							<div class="media">
 							  <a class="pull-left" id="DatabaseSignedInLink" href="#" target="_blank">
-								<img src="img/thumb_missing.png" class="media-object" id="LoginUserAvatar">
+								<img src="img/thumb_missing.png" class="media-object img-circle" id="LoginUserAvatar" style="width:64px; height:64px">
 							  </a>
 							  <div class="media-body">
 								<h4 class="media-heading" id="DatabaseSignedInUser">User</h4>
@@ -252,8 +251,8 @@
 			
 			<!-- Container for Plots -->
 			<div class="col-md-8 col-lg-9">
-				<div class="panel panel-default" id="MainDisplayContainer" style="height:100%">
-					<div class="panel-body" style="background-image:url('img/containerbackground.png'); background-size:50%; background-repeat:no-repeat; background-position:50% 50%;overflow-y:scroll;">
+				<div class="" id="MainDisplayContainer" style="height:100%;">
+					<div class="panel-body" style="background-image:url('img/containerbackground.png');  padding-top:0px; background-size:50%; background-repeat:no-repeat; background-position:50% 50%;overflow-y:auto;">
 						<div id="TransientPlotsContainer" style="min-height:0px"></div>
 						<div class="row">
 							<div id="PlotsContainer" style="word-wrap:break-word;"></div>

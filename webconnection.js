@@ -43,7 +43,6 @@ function DatabaseSignIn(){
 					$('#LoginUserAvatar').attr('src',img.src);
 				});
 				
-				
 				GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 				GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 				GetMacrosFromDB(_authentication.auth_token,_authentication.email);
@@ -108,7 +107,10 @@ function GetProjectsFromCache(){
 				var html = '<a href="#" class="list-group-item" data-value="'+_projects[i].id+'" style="min-height:88px;">';
 				html += '<img class="media-object pull-left" data-url="'+_projects[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
 				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_projects[i].name+'</h5>';
-				html += '<small class="list-group-item-text">'+_projects[i].description+'</small>';
+				if(_projects[i].description.length > 400)
+					html += '<small class="list-group-item-text">'+_projects[i].description.substring(0, 400)+' ...</small>';
+				else
+					html += '<small class="list-group-item-text">'+_projects[i].description+'</small>';
 				html += '</a>';
 				$('#ProjectList').append(html);
 				
@@ -147,18 +149,21 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
+					console.log(tmp)
 					_projects = {};
 					for(i in tmp){
 						_projects[tmp[i].id] = {
-							'id':tmp[i].id,
-							'name':tmp[i].name,
-							'custom_fields':tmp[i].custom_fields,
-							'directions_to_collaborators':tmp[i].directions_to_collaborators,
-							'lead':tmp[i].lead,
-							'medium_image_url':tmp[i].medium_image_url,
-							'description':tmp[i].description,
-							'protocols_ids':tmp[i].protocols_ids,
-							'slug':tmp[i].slug
+							'id': tmp[i].id,
+							'name': tmp[i].name,
+							'custom_fields': tmp[i].custom_fields,
+							'directions_to_collaborators': tmp[i].directions_to_collaborators,
+							'lead': JSON.parse(tmp[i].plead),
+							'medium_image_url': tmp[i].medium_image_url,
+							'description': tmp[i].description,
+							'protocols_ids': tmp[i].protocols_ids,
+							'url': tmp[i].purl,
+							'update': tmp[i].updated_at,
+							'data_count': tmp[i].data_count
 						}
 					}
 				} catch (e) {

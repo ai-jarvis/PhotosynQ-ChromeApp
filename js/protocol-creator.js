@@ -998,9 +998,9 @@ onload = function() {
 	$(window).resize(function() {
 		bodyheight = $(window).height()-45;
 		$("#MainDisplayContainer").height(bodyheight);
-		$("#parameter_unused,#presets,#presets_second").height(bodyheight-432);
-		$("#parameter_used").height(bodyheight-397);
-		$("#RawProtocol").height(bodyheight-371);
+		$("#parameter_unused,#presets,#presets_second").height(bodyheight-396);
+		$("#parameter_used").height(bodyheight-370);
+		$("#RawProtocol").height(bodyheight-345);
 	});
 	$(window).trigger('resize');
 

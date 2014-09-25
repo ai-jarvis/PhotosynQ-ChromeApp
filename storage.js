@@ -145,37 +145,51 @@ function SelectProject(id) {
 		/** Add project title **/
 		var html = '<div class="col-md-12"><legend>'+_projects[id].name+'</legend></div>';
 		
-		/** Adding project directions and description **/
-		html += '<div class="col-md-7 col-lg-8">'
-			+'<blockquote style="font-size:14px">'+_projects[id].directions_to_collaborators+'</blockquote>'
-			+'<h4>About</h4>'
-			+'<div class="text-justify">'
-			+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
-			+ _projects[id].description
-			+'</div>'
-		+'</div>';
-
 		/** Add project lead and link to website **/
 		html += '<div class="col-md-5 col-lg-4">'
 			+'<div class="media">'
-			+'<a href="http://photosynq.venturit.net/users/'+_projects[id].lead.slug+'" class="pull-left" id="LeadAvatar" target="_blank"></a>'
+			+'<a href="'+_projects[id].lead.profile_url+'" class="pull-left" id="LeadAvatar" target="_blank">'
+			+'<img src="img/thumb_missing.png" class="media-object img-circle" style="width:64px; height:64px">'
+			+'</a>'
 			+'<div class="media-body">'
 			+'<h4 class="media-heading">'+_projects[id].lead.name+'</h4>'
 			+'<small class="text-muted">'
-			+'<i class="fa fa-envelope-o"></i> '+_projects[id].lead.email
+			//+'<i class="fa fa-envelope-o text-success"></i> '+_projects[id].lead.email
+			//+'<br>'
+			+_projects[id].lead.institute
 			+'<br>'
-			+'<i class="fa fa-map-marker"></i> '+_projects[id].lead.institute
+			+'<strong class="text-primary">'+_projects[id].lead.data_count+'</strong> Contributions'
 			+'</small>'
 			+'</div>'
-			+'<div class="row" style="margin-top:10px">'
-			+'<div class="col-md-6 text-center"><h4 class="text-primary">'+_projects[id].lead.data_count+'<br><small>Measurements</small></h4></div>'
-			+'<div class="col-md-6 text-center"><h4 class="text-primary">'+ new Date(_projects[id].lead.updated_at).toLocaleDateString()+'<br><small>Latest Activity</small></h4></div>'
-			+'<div class="col-md-12"><hr></div>'
-			+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
-				+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+_projects[id].slug+'" target="_blank">View project</a>'
+			+'<hr>'
+			+'<h4 class="text-primary">'+_projects[id].data_count+' <small>Measurements</small></h4>'
+		
+			var lastactivity = ' 1 minute ago'
+			var timediff = Date.now() - new Date(_projects[id].update)
+			if(timediff < 36e5)
+				lastactivity = Math.floor(timediff % 36e5 / 60000) +' minute'
+			else if(timediff < 864e5)
+				lastactivity =  Math.floor(timediff % 864e5 / 36e5) +' hour'
+			else if(timediff < 2.62974e9)
+				lastactivity =  Math.floor(timediff / 864e5) +' day'
+			else if(timediff < 3.156e10)
+				lastactivity =  Math.floor(timediff / 2.62974e9) +' month'
+			else if(timediff < 3.156e10)
+				lastactivity =  Math.floor(timediff / 3.156e+10) +' year'
+			
+			if(parseInt(lastactivity) > 1)
+				lastactivity += 's'
+			lastactivity += ' ago'
+				
+			
+		html += '<h5 class="text-primary">Latest Activity <small>'+ lastactivity +'</small></h5>'
+			+'<hr>'
+			+'<div class="btn-group btn-group-justified">'
+			+'<div class="btn-group">'
+			+'<a class="btn btn-link" href="'+_projects[id].url+'/explore_data" target="_blank"><i class="fa fa-line-chart"></i> Explore data</a>'
 			+'</div>'
-			+'<div class="col-xs-12 col-sm-12 col-md-6 text-center">'
-				+'<a class="btn btn-link" href="http://photosynq.venturit.net/projects/'+_projects[id].slug+'/explore_data" target="_blank">Explore data</a>'
+			+'<div class="btn-group">'
+			+'<a class="btn btn-link text-left" href="'+_projects[id].url+'" target="_blank"><i class="fa fa-flask"></i> View project</a>'
 			+'</div>'
 			+'</div>'
 			+'</div>'
@@ -190,18 +204,28 @@ function SelectProject(id) {
 			}
 			html += '</dl>'
 		html += '</div>';
-
+		
+		/** Adding project directions and description **/
+		html += '<div class="col-md-7 col-lg-8">'
+			+'<blockquote style="font-size:14px">'+_projects[id].directions_to_collaborators+'</blockquote>'
+			+'<h4>About</h4>'
+			+'<div class="text-justify" id="ProjectAboutSection">'
+			//+'<div id="ImageSpacer" class="pull-right" style="padding-left:10px;"></div>'
+			+ _projects[id].description
+			+'</div>'
+		+'</div>';		
+		
 		$('#PlotsContainer').append(html);
 		
 		DatabaseGetImage('project',_projects[id].medium_image_url,function(img){
-			$('#ImageSpacer').replaceWith('<img src="'+img.src+'" class="pull-left" style="padding-right:10px; width:40%">');
+			$('#ProjectAboutSection').prepend('<img src="'+img.src+'" class="pull-left img-rounded" style="margin-right:10px; width:40%">');
 		});
-		DatabaseGetImage('avatar',_projects[id].image_file_name,function(img){
-			$('#LeadAvatar').html(img.img);
+		DatabaseGetImage('avatar',_projects[id].lead.thumb_url,function(img){
+			$('#LeadAvatar img').attr("src", img.src);
 		});
 
-		$('#LeadAvatar').html('<img src="img/thumb_missing.png">')
-		
+
+	
 		if($('#CheckBoxRememberAnswers:checked').length == 1)
 			return
 

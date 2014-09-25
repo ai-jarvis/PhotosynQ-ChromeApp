@@ -16,7 +16,6 @@
 	<script src="js/protocol-creator.js"></script>
 	<script src="storage.js"></script>
 	<style>
-	body {background-image:url('img/papar_texture.jpg'); margin:0px; padding:0px;}
 	#ConstructionTab li {min-height:40px;}
 	#ConstructionTab li .form-group {margin-bottom:0px;}
 	#ConstructionTab li, li > label, li .form-group > label {cursor:move}
@@ -72,8 +71,8 @@
 		<div style="height:220px; width:100%; padding:4px" id="SingleScriptGraph" class="panel-body"></div>
 	</div>
 	
-	<div class="tab-content panel panel-default">
-		<div class="tab-pane fade in active" id="ConstructionTab" style="padding:10px">
+	<div class="tab-content">
+		<div class="tab-pane fade in active" id="ConstructionTab">
 			<div class="row">
 				<div class="col-md-5 col-sm-4">
 					<ul class="nav nav-tabs nav-justified">
@@ -123,7 +122,7 @@
 			</div>
 		</div>
 		
-		<div class="tab-pane fade" id="AssemblyTab" style="padding:10px">
+		<div class="tab-pane fade" id="AssemblyTab">
 			<div class="row">
 				<div class="col-md-5 col-sm-6">
 					<div class="panel panel-default">
@@ -146,7 +145,7 @@
 			</div>
 		</div>
 		
-		<div class="tab-pane fade" id="CodeTab" style="padding:10px;">
+		<div class="tab-pane fade" id="CodeTab">
 			<pre id="RawProtocol" style="overflow-y:scroll;"></pre>
 		</div>
 	</div>
