@@ -12,10 +12,14 @@ onload = function() {
 	// Initial call for empty JSON
 	// =====================================================================
 	window.addEventListener('message', function(event) {
+		if(event.data.filedata === undefined)
+			return;
+	
 		var filedata = event.data['filedata'];
 		_protocols = event.data['protocols'];
 		_macros = event.data['macros'];
 		$('#FileName,#FileNameMini').append(event.data['file']);
+
 		if(typeof filedata['time'] !== undefined){
 			var timestamp = filedata['time']
 			if(filedata.time_offset !== undefined)
