@@ -155,8 +155,12 @@ var plotoptionschromeextension = {
 var MenuItems = {
 	'Device': [
 		{
+		'type': 'spacer',
+		'title': 'Device Information'
+		},
+		{
 		'type': 'button',
-		'title': 'Device Info',
+		'title': 'General',
 		'icon': 'fa fa-info-circle',
 		'id': 'DeviceInfoBtn',
 		'command': '1007+',
@@ -174,7 +178,7 @@ var MenuItems = {
 		},
 		{
 		'type': 'button',
-		'title': 'Calibration Info',
+		'title': 'Calibrations',
 		'icon': 'fa fa-bar-chart-o',
 		'id': 'CalibrationInfoBtn',
 		'command': '1005+',
@@ -183,6 +187,10 @@ var MenuItems = {
 		},
 		{
 		'type': 'spacer'
+		},
+		{
+		'type': 'spacer',
+		'title': 'Power Control'
 		},
 		{
 		'type': 'button',

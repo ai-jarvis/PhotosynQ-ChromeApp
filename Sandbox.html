@@ -18,7 +18,7 @@ window.addEventListener('message', function(event) {
 	// Get macro lookup table
 	// ===============================================================================================
 	protocol_lookup = event.data.sandbox.protocols;
-	
+
 	// Run macros on data
 	// ===============================================================================================
 	for(sampleID in event.data.sandbox.devicedata.sample){
@@ -31,6 +31,9 @@ window.addEventListener('message', function(event) {
 			// Get Protocol_ID from measurement
 			if(event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id !== undefined)
 				protocol_id = event.data.sandbox.devicedata.sample[sampleID][measurementID].protocol_id;
+			
+			if(protocol_id == "")
+				protocol_id = false;
 			
 			// If Protocol_ID doesn't exist look for macro_id
 			if(!protocol_id){
@@ -64,6 +67,8 @@ window.addEventListener('message', function(event) {
 					data_return[sampleID] = {}
 				try {
 					data_return[sampleID][measurementID] = fn.apply(null, new Array(protocol_data));
+					if(event.data.sandbox.plottype == 'transient')
+						data_return[sampleID][measurementID].time = event.data.sandbox.timestamp;
 				}
 				catch(e){
 					data_return.error = e.message;
@@ -74,7 +79,10 @@ window.addEventListener('message', function(event) {
 
 	// Return macro output to main app
 	// ===============================================================================================
-	event.source.postMessage({'graph':data_return}, event.origin);
+	if(event.data.sandbox.plottype == 'post')
+		event.source.postMessage({'graph':data_return}, event.origin);
+	else if(event.data.sandbox.plottype == 'transient' )
+		event.source.postMessage({'graph_transient':data_return}, event.origin);
 
 });
 </script>

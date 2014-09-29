@@ -62,7 +62,7 @@ function LoadAuthentificationFromStorage() {
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 			GetMacrosFromDB(_authentication.auth_token,_authentication.email);
-			DatabaseAddDataToProjectFROMStorage(_authentication.auth_token,_authentication.email);			
+			DatabaseAddDataToProjectFROMStorage(_authentication.auth_token,_authentication.email);
 		}
 		else{
 			_authentication = null;
@@ -568,6 +568,7 @@ function loadFileEntry(chosenEntry) {
 							post['filedata'] = filedata;
 							post['protocols'] = [];
 							post['macros'] = [];
+							post['plottype'] = 'post';
 							for(i in filedata.sample){
 								for(ii in filedata.sample[i]){
 									if(filedata.sample[i][ii].protocol_id !== undefined && filedata.sample[i][ii].protocol_id != ""){									
@@ -577,9 +578,9 @@ function loadFileEntry(chosenEntry) {
 											post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
 									}
 
-									if(filedata.sample[i][ii].macro_id !== undefined && filedata.sample[i][ii].macro_id != ""){									
-										if(_macros[filedata.sample[i][ii].macro_id].macro_id !== undefined)
-											post['macros'][filedata.sample[i][ii].macro_id] = _macros[filedata.sample[i][ii].macro_id].macro_id
+									if(filedata.sample[i][ii].macro_id !== undefined && filedata.sample[i][ii].macro_id != ""){
+										if(_macros[filedata.sample[i][ii].macro_id].id !== undefined)
+											post['macros'][filedata.sample[i][ii].macro_id] = _macros[filedata.sample[i][ii].macro_id]
 									}
 
 								}

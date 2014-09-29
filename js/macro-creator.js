@@ -55,8 +55,7 @@ onload = function() {
 		postData['macros'][1] = {'id':1,'javascript_code':code,'name':'Test Macro','slug':'test_macro'};
 		postData['devicedata'] = {'sample':[[_json.sample[0][protocol]]]};
 		postData['protocols'][1] = {'macro_id':1};
-		
-		console.log(postData)
+		postData['plottype'] = "post"
 		
 		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
 		return false;
@@ -133,7 +132,7 @@ onload = function() {
 						Sparkline(_json.sample[0][0].data_raw);
 					}
 					catch(e){
-						//console.log(e);
+						console.log(e);
 					}
 				}
 			});

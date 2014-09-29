@@ -149,7 +149,6 @@ function GetProjectsFromDB(token,email){
 			if (xhr.readyState == 4){
 				try {
 					tmp = JSON.parse(xhr.responseText);
-					console.log(tmp)
 					_projects = {};
 					for(i in tmp){
 						_projects[tmp[i].id] = {
@@ -431,7 +430,10 @@ function PushDataToStorage(email,project_id,data){
 			experiment_data[email][project_id] = []
 		experiment_data[email][project_id].push(data);
 		SaveToStorage('cached_data',experiment_data, function(){
-			WriteMessage('Measurement cached','info');		
+			chrome.storage.local.getBytesInUse('cached_data', function(response){
+				$('#CachedDataQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});
+			WriteMessage('Measurement cached','info');	
 		});
 	});
 }
@@ -482,6 +484,9 @@ function PushData(cacheProjectID, token, email, experiment_data, i, callback){
 // 								Database Add Data to Project from cache
 // ===============================================================================================
 function DatabaseAddDataToProjectFROMStorage(token,email){
+	chrome.storage.local.getBytesInUse('cached_data', function(response){
+		$('#CachedDataQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+	});	
 	if(navigator.onLine && (token != null && email != null)){
 		chrome.storage.local.get('cached_data', function(response){
 			if(response['cached_data'] !== undefined){
@@ -518,7 +523,9 @@ function DatabaseAddDataToProjectFROMStorage(token,email){
 							}
 							// start 'loop'
 							LoopThroughData(cacheProjectID, token, email, experiment_data);							
-							
+							chrome.storage.local.getBytesInUse('cached_data', function(response){
+								$('#CachedDataQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+							});
 						}
 					}
 				} catch (e) {
@@ -560,6 +567,8 @@ function DatabaseGetImage(location,url,callback){
 		callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
 	}	
 	else{
+		if(!url.match('/(^http)/'))
+			return;
 		var xhr = new XMLHttpRequest();
 		xhr.responseType = 'blob';
 		xhr.onreadystatechange = function() {

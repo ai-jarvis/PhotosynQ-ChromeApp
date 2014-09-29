@@ -9,6 +9,7 @@ var _port_path;
 var _MeasurementType = null;
 var _ShowTansientgraph = true;
 var _dataRead = '';
+var _initialTime = 0;
 var _SelectedProject = null;
 var _authentication;
 var _geolocation = false;
@@ -36,8 +37,12 @@ function onCharRead(readInfo) {
 
 	if(_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console'){
 		try{
-			str = str.replace(new RegExp('{', 'gi'), '{"time": '+ new Date().getTime() +', ');
-			str = str.replace(new RegExp('^{', 'gi'), '{"time_offset": '+ new Date().getTimezoneOffset() +', ');
+			var addtimestamp = new Date().getTime();
+			str = str.replace(new RegExp('{', 'gi'), '{"time": '+ addtimestamp +', ');
+			if(_dataRead.length === 0){
+				str = str.replace(new RegExp('^{', 'gi'), '{"time_offset": '+ new Date().getTimezoneOffset() +', ');
+				_initialTime = addtimestamp;
+			}
 		}
 		catch(e){
 			console.log(e);
@@ -178,7 +183,7 @@ function onCharRead(readInfo) {
 			var testeded = _dataRead.slice(pos);
 			testeded = testeded.split("\r\n");
 			if($('#MeasurementProgress').attr('data-total') > 5 && _ShowTansientgraph){
-				plottransient(testeded[0]);
+				PlotDataRealTime(JSON.parse(testeded[0]));
 				
 			}
 		}
@@ -527,7 +532,7 @@ onload = function() {
 
 	// Cache Update events
 	// ===============================================================================================
-	document.getElementById('AppUpdateButton').addEventListener('click', function(e){
+	document.getElementById('AppSynqBtn').addEventListener('click', function(e){
 		if(e.shiftKey) {
        		chrome.storage.local.clear(function(){
  				DatabaseSignOff();
@@ -543,7 +548,9 @@ onload = function() {
  				chrome.storage.local.getBytesInUse('media', function(response){
 					$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 				});
-						
+				chrome.storage.local.getBytesInUse('cached_data', function(response){
+					$('#CachedDataQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+				});	
        		});
        		e.preventDefault();
        		return;
@@ -552,6 +559,7 @@ onload = function() {
 			GetProjectsFromDB(_authentication.auth_token,_authentication.email);
 			GetProtocolsFromDB(_authentication.auth_token,_authentication.email);
 			GetMacrosFromDB(_authentication.auth_token,_authentication.email);
+			DatabaseAddDataToProjectFROMStorage(_authentication.auth_token,_authentication.email);
 		}
 		else
 			WriteMessage('You have to be signed in and have an internet connection to update your projects and protocols.','warning');
@@ -1229,16 +1237,20 @@ function RunMeasurement(protocol,mtype){
 	$('#TransientPlotsContainer').css('min-height','55%');
 	var protocol_total = protocol.length;
 	var protocol_measurements = 1;
-	_ShowTansientgraph = true;
+	_ShowTansientgraph = false;
 	for(m in protocol){
 		if(protocol[m].measurements !== undefined){
 			if(protocol[m].measurements > protocol_measurements)
 				protocol_measurements = protocol[m].measurements;
 		}
-		if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay < 1 && _ShowTansientgraph)
-			_ShowTansientgraph = false;
 	}
 	protocol_total *= protocol_measurements;
+	
+	
+	if(protocol[m].measurements_delay !== undefined && protocol[m].measurements_delay > 1 && protocol_total > 5){
+		_ShowTansientgraph = true;
+		SetupTransientRealtimePlot();
+	}
 	ProgressBar(1, protocol_total);
 	return;
 }
@@ -1379,6 +1391,7 @@ function DiscardMeasurement(){
 	MacroArray = null;
 	serialBuffer = '';
 	_dataRead = '';
+	_initialTime = 0;
 	RemoveFromStorage('measurement_tmp');
 }
 
@@ -1419,4 +1432,3 @@ function BatteryLevel(batt_level,dialog){
 	if(dialog)
 		$('#ModalDialogMsg').show().append('<div class="text-primary">'+state+'<br><small class="text-muted">'+batt_level[0]+', '+batt_level[1]+', '+batt_level[2]+'</small></div>');
 }
-

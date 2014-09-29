@@ -1,3 +1,6 @@
+// ===============================================================================================
+// Define colors for plots
+// ===============================================================================================
 var HighchartColors = [
 	'#428bca', 
 	'#5cb85c', 
@@ -11,6 +14,31 @@ var HighchartColors = [
 	'#a6c96a'
 ];
 
+// ===============================================================================================
+// Key value pairs to be excluded from plotting
+// ===============================================================================================
+var ExcludeFromTransientPlot = [
+	'time',
+	'protocol_id',
+	'data_raw',
+	'r',
+	'g',
+	'b',
+	'message',
+	'macro_id',
+	'slope_34',
+	'yintercept_34',
+	'slope_35',
+	'yintercept_35',
+	'get_ir_baseline',
+	'GraphType',
+	'HTML',
+	'Macro'
+]
+
+// ===============================================================================================
+// Generate classes for plot containers
+// ===============================================================================================
 function GeneratePanelClasses(HighchartColors){
 	var css= '';
 	for(i in HighchartColors){
@@ -59,6 +87,9 @@ function GeneratePanelClasses(HighchartColors){
 	$('head style').append(css);
 }
 
+// ===============================================================================================
+// Plot Protocols after measurement
+// ===============================================================================================
 function plot(data){
 	$('#MainDisplayContainer .panel-body').css('background-image', 'none');
 	if($('#TransientPlotsContainer').html() == ""){
@@ -72,6 +103,7 @@ function plot(data){
 	postData['macros'] = [];
 	postData['devicedata'] = data;
 	postData['protocols'] = [];
+	postData['plottype'] = "post"
 	
 	MacroArray = [];
 	
@@ -90,13 +122,13 @@ function plot(data){
 				
 			// Add macros according to macro_id from console measurement
 			if(data[repeat][protocolID].macro_id !== undefined){
-				if(data[repeat][protocolID].macro_id !== '' && _macros[data[repeat][protocolID].macro_id] !== undefined)
+				if(_macros[data[repeat][protocolID].macro_id] !== undefined)
 					postData['macros'][data[repeat][protocolID].macro_id] = _macros[data[repeat][protocolID].macro_id]
 			}
 
 			// Add macros according to macro_id from console measurement
 			if(data[repeat][protocolID].protocol_id !== undefined){
-				if(data[repeat][protocolID].protocol_id != "" && _protocols[data[repeat][protocolID].protocol_id] !== undefined){
+				if(data[repeat][protocolID].protocol_id !== "" && _protocols[data[repeat][protocolID].protocol_id] !== undefined){
 					if(_protocols[data[repeat][protocolID].protocol_id].macro_id !== undefined){
 						postData['protocols'][data[repeat][protocolID].protocol_id] = {'macro_id': _protocols[data[repeat][protocolID].protocol_id].macro_id};
 						if(_macros[_protocols[data[repeat][protocolID].protocol_id].macro_id] !== undefined)
@@ -251,7 +283,7 @@ function plot(data){
 
 	// Send data to sandbox or clean up no macro message
 	// ===============================================================================================
-	if( postData['protocols'].length > 0){
+	if( postData['macros'].length > 0){
 		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
 	}
 
@@ -260,9 +292,392 @@ function plot(data){
 	_used_protocols = []
 }
 
+// ===============================================================================================
+// Set up the transient plot
+// ===============================================================================================
+function SetupTransientRealtimePlot(){
+
+	var timeOffset = new Date();
+	timeOffset = timeOffset.getTimezoneOffset();
+
+	$('#TransientPlotsContainer').highcharts({
+		global: {
+			timezoneOffset: timeOffset
+		},
+		chart: {
+			zoomType: 'xy',
+			animation: false
+		},
+		title: {
+			text: 'Realtime Plot'
+		},
+		xAxis: [{
+			type: 'datetime', //ensures that xAxis is treated as datetime values
+			dateTimeLabelFormats: { 
+				millisecond: '%S.%L ms',
+				second: '%M:%S s',
+				minute: '%H:%M m',
+				hour: '%H:%M h',
+				day: '%e. %b d',
+				week: '%e. %b weeks',
+				month: '%b \'%y months',
+				year: '%Y a'
+			},
+			startOnTick: false,
+			showFirstLabel: false
+		}],
+		yAxis: [{
+			id:"inital"
+		}],
+		tooltip: {
+			shared: true,
+			useHTML: true,
+			headerFormat: '<table>',
+			pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
+			'<td style="text-align: right"><b>{point.y}</b></td></tr>',
+			footerFormat: '</table>'
+		},
+		legend: {
+			layout: 'horizontal',
+			align: 'center',
+			verticalAlign: 'bottom'
+		},
+		plotOptions: {
+			series: {
+				states: {
+					hover: {
+						enabled: true,
+						halo: {
+							size: 0
+						}
+					}
+				}
+			}
+		},
+		exporting: {
+			buttons: {
+				contextButton: {
+					menuItems: [{
+						text: 'Print',
+						onclick: function() {
+							this.print();
+						}
+					}, {
+						text: 'Save as png image',
+						onclick: function() {
+							SaveGraphToFile(this.getSVG(),'png','PhotosynQ_Graph.png');
+						},
+						separator: false
+					},
+					{
+						text: 'Save as jpeg image',
+						onclick: function() {
+							SaveGraphToFile(this.getSVG(),'jpeg','PhotosynQ_Graph.jpg');
+						},
+						separator: false
+					},
+					{
+						text: 'Save as pdf image',
+						onclick: function() {
+							SaveGraphToFile(this.getSVG(),'pdf','PhotosynQ_Graph.pdf');
+						},
+						separator: false
+					}]
+				}
+			}
+		},
+		series: [],
+		credits: {
+			enabled: false
+		}
+	});
+}
+
+// ===============================================================================================
+// Plot current dataset
+// ===============================================================================================
+function PlotDataRealTime(data){
+
+	// Get transient graph
+	// ===============================================================================================
+	var TransientChart = $('#TransientPlotsContainer').highcharts();
+
+	// Loop through array from data
+	// ===============================================================================================
+	var lookupSeries = {}
+	// remove initial yAxis
+	if(TransientChart.series.length == 0)
+		TransientChart.get('inital').remove(false);
+
+	for(i in TransientChart.series)
+		lookupSeries[TransientChart.series[i].userOptions.id] = parseInt(i);
+	
+	for(evkey in data){
+		if(ExcludeFromTransientPlot.indexOf(evkey) > -1)
+			continue;
+		
+		if(lookupSeries[evkey] === undefined){
+
+			var yaxis_label = evkey;
+			
+			if(replacements[evkey] !== undefined)
+				yaxis_label = replacements[evkey];
+
+			var yAxis = { // Secondary yAxis
+				id: evkey,
+				title: {
+					text: yaxis_label
+				}
+			}
+			if(TransientChart.yAxis.length % 2)
+				yAxis['opposite'] = true;
+		
+			TransientChart.addAxis(yAxis);
+			TransientChart.addSeries({
+				id: evkey,
+				name: yaxis_label,
+				type: 'line',
+				animation: false,
+				yAxis: evkey,
+				data: [[(data['time']-_initialTime),parseFloat(data[evkey])]]
+			},false);		
+		}
+		else{
+			TransientChart.series[lookupSeries[evkey]].addPoint([(data['time']-_initialTime),parseFloat(data[evkey])],false);
+		}
+	}
+	TransientChart.redraw();
+	
+	var postData = {}
+	postData['macros'] = [];
+	postData['devicedata'] = {"time":data['time'], "sample":[[data]]};
+	postData['protocols'] = [];
+	postData['plottype'] = "transient"
+	postData['timestamp'] = data['time'];
+
+	if(data.macro_id !== undefined){
+		if(_macros[data.macro_id] !== undefined)
+			postData['macros'][data.macro_id] = _macros[data.macro_id]
+	}
+
+	if(data.protocol_id !== undefined){
+		if(_protocols[data.protocol_id] !== undefined){
+			if(_protocols[data.protocol_id].macro_id !== undefined){
+				postData['macros'].push(_macros[_protocols[data.protocol_id].macro_id]);
+				postData['protocols'][_protocols[data.protocol_id].id] = _protocols[data.protocol_id];
+			}
+		}
+	}
+
+	if(postData.macros.length > 0)
+		document.getElementById('MacroSandbox').contentWindow.postMessage({'sandbox':postData}, '*');
+
+}
+
+// ===============================================================================================
+// Plot current data returned from macro
+// ===============================================================================================
+function PlotMacroDataRealTime(data){
+
+	// Get transient graph
+	// ===============================================================================================
+	var TransientChart = $('#TransientPlotsContainer').highcharts();
+
+	var lookupSeries = {}
+	
+	// remove initial yAxis
+	if(TransientChart.series.length == 0)
+		TransientChart.get('inital').remove(false);
+					
+	for(i in TransientChart.series)
+		lookupSeries[TransientChart.series[i].userOptions.id] = i;
+
+	for(i in data){
+		for(r in data[i]){
+			for(evkey in data[i][r]){
+				if(ExcludeFromTransientPlot.indexOf(evkey) > -1)
+					continue;
+
+				if(lookupSeries[evkey] === undefined){
+
+					var yaxis_label = evkey;
+			
+					if(replacements[evkey] !== undefined)
+						yaxis_label = replacements[evkey];
+
+					var yAxis = { // Secondary yAxis
+						id: evkey,
+						title: {
+							text: yaxis_label
+						}
+					}
+					if(TransientChart.yAxis.length % 2)
+						yAxis['opposite'] = true;
+
+					TransientChart.addAxis(yAxis);
+					TransientChart.addSeries({
+						id: evkey,
+						name: yaxis_label,
+						type: 'line',
+						animation: false,
+						yAxis: evkey,
+						data: [[(data[i][r]['time']-_initialTime),parseFloat(data[i][r][evkey])]]
+					},false);
+					
+					for(sID in TransientChart.series)
+						lookupSeries[TransientChart.series[sID].userOptions.id] = sID;
+				}
+				else{
+					TransientChart.series[lookupSeries[evkey]].addPoint([(data[i][r]['time']-_initialTime),parseFloat(data[i][r][evkey])],false);
+				}
+			}
+		}		
+	}		
+	TransientChart.redraw();
+}
+
+// ===============================================================================================
+// Plot data in transient plot
+// ===============================================================================================
+function plottransientFast(data){
+
+	// Initialize parameters
+	// ===============================================================================================
+	
+	var _initialTime = data.time;
+	var timeOffset = 0;
+	
+	if(data.time_offset !== undefined)
+		timeOffset = data.time_offset
+	
+	data = data['sample'];
+	
+	var TransientChart = $('#TransientPlotsContainer').highcharts();
+	
+	/*TransientChart.setOptions({
+        global: {
+            timezoneOffset: timeOffset
+        }
+    });*/
+
+	// Loop through array from data
+	// ===============================================================================================
+	var lookupSeries = {}
+	TransientChart.get('inital').remove(false);
+
+	for(repeat in data){
+
+		for(protocolID in data[repeat]){
+			
+			for(evkey in data[repeat][protocolID]){
+				
+				if(ExcludeFromTransientPlot.indexOf(evkey) > -1)
+					continue;
+				
+				if(lookupSeries[evkey] === undefined){
+
+					var yaxis_label = evkey;
+		
+					if(replacements[evkey] !== undefined)
+						yaxis_label = replacements[evkey];
+
+					var yAxis = { // Secondary yAxis
+						id: evkey,
+						title: {
+							text: yaxis_label
+						}
+					}
+					
+					if(TransientChart.yAxis.length % 2)
+						yAxis['opposite'] = true;
+	
+					TransientChart.addAxis(yAxis);
+					TransientChart.addSeries({
+						id: evkey,
+						name: yaxis_label,
+						animation: false,
+						type: 'line',
+						yAxis: evkey,
+						data: [[(data[repeat][protocolID].time-_initialTime),parseFloat(data[repeat][protocolID][evkey])]]
+					},false);
+					
+					for(i in TransientChart.series){
+						if(TransientChart.series[i].userOptions.id == evkey)
+							lookupSeries[evkey] = parseInt(i);
+					}
+
+				}
+				else{
+					TransientChart.series[lookupSeries[evkey]].addPoint([(data[repeat][protocolID].time-_initialTime),parseFloat(data[repeat][protocolID][evkey])],false);
+				}
+			}
+		}
+	}
+
+	TransientChart.redraw();
+}
+
+// ===============================================================================================
+// Save graph to file
+// ===============================================================================================
+function SaveGraphToFile(data, type, name){
+	$.ajax({
+		type: 'POST',
+		data: 'async=true&type='+type+'&width=1024&options=' + data,
+		url: 'http://export.highcharts.com',
+		success: function (data) {
+			var xhr = new XMLHttpRequest();
+			xhr.responseType = 'blob';
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4){
+					if(xhr.response !== null && xhr.response !== undefined){
+						var mimetype = 'image/png';
+						var extension = 'png';
+						if(type == 'jpeg'){
+							mimetype = 'image/jpeg';
+							extension = 'jpg';						
+						}
+						if(type == 'pdf'){
+							mimetype = 'application/pdf';
+							extension = 'pdf';					
+						}
+						chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [extension]}] }, function(writableFileEntry) {
+							if(!writableFileEntry)
+								return;
+							writableFileEntry.createWriter(function(writer) {
+							  writer.onerror = function(e) {
+								WriteMessage('Graph couldn\'t be saved', 'danger');
+							  };
+							  writer.onwrite = function(e) {
+								writer.onwrite = null;
+								writer.truncate(writer.position);
+								WriteMessage('Graph saved as '+extension, 'success');
+							  };
+							  writer.write(xhr.response, {type: mimetype});
+							}, errorHandler);
+						});
+						
+						
+					}
+				}
+			}
+			xhr.open('GET', 'http://export.highcharts.com/' + data, true);
+			xhr.send();            	
+		  }
+	});
+}
+
+
+// ===============================================================================================
 // Apply changes from macros to plots
 // ===============================================================================================
 window.addEventListener('message', function(event) {
+	
+	if(event.data.graph_transient !== undefined){
+		PlotMacroDataRealTime(event.data.graph_transient);
+		return false;
+	}
+		
 	if(event.data.graph === undefined)
 		return false;
 	
@@ -343,6 +758,7 @@ window.addEventListener('message', function(event) {
 	MacroArray = event.data.graph;
 });
 
+// ===============================================================================================
 // Show alert, when measurement is done
 // ===============================================================================================
 if(chrome.app.window.current().isMinimized()){
@@ -355,352 +771,5 @@ if(chrome.app.window.current().isMinimized()){
 		setTimeout(function() {
 		chrome.notifications.clear("measurement", function(){});
 		}, 3000);
-	});
-}
-
-function plottransient(data){
-
-	var timeOffset = new Date();
-	timeOffset = timeOffset.getTimezoneOffset();
-
-	initalTime = _dataRead.match(/(\"time\": )(\d{13})/i);
-	initalTime = parseInt(initalTime[2]);
-
-
-	// Initial graph
-	// ===============================================================================================
-	if($('#TransientPlotsContainer').html() == ""){
-		$('#TransientPlotsContainer').highcharts({
-			global: {
-				timezoneOffset: timeOffset
-			},
-			chart: {
-				zoomType: 'xy',
-				animation: false
-			},
-			title: {
-				text: 'Environmental Parameters'
-			},
-			xAxis: [{
-				type: 'datetime', //ensures that xAxis is treated as datetime values
-				dateTimeLabelFormats: { 
-					millisecond: '%S.%L',
-					second: '%M:%S',
-					minute: '%H:%M',
-					hour: '%H:%M',
-					day: '%e. %b',
-					week: '%e. %b',
-					month: '%b \'%y',
-					year: '%Y'
-				},
-				startOnTick: false,
-				showFirstLabel: false
-			}],
-			yAxis: [{
-				id:"inital"
-			}],
-			tooltip: {
-				shared: true,
-				useHTML: true,
-				headerFormat: '<table>',
-				pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
-				'<td style="text-align: right"><b>{point.y}</b></td></tr>',
-				footerFormat: '</table>'
-			},
-			legend: {
-				layout: 'horizontal',
-				align: 'center',
-				verticalAlign: 'bottom'
-			},
-			exporting: {
-				buttons: {
-					contextButton: {
-						menuItems: [{
-							text: 'Print',
-							onclick: function() {
-								this.print();
-							}
-						}, {
-							text: 'Save as png image',
-							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'png','PhotosynQ_Graph.png');
-							},
-							separator: false
-						},
-						{
-							text: 'Save as jpeg image',
-							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'jpeg','PhotosynQ_Graph.jpg');
-							},
-							separator: false
-						},
-						{
-							text: 'Save as pdf image',
-							onclick: function() {
-								SaveGraphToFile(this.getSVG(),'pdf','PhotosynQ_Graph.pdf');
-							},
-							separator: false
-						}]
-					}
-				}
-			},
-			series: [],
-			credits: {
-				enabled: false
-			}
-		});
-	}
-	
-	var TransientChart = $('#TransientPlotsContainer').highcharts();
-
-	// Loop through array from data
-	// ===============================================================================================
-	jsondata = JSON.parse(data);
-	var iii =0;
-	if(TransientChart.series.length === 0){
-		TransientChart.get('inital').remove();
-		for(evkey in jsondata){
-			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
-				var yAxis = { // Secondary yAxis
-					id: evkey,
-					title: {
-						text: evkey
-					}
-				}
-				if(iii % 2)
-					yAxis['opposite'] = true;
-					
-				TransientChart.addAxis(yAxis);
-				TransientChart.addSeries({
-					name: evkey,
-					type: 'line',
-					yAxis: evkey,
-					data: [[(jsondata['time']-jsondata['time']),jsondata[evkey]]]
-				});
-			iii++;
-			}
-		}
-	}
-	else{
-		var lookupSeries = {}
-		for(i in TransientChart.series)
-			lookupSeries[TransientChart.series[i].name] = parseInt(i);
-			
-		for(evkey in jsondata){
-			if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
-				if(lookupSeries[evkey] !== undefined && jsondata[evkey] !== undefined)
-					TransientChart.series[lookupSeries[evkey]].addPoint([(jsondata['time']-initalTime),jsondata[evkey]],false);
-			}
-		}
-	}
-	TransientChart.redraw();
-}
-
-
-function plottransientFast(data){
-
-	var iniTime = data.time;
-	var timeOffset = 0;
-	var marker = true;
-	
-	if(data.time_offset !== undefined)
-		timeOffset = data.time_offset
-	
-	data = data['sample'];
-	
-	if(data.length > 300)
-		marker = false;
-
-	console.log(marker);
-	
-	// Initial graph
-	// ===============================================================================================
-	var TransientFastPlotOptions = {
-		global: {
-            timezoneOffset: timeOffset
-        },
-		chart: {
-			zoomType: 'xy',
-			animation: false
-		},
-		title: {
-			text: 'Environmental Parameters'
-		},
-		xAxis: [{
-			type: 'datetime', //ensures that xAxis is treated as datetime values
-			dateTimeLabelFormats: { 
-				millisecond: '%S.%L',
-				second: '%M:%S',
-				minute: '%H:%M',
-				hour: '%H:%M',
-				day: '%e. %b',
-				week: '%e. %b',
-				month: '%b \'%y',
-				year: '%Y'
-			},
-			startOnTick: false,
-			showFirstLabel: false
-		}],
-		yAxis: [{
-			id:"inital"
-		}],
-		tooltip: {
-            shared: true,
-            useHTML: true,
-            headerFormat: '<table>',
-            pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
-            '<td style="text-align: right"><b>{point.y}</b></td></tr>',
-            footerFormat: '</table>'
-		},
-		legend: {
-			layout: 'horizontal',
-			align: 'center',
-			verticalAlign: 'bottom'
-		},
-		plotOptions: {
-            series: {
-                marker: {
-                    enabled: marker
-                }
-            }
-        },
-		series: [],
-		credits: {
-			enabled: false
-		},
-		exporting: {
-			buttons: {
-				contextButton: {
-					menuItems: [{
-						text: 'Print',
-						onclick: function() {
-							this.print();
-						}
-					}, {
-						text: 'Save as png image',
-						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'png','PhotosynQ_Graph.png');
-						},
-						separator: false
-					},
-					{
-						text: 'Save as jpeg image',
-						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'jpeg','PhotosynQ_Graph.jpg');
-						},
-						separator: false
-					},
-					{
-						text: 'Save as pdf image',
-						onclick: function() {
-							SaveGraphToFile(this.getSVG(),'pdf','PhotosynQ_Graph.pdf');
-						},
-						separator: false
-					}]
-				}
-			}
-		}
-	};
-	
-	//var TransientChart = $('#TransientPlotsContainer').highcharts();
-	
-	// Loop through array from data
-	// ===============================================================================================
-	var iii =0;
-	for(repeat in data){
-
-		for(protocolID in data[repeat]){
-		
-			jsondata = data[repeat][protocolID]
-
-			if(TransientFastPlotOptions.series.length === 0){
-				for(evkey in jsondata){
-					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
-						var yAxis = { // Secondary yAxis
-							id: evkey,
-							title: {
-								text: evkey
-							}
-						}
-						if(iii % 2)
-							yAxis['opposite'] = true;
-					
-						TransientFastPlotOptions.yAxis[iii] = yAxis;
-						TransientFastPlotOptions.series[iii] = {
-							name: evkey,
-							type: 'line',
-							yAxis: evkey,
-							data: [[(jsondata['time']-iniTime),jsondata[evkey]]]
-						};
-					iii++;
-					}
-				}
-			}
-			else{
-				var lookupSeries = {}
-				for(i in TransientFastPlotOptions.series)
-					lookupSeries[TransientFastPlotOptions.series[i].name] = parseInt(i);
-			
-				for(evkey in jsondata){
-					if(evkey == 'temperature' || evkey == 'relative_humidity' || evkey == 'light_intensity' || evkey == 'co2' || evkey == 'analog_read' || evkey == 'digital_read'){
-						if(lookupSeries[evkey] !== undefined && jsondata[evkey] !== undefined)
-							TransientFastPlotOptions.series[lookupSeries[evkey]].data.push([(jsondata['time']-iniTime),jsondata[evkey]]);
-					}
-				}
-			}
-		}
-	}
-	//TransientChart.redraw();
-	$('#TransientPlotsContainer').highcharts(TransientFastPlotOptions);
-}
-
-
-// ===============================================================================================
-//						Save graph to file
-// ===============================================================================================
-function SaveGraphToFile(data, type, name){
-	$.ajax({
-		type: 'POST',
-		data: 'async=true&type='+type+'&width=1024&options=' + data,
-		url: 'http://export.highcharts.com',
-		success: function (data) {
-			var xhr = new XMLHttpRequest();
-			xhr.responseType = 'blob';
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState == 4){
-					if(xhr.response !== null && xhr.response !== undefined){
-						var mimetype = 'image/png';
-						var extension = 'png';
-						if(type == 'jpeg'){
-							mimetype = 'image/jpeg';
-							extension = 'jpg';						
-						}
-						if(type == 'pdf'){
-							mimetype = 'application/pdf';
-							extension = 'pdf';					
-						}
-						chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: name, accepts: [{extensions: [extension]}] }, function(writableFileEntry) {
-							if(!writableFileEntry)
-								return;
-							writableFileEntry.createWriter(function(writer) {
-							  writer.onerror = function(e) {
-								WriteMessage('Graph couldn\'t be saved', 'danger');
-							  };
-							  writer.onwrite = function(e) {
-								writer.onwrite = null;
-								writer.truncate(writer.position);
-								WriteMessage('Graph saved as '+extension, 'success');
-							  };
-							  writer.write(xhr.response, {type: mimetype});
-							}, errorHandler);
-						});
-						
-						
-					}
-				}
-			}
-			xhr.open('GET', 'http://export.highcharts.com/' + data, true);
-			xhr.send();            	
-		  }
 	});
 }
