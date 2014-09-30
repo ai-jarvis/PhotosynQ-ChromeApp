@@ -57,7 +57,19 @@
 					<li><a href="#" id="BuiltYourMacro"><i class="fa fa-puzzle-piece" title="Develop macros to evaluate measurements"></i> Macro Development</a></li>
 				</ul>
 			</li>
-			<li><a href="#" id="ShowHelpBtn" title="Documentation on how to use the software">Help</a></li>
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown" title="Tools to explore and generate experiments">Help <b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li class="dropdown-header">Help</li>
+					<li><a href="#" id="ShowHelpBtn" title="Documentation on using PhotosynQ"><i class="fa fa-info-circle"></i> Documentation</a></li>
+					<li class="divider"></li>
+					<li class="dropdown-header">Tutorials</li>
+					<li><a href="#" id="GettingStartedHelpBtn" title="Got your new MultispeQ device, so what's next?"><i class="fa fa-magic"></i> Getting Started</a></li>
+					<li><a href="#" id="ProjectHelpBtn"><i class="fa fa-flask" title="How to take measurements for a project"></i> Projects</a></li>
+					<li><a href="#" id="ProtocolHelpBtn"><i class="fa fa-rocket" title="How to take a single measurement"></i> Single Measurements</a></li>
+					<li><a href="http://www.youtube.com/watch?v=CQBV7VrmvJo" id="VideosHelpBtn" target="_blank"><i class="fa fa-youtube-play" title="How to videos on how to use PhotosynQ"></i> How to videos</a></li>
+				</ul>
+			</li>
 		</ul>
 		<ul id="StatusBar" class="nav navbar-nav navbar-right">	
 			<li class="dropdown">
@@ -302,6 +314,58 @@
 		</div>
 	  </div>
 	</div>
+
+	<div class="modal fade" id="ModalDialogAlert" tabindex="-1" role="dialog" aria-labelledby="ModalDialogAlertLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="ModalDialogAlertLabel"><i class="fa fa-exclamation-triangle"></i></h4>
+		  </div>
+		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-primary">OK</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
 	
+	<div class="modal fade" id="ModalDialogConfirm" tabindex="-1" role="dialog" aria-labelledby="ModalDialogConfirmLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="ModalDialogConfirmLabel"><i class="fa fa-question-circle"></i></h4>
+		  </div>
+		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-default">Cancel</button>
+			<button type="button" class="btn btn-primary">OK</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+	<div class="modal fade" id="ModalDialogPromt" tabindex="-1" role="dialog" aria-labelledby="ModalDialogPromtLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="ModalDialogPromtLabel"><i class="fa fa-pencil-square-o"></i></h4>
+		  </div>
+		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
+		  <label>Hello</label>
+		  <input type="text" class="form-control">
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-default">Cancel</button>
+			<button type="button" class="btn btn-primary">OK</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
 </body>
 </html>
