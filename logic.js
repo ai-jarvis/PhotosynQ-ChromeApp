@@ -360,7 +360,7 @@ function fetchPorts(){
 }
 
 // ===============================================================================================
-// 					Initialized, when app is loaded
+// 					Initialized, when app is loading
 // ===============================================================================================
 onload = function() {
 	// Events when measurement started

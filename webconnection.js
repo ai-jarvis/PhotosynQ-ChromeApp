@@ -563,11 +563,12 @@ function DatabaseGetImage(location,url,callback){
 	if(url === undefined){
 		return;
 	}
-	if(_media[location] !== undefined && _media[location][url] !== undefined){
-		callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
+	if(_media[location] !== undefined){
+		if(_media[location][url] !== undefined)
+			callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
 	}	
 	else{
-		if(!url.match('/(^http)/'))
+		if(!url.match(/(^https?)/gi))
 			return;
 		var xhr = new XMLHttpRequest();
 		xhr.responseType = 'blob';
