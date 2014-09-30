@@ -560,15 +560,15 @@ function DatabaseAddEditProtocol(token,email,protocol){
 //									Get Images from server
 // ===============================================================================================
 function DatabaseGetImage(location,url,callback){
+	console.log(url)
 	if(url === undefined){
 		return;
 	}
-	if(_media[location] !== undefined){
-		if(_media[location][url] !== undefined)
-			callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
+	if(_media[location] !== undefined && _media[location][url] !== undefined){
+		callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
 	}	
 	else{
-		if(!url.match(/(^https?)/gi))
+		if(url.match(/(^https?)/gi) == null)
 			return;
 		var xhr = new XMLHttpRequest();
 		xhr.responseType = 'blob';
