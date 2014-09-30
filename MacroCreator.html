@@ -67,21 +67,13 @@
 	<div class="container-fluid" id="MainDisplayContainer" style="padding:5px; overflow:hidden; overflow-y: auto;">
 	<div class="row">
 		<div class="col-md-8">
-			<div class="panel panel-primary" id="CodePanel">
-				<div class="panel-heading">
-				<button name="TestMacroButton" id="TestMacroButton" value="Run" class="btn btn-default btn-xs pull-right"><i class="fa fa-cogs"></i> Run</button>
-				<h4 class="panel-title"><i class="fa fa-code"></i> Code</h4>
-				</div>
-				<div class="panel-body">
-					<div id="CodeMirrorContainer"></div>
-				</div>
-			</div>
+			<div id="CodeMirrorContainer"></div>
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<div class="row">
-						<div class="col-md-5"><strong><i class="fa fa-archive"></i> Variables</strong></div>
+						<div class="col-md-5"><strong><i class="fa fa-code"></i> Variables</strong></div>
 						<div class="col-md-7"><select class="form-control input-sm" style="margin-top:-3px;margin-bottom:-5px" id="ProtocolToTest"></select></div>
 					</div>
 				</div>
@@ -97,7 +89,9 @@
 
 
 			<div class="panel panel-default" id="MacroReturnContent">
-				<div class="panel-heading"><strong><i class="fa fa-share-square-o"></i> Macro Output</strong></div>
+				<div class="panel-heading"><strong><i class="fa fa-cogs"></i> Macro</strong>
+				<button name="TestMacroButton" id="TestMacroButton" value="Run" class="btn btn-default btn-xs pull-right">Run</button>
+				</div>
 				<div class="panel-body" style="word-wrap: break-word; height:100px; overflow:hidden; overflow-y: auto;" contenteditable="true"></div>
 			</div>
 		</div>

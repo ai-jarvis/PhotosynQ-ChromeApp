@@ -381,6 +381,35 @@ onload = function() {
 		$('#RawOutputTextarea').toggle(); 
 	});
 
+
+	document.getElementById('ToDeviceBtn').addEventListener('click', function(e){ 
+		$('#ToDeviceBtn').blur();
+		$('#ModalDialogUser').modal('show');
+	});
+
+
+	// User input dialogs
+	// ===============================================================================================
+	$('#ModalDialogUser').on('hide.bs.modal',function(){
+		var CancelValue = $('#ModalDialogUserCancel').val();
+		if(CancelValue != ""){
+			chrome.serial.send(connectionId, str2ab(CancelValue), function(){});
+		}
+		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('')
+		$('#ModalDialogUserLabel, #ModalDialogUser .modal-body').empty();
+		$('#ToDeviceBtn').hide();
+	});
+
+	$('#ModalDialogUserOK').on('click',function(){
+		var OKValue = $('#ModalDialogUserOK').val();
+		if(OKValue != ""){
+			SendLongStrings(OKValue);
+			WriteMessage('Data submitted to device.','success');
+		}
+		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('')
+	});
+
+
 	document.getElementById('BtnToggleAllGraphs').addEventListener('click', function(){
 		$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
 		if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-down'))
@@ -449,6 +478,18 @@ onload = function() {
 			store['MuteNotifications'] = _muteMessages;
 			chrome.storage.local.set(store);
 		}
+	});
+
+	// Events for tours
+	// ===============================================================================================
+	document.getElementById('ProtocolHelpBtn').addEventListener('click', function(){
+		
+	});
+	document.getElementById('ProjectHelpBtn').addEventListener('click', function(){
+		
+	});
+	document.getElementById('GettingStartedHelpBtn').addEventListener('click', function(){
+		
 	});
 
 	// Events when port is changed
@@ -822,13 +863,10 @@ onload = function() {
 	
 	// Get updates from database/file, auto login
 	// ===============================================================================================
-	LoadMediaFromStorage();
-	LoadAuthentificationFromStorage();
-	GetMacrosFromCache();
-	GetProtocolsFromCache();
-	GetProjectsFromCache();
-	GetLocation();
 	LoadPortNameFromStorage();
+	LoadMediaFromStorage()
+	LoadAuthentificationFromStorage();
+	GetLocation();
 
 	// Info message window test
 	// ===============================================================================================
@@ -886,6 +924,7 @@ onload = function() {
 			minHeight: 650,
 			minWidth: 1000
 		}, function (ProtocolWindow){
+			console.log(ProtocolWindow)
 			ProtocolWindow.contentWindow.addEventListener('load', function(e) {
 				ProtocolWindow.contentWindow.postMessage({'db':_protocols,'macros':_macros}, '*');
 			});
@@ -1111,17 +1150,22 @@ function DatabaseMeasurement() {
 		WriteMessage('Please select a project first','warning');
 		return;
 	}
+
+	if(_authentication === null){
+		WriteMessage('Please sign in to contribute to the project','warning');
+		return;
+	}
 	
 	var no_answers = false;
 	_given_answers = [];
 	$('#UserAnswers [id^="answer_"]').each(function(i,k){
-		_given_answers.push($(k).val());
+		_given_answers.push($(k).val().trim());
 		if($(k).val() === ""){
 			no_answers = true;
 		}
 	});
 	if(no_answers){
-		WriteMessage('Please answer all questions first','danger');
+		WriteMessage('Please answer all questions first','warning');
 		return false;
 	}
 	var protocol = [];
@@ -1375,7 +1419,7 @@ function DiscardMeasurement(){
 	chrome.power.releaseKeepAwake();
 	EnableInputs();
 	$('#MainDisplayContainer .panel-body').prop('contenteditable', false);
-	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB').hide();
+	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB, #ToDeviceBtn').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');

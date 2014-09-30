@@ -5,15 +5,13 @@ onload = function() {
 	// ===============================================================================================
 	var bodyheight =$(window).height()-$('.navbar').height()-10
 	$("#MainDisplayContainer").height(bodyheight);
-	$('#CodePanel').height(bodyheight-25);
+	$('#CodeMirrorContainer').height(bodyheight-25);
 	$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-356)/2);
-	$('#CodeMirrorContainer').height(bodyheight-100);
 	$(window).resize(function() {
 		bodyheight = $(window).height()-$('.navbar').height()-10;
 		$("#MainDisplayContainer").height(bodyheight);
-		$('#CodePanel').height(bodyheight-25);
+		$('#CodeMirrorContainer').height(bodyheight-25);
 		$('#ProtocolVariables, #MacroReturnContent .panel-body').height((bodyheight-356)/2);
-		$('#CodeMirrorContainer').height(bodyheight-100);
 		if(_json !== undefined && _json.sample !== undefined)
 			Sparkline(_json.sample[0][0].data_raw);
 	});

@@ -560,11 +560,13 @@ function DatabaseAddEditProtocol(token,email,protocol){
 //									Get Images from server
 // ===============================================================================================
 function DatabaseGetImage(location,url,callback){
-	console.log(url)
 	if(url === undefined){
 		return;
 	}
-	if(_media[location] !== undefined && _media[location][url] !== undefined){
+	if(_media[location] === undefined)
+		_media[location] = {}
+	
+	if(_media[location][url] !== undefined){
 		callback({'img':'<img src="'+_media[location][url]+'">','url':url, 'src':_media[location][url]});
 	}	
 	else{

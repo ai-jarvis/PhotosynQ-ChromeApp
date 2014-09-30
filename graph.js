@@ -681,16 +681,20 @@ window.addEventListener('message', function(event) {
 	if(event.data.graph === undefined)
 		return false;
 	
-	for(repeat in event.data.graph){
+	MacroArray = event.data.graph;
+	var ToDeviceCount = 0;
+	var ToDeviceValue = '';
+	
+	for(repeat in MacroArray){
 
-		for(protocolID in event.data.graph[repeat]){
+		for(protocolID in MacroArray[repeat]){
 			
-			if(event.data.graph[repeat][protocolID] !== undefined){
+			if(MacroArray[repeat][protocolID] !== undefined){
 				// Add macro html output to graph info container
 				var simpleHTML ='';
 				var HTML = '<tr class="macroout warning">';
 				var col = 1;
-				for(key in event.data.graph[repeat][protocolID]){
+				for(key in MacroArray[repeat][protocolID]){
 					if(key == 'GraphType' || key == 'HTML' || key == 'Macro')
 						continue;
 					else{
@@ -708,8 +712,8 @@ window.addEventListener('message', function(event) {
 							simpleHTML += '<h4>'+key+'</h4>'
 						}
 						HTML += ':</em> ';
-						HTML += '<span style="margin-left:10px">'+event.data.graph[repeat][protocolID][key]+'</span>';
-						simpleHTML +=MathROUND(event.data.graph[repeat][protocolID][key],3)+'</div>';
+						HTML += '<span style="margin-left:10px;">'+MacroArray[repeat][protocolID][key]+'</span>';
+						simpleHTML +=MathROUND(MacroArray[repeat][protocolID][key],3)+'</div>';
 						HTML += '</td>';
 						col++;
 					}
@@ -726,7 +730,7 @@ window.addEventListener('message', function(event) {
 				});
 				
 				if($('#plotRawData'+repeat+''+protocolID).length > 0){
-					if(event.data.graph[repeat][protocolID].GraphType == 'line'){
+					if(MacroArray[repeat][protocolID].GraphType == 'line'){
 						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
 							 marker: { enabled: false}
 						});
@@ -734,7 +738,7 @@ window.addEventListener('message', function(event) {
 							lineWidth: 4
 						});
 					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'points'){
+					if(MacroArray[repeat][protocolID].GraphType == 'points'){
 						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
 							 marker: { enabled: true}
 						});
@@ -742,7 +746,7 @@ window.addEventListener('message', function(event) {
 							lineWidth: 0
 						});
 					}
-					if(event.data.graph[repeat][protocolID].GraphType == 'pointline'){
+					if(MacroArray[repeat][protocolID].GraphType == 'pointline'){
 						$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
 							 marker: { enabled: true}
 						});
@@ -751,11 +755,30 @@ window.addEventListener('message', function(event) {
 						});
 					}
 				}
+				
+				if(MacroArray[repeat][protocolID].toDevice !== undefined){
+					ToDeviceCount++;
+					ToDeviceValue = MacroArray[repeat][protocolID].toDevice;
+				}
+				
 			}
 		}
 		
 	}
-	MacroArray = event.data.graph;
+	
+	// ===============================================================================================
+	// To device function
+	// ===============================================================================================
+	if(ToDeviceCount > 0){
+		if(ToDeviceCount >1)
+			WriteMessage('You can only send one dataset per measurement back to the device.','warning');
+		if(ToDeviceCount == 1 && ToDeviceValue !== ""){
+			$('#ModalDialogUserLabel').html('Data to device');
+			$('#ModalDialogUser .modal-body').html('<h5>Do you want to transfer this piece of data to your device?</h5><small class="text-muted" style="word-wrap: break-word">'+ToDeviceValue+'</small>');
+			$('#ModalDialogUserOK').val(ToDeviceValue);
+			$('#ToDeviceBtn').show();
+		}
+	}
 });
 
 // ===============================================================================================

@@ -103,3 +103,5 @@ h1, h2, h3, h4, h5, h6 {
 legend { color:#3094db; font-weight:bold }
 
 label { color:#494d57 }
+
+td {word-wrap: break-word;}

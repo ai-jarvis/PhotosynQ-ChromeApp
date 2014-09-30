@@ -66,6 +66,9 @@ function LoadAuthentificationFromStorage() {
 		}
 		else{
 			_authentication = null;
+			GetMacrosFromCache();
+			GetProtocolsFromCache();
+			GetProjectsFromCache();
 		}
 	});
 }
@@ -99,7 +102,7 @@ function LoadMediaFromStorage() {
 	chrome.storage.local.get('media', function(result){
 		if(result['media'] != undefined){
 			try {
-				_media = JSON.parse(result['media']);
+				_media = $.extend(true, {}, JSON.parse(result['media']) );
 			} catch (e) {
 				RemoveFromStorage('media');
 				WriteMessage('Stored media has wrong format.','danger');
@@ -107,7 +110,7 @@ function LoadMediaFromStorage() {
 			}
 			chrome.storage.local.getBytesInUse('media', function(response){
 				$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
-			});		
+			});
 		}
 	});
 }
@@ -467,34 +470,15 @@ function SaveImgToLocalStorage(location,url,urlData){
         canvas.width = img.width;
         ctx.drawImage(img, 0, 0);
         var imgencoded = canvas.toDataURL('image/png');
-		chrome.storage.local.get('media', function(result){
-			if(result['media'] !== undefined){
-				try {
-					_media = JSON.parse(result['media']);
-					if(_media[location] === undefined)
-						_media[location] = {}
-					_media[location][url] = imgencoded;
-					SaveToStorage('media',_media, function(){
-						chrome.storage.local.getBytesInUse('media', function(response){
-							$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
-						});	
-					});
-				} catch (e) {
-					RemoveFromStorage('media');
-					WriteMessage('Stored media port has wrong format.','danger');
-					return;
-				}
-				
-			}else{
-				if(_media[location] === undefined)
-					_media[location] = {}
-				_media[location][url] = imgencoded;
-				SaveToStorage('media',_media,function(){
-					chrome.storage.local.getBytesInUse('media', function(response){
-						$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
-					});	
-				});
-			}
+		
+		if(_media[location] === undefined)
+			_media[location] = {}
+		_media[location][url] = imgencoded;        
+
+		SaveToStorage('media',_media,function(){
+			chrome.storage.local.getBytesInUse('media', function(response){
+				$('#MediaStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
+			});	
 		});
         canvas = null; 
     };

@@ -290,6 +290,7 @@
 						<button id="SaveMeasurementToFile" class="btn btn-success" style="display:none;" title="Save measurement as text-file"><i class="fa fa-hdd-o"></i> Save</button>
 						<button id="BtnToggleAllGraphs" class="btn btn-default" title="Toggle all graphs"><i class="fa fa-chevron-down"></i></button>
 						<button id="BtnToggleSimpleAdvanced" class="btn btn-default" title="Toggle simple and advanced view"><i class="fa fa-toggle-left"></i></button>
+						<button id="ToDeviceBtn" class="btn btn-default" title="SendDataToDevice" style="display:none;"><i class="fa fa-send-o"></i></button>
 						<button id="DiscardMeasurement" class="btn btn-danger pull-right" title="Discard measurement"><i class="fa fa-trash-o"></i> Discard</button>
 					</div>
 				</div>
@@ -315,53 +316,18 @@
 	  </div>
 	</div>
 
-	<div class="modal fade" id="ModalDialogAlert" tabindex="-1" role="dialog" aria-labelledby="ModalDialogAlertLabel" aria-hidden="true">
-	  <div class="modal-dialog">
+	<div class="modal fade" id="ModalDialogUser" tabindex="-1" role="dialog" aria-labelledby="ModalDialogUserLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-sm">
 		<div class="modal-content">
 		  <div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="ModalDialogAlertLabel"><i class="fa fa-exclamation-triangle"></i></h4>
+			<h4 class="modal-title" id="ModalDialogUserLabel">&nbsp;</h4>
 		  </div>
 		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
 		  </div>
 		  <div class="modal-footer">
-			<button type="button" class="btn btn-primary">OK</button>
-		  </div>
-		</div>
-	  </div>
-	</div>
-	
-	<div class="modal fade" id="ModalDialogConfirm" tabindex="-1" role="dialog" aria-labelledby="ModalDialogConfirmLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="ModalDialogConfirmLabel"><i class="fa fa-question-circle"></i></h4>
-		  </div>
-		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-default">Cancel</button>
-			<button type="button" class="btn btn-primary">OK</button>
-		  </div>
-		</div>
-	  </div>
-	</div>
-	
-	<div class="modal fade" id="ModalDialogPromt" tabindex="-1" role="dialog" aria-labelledby="ModalDialogPromtLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="ModalDialogPromtLabel"><i class="fa fa-pencil-square-o"></i></h4>
-		  </div>
-		  <div class="modal-body" style="max-height:450px;overflow-y:auto;">
-		  <label>Hello</label>
-		  <input type="text" class="form-control">
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-default">Cancel</button>
-			<button type="button" class="btn btn-primary">OK</button>
+			<button type="button" class="btn btn-default" value="" id="ModalDialogUserCancel" data-dismiss="modal">Cancel</button>
+			<button type="button" class="btn btn-primary" value="" id="ModalDialogUserOK" data-dismiss="modal">OK</button>
 		  </div>
 		</div>
 	  </div>
