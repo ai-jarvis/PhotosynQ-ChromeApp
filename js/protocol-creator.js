@@ -1051,10 +1051,14 @@ onload = function() {
 			if(!writableFileEntry)
 				return;
 			writableFileEntry.createWriter(function(writer) {
-			  writer.onerror = errorHandler;
-			  writer.onwriteend = function(e) {
-				WriteMessage('File saved.','success');
-			  };
+				writer.onerror = function(e) {
+					console.log('Textfile couldn\'t be saved');
+				};
+				writer.onwrite = function(e) {
+				writer.onwrite = null;
+				writer.truncate(writer.position);
+					console.log('File saved.');
+				};
 			  var ProtocolToSave = $('#RawProtocol').text();
 			  if(ProtocolToSave !== ""){
 			  	try{
