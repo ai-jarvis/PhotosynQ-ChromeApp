@@ -9,6 +9,7 @@ var _port_path;
 var _MeasurementType = null;
 var _ShowTansientgraph = true;
 var _dataRead = '';
+var _terminateMeasurement = false;
 var _initialTime = 0;
 var _SelectedProject = null;
 var _authentication;
@@ -23,9 +24,9 @@ var _consolemacros = false;
 var _muteMessages = false;
 var _apiURL = "http://photosynq.venturit.net/api/v1/";
 
-// ===============================================================================================
-// 					Logic to read and process incoming data
-// ===============================================================================================
+// =======================================================================================
+// Logic to read and process incoming data
+// =======================================================================================
 function onCharRead(readInfo) {
     if (!connectionId)
 		return;
@@ -35,10 +36,15 @@ function onCharRead(readInfo) {
     	
 	var str = ab2str(readInfo.data);
 
-	if(_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console'){
+	// Add time to data from device
+	// =======================================================================================
+	if((_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && !_terminateMeasurement){
 		try{
+			// Add timestamp to each incoming protocol
 			var addtimestamp = new Date().getTime();
 			str = str.replace(new RegExp('{', 'gi'), '{"time": '+ addtimestamp +', ');
+			
+			// Add timezone offset to the measurement header
 			if(_dataRead.length === 0){
 				str = str.replace(new RegExp('^{', 'gi'), '{"time_offset": '+ new Date().getTimezoneOffset() +', ');
 				_initialTime = addtimestamp;
@@ -48,13 +54,17 @@ function onCharRead(readInfo) {
 			console.log(e);
 		}
 	}
-
-	console.log(str);
+	
+	// Add data from device to data saving string
+	// =======================================================================================
 	_dataRead += str;
+	console.log(str);
 
+	// Check if device is connected
+	// =======================================================================================
 	if(_dataRead.match(/(MultispeQ Ready\r\n)/gi)){
 		setStatus("MultispeQ Ready",'success');
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success').parent().attr('title','Device connected to port '+_port_path);
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success').parent().attr('title','Device connected to port '+_port_path);
 		var SaveConnection = {}
 		SaveConnection["os"] = _port_os;
 		SaveConnection["path"] = _port_path;
@@ -67,6 +77,8 @@ function onCharRead(readInfo) {
 		return;
 	}
 
+	// Capture background battery checks
+	// =======================================================================================
 	if(_MeasurementType == 'BackgroundBatteryCheck'){
 			try{
 				var info = JSON.parse(_dataRead);
@@ -81,7 +93,8 @@ function onCharRead(readInfo) {
 		return;
 	}
 
-	
+	// Capture Menu Bar initiated measurements
+	// =======================================================================================	
 	if(_MeasurementType == 'MenuBarMeasurement'){
 		if(_dataRead.match(/(\s?{[\d\w\s\":]*\[)([\d\.]*)(\,)/g) !== null){
 			var passedValue = _dataRead.replace(/(\s?{[\d\w\s\":]*\[)/g, '');
@@ -120,6 +133,8 @@ function onCharRead(readInfo) {
 		return;
 	}
 
+	// Capture infos returned from the device
+	// =======================================================================================
 	if(_MeasurementType == 'MenuBarInfo'){
 			try{
 				var info = JSON.parse(_dataRead);
@@ -142,6 +157,8 @@ function onCharRead(readInfo) {
 		return;
 	}
 
+	// Capture readings initiated from the menubar
+	// =======================================================================================
 	if(_MeasurementType == 'MenuBarRead'){
 		if(_dataRead.match(/\,/g)){
 			$('#ModalDialogMsg').hide();
@@ -161,7 +178,8 @@ function onCharRead(readInfo) {
 		return;
 	}
 
-
+	// Add data to the container in raw mode
+	// =======================================================================================
 	if(_MeasurementType == 'consoleraw'){
 		try{
 			$('#PlotsContainer').append(str.replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2'));
@@ -170,27 +188,29 @@ function onCharRead(readInfo) {
 		catch(e){}
 	}
 
-	/** Add str to local memory **/
+	// Add str to local memory
+	// =======================================================================================
 	SaveOutputToStorage(_dataRead);
 		
 	$('#RawOutputTextarea').text(_dataRead);
-		
-	if(str.match(/(\r\n)/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
-
-		ProgressBar((parseInt($('#MeasurementProgress').attr('data-step'))+1), $('#MeasurementProgress').attr('data-total'));
-		try{
-			var pos = _dataRead.lastIndexOf('{');
-			var testeded = _dataRead.slice(pos);
-			testeded = testeded.split("\r\n");
-			if($('#MeasurementProgress').attr('data-total') > 5 && _ShowTansientgraph){
-				PlotDataRealTime(JSON.parse(testeded[0]));
-				
+	
+	if(_ShowTansientgraph){
+		if(str.match(/\}/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
+			ProgressBar((parseInt($('#MeasurementProgress').attr('data-step'))+1), $('#MeasurementProgress').attr('data-total'));
+			try{
+				var StartPos = _dataRead.lastIndexOf('{');
+				var EndPos = _dataRead.lastIndexOf('}') + 1;
+				var LastProtocolStr = _dataRead.slice(StartPos,EndPos);
+				LastProtocolStr = LastProtocolStr.slice( 0,( LastProtocolStr.indexOf('}') +1 ) )
+				PlotDataRealTime(JSON.parse(LastProtocolStr));
 			}
+			catch(e){}	
 		}
-		catch(e){}	
 	}
-
-	if(_dataRead.match(/(\r\n\r\n)$/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
+	
+	// Capture the end of the measurement
+	// =======================================================================================	
+	if(_dataRead.match(/(\]\]\})(\r|\n)*$/gi) && _dataRead.length > 0 && (_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null){
 		_dataRead = _dataRead.trim();
 		try {
 		  _dataRead = JSON.parse(_dataRead);
@@ -200,7 +220,7 @@ function onCharRead(readInfo) {
 		}			
 		EnableInputs();
 		ResultString = _dataRead;
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
 		WriteMessage('Protocol done.','success');
 
 		if(_MeasurementType == 'database'){
@@ -1134,7 +1154,7 @@ function MenubarFunction(item,itemid) {
 	$('#ModalDialog').on('hide.bs.modal', function (e) {
 		chrome.serial.send(connectionId, str2ab('-1+'), function(){});
 		_MeasurementType = false;
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
 		chrome.power.releaseKeepAwake();
 	});
 
@@ -1305,8 +1325,9 @@ function RunMeasurement(protocol,mtype){
 // ===============================================================================================
 function TerminateMeasurement(){
 	$('#TerminateMeasurement').blur();
+	_terminateMeasurement = true;
 	chrome.serial.send(connectionId, str2ab("-1+-1+"), function(){
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
 		EnableInputs();
 	});
 }
@@ -1424,7 +1445,7 @@ function DiscardMeasurement(){
 	$('#TransientPlotsContainer').css('min-height','0px');
 	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
 	if(connectionId != -1 && _deviceConnected)
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success');
+		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
 	ProgressBar(0, 0);
 	$(window).trigger('resize');
 	_MeasurementType = null;
@@ -1435,6 +1456,7 @@ function DiscardMeasurement(){
 	MacroArray = null;
 	serialBuffer = '';
 	_dataRead = '';
+	_terminateMeasurement = false;
 	_initialTime = 0;
 	RemoveFromStorage('measurement_tmp');
 }

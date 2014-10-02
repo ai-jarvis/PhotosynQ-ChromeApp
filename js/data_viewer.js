@@ -27,34 +27,39 @@ onload = function() {
 			filedata = event.data['filedata'];
 			_protocols = event.data['protocols'];
 			_macros = event.data['macros'];
-			$('#FileName,#FileNameMini').append(event.data['file']);
-
+			_initialTime = filedata.time;
+					
 			if(typeof filedata['time'] !== undefined){
 				var timestamp = filedata['time']
 				if(filedata.time_offset !== undefined)
 					timestamp += filedata.time_offset * 60000;
 				var date = new Date(timestamp);
 				$('#FileDate').append(date.toLocaleString());
+			}
+			
+			// Add a 1 ms delay to make sure the date, filename and spinner are visible
+			$('#FileName,#FileNameMini').append(event.data['file']).delay(1).queue(function() { 
+				
+				plot(filedata);
+				if(filedata.sample.length > 5){
+					$('#TransientPlotsContainer').show();
+					SetupTransientRealtimePlot()
+					plottransientFast(filedata);
+				}
+				$('#LoadingIndicator').hide();
+	
+				// =====================================================================
+				$('#PlotsContainer').on('shown.bs.collapse', function (e) {
+					$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-up');
+					$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
+				});
+				$('#PlotsContainer').on('hide.bs.collapse', function (e) {
+				  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-up fa-chevron-down');
+				});
+			
+			
+			});
 
-			}
-			_initialTime = filedata.time;
-			plot(filedata);
-			if(filedata.sample.length > 5){
-				$('#TransientPlotsContainer').show();
-				SetupTransientRealtimePlot()
-				plottransientFast(filedata);
-			}
-		
-			$('#LoadingIndicator').hide();
-		
-			// ===============================================================================================
-			$('#PlotsContainer').on('shown.bs.collapse', function (e) {
-				$(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-down fa-chevron-up');
-				$(e.target).children('div[id^=plotRawData]').highcharts().reflow();
-			});
-			$('#PlotsContainer').on('hide.bs.collapse', function (e) {
-			  $(e.target).prev('.panel-heading').find('i').toggleClass('fa-chevron-up fa-chevron-down');
-			});
 		}
 		
 		else if(event.data.graph !== undefined){

@@ -269,10 +269,12 @@ function SelectProject(id) {
 
 
 // ===============================================================================================
-//							Empty local storage... console only
+// Empty local storage
 // ===============================================================================================
 function EmptyStorage(){
-	chrome.storage.local.clear(function(){})
+	chrome.storage.local.clear(function(){
+		WriteMessage('Cache empty.','info')
+	});
 }
 
 
