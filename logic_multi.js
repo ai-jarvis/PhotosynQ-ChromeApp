@@ -35,7 +35,7 @@ function onCharRead(readInfo) {
     	
 	var str = ab2str(readInfo.data);
 
-	if(MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console'){
+	if(MeasurementType == 'database' || MeasurementType == 'quick'){
 		try{
 			str = str.replace(new RegExp('{', 'gi'), '{"time": '+ new Date().getTime() +', ');
 			str = str.replace(new RegExp('^{', 'gi'), '{"time_offset": '+ new Date().getTimezoneOffset() +', ');
@@ -49,14 +49,8 @@ function onCharRead(readInfo) {
 	dataRead += str;
 
 	if(dataRead.match(/(MultispeQ Ready\r\n)/gi)){
-		setStatus("MultispeQ Ready",'success');
-		$('#DeviceConnectionState').removeClass().addClass('fa fa-exchange text-success').parent().attr('title','Device connected to port '+port_path);
-		var SaveConnection = {}
-		SaveConnection["os"] = port_os;
-		SaveConnection["path"] = port_path;
-		SaveToStorage('com_port',SaveConnection, function(){});
-		deviceConnected = true;
-		dataRead = '';
+		$('tr[data-device-id="'+deviceID+'"] td:eq(1) span:eq(0) i').removeClass().addClass('fa fa-check text-success');
+		_DevicesSetup[deviceID].dataRead = '';
 		MeasurementType = 'BackgroundBatteryCheck';
 		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 		$('#ConnectBtn').button('complete');
@@ -64,7 +58,7 @@ function onCharRead(readInfo) {
 	}
 
 	
-	if(str.match(/(\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
+	if(str.match(/(\r\n)/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick') && MeasurementType != null){
 
 		ProgressBar((parseInt($('#MeasurementProgress').attr('data-step'))+1), $('#MeasurementProgress').attr('data-total'));
 		try{
@@ -79,7 +73,7 @@ function onCharRead(readInfo) {
 		catch(e){}	
 	}
 
-	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick' || MeasurementType == 'console') && MeasurementType != null){
+	if(dataRead.match(/(\r\n\r\n)$/gi) && dataRead.length > 0 && (MeasurementType == 'database' || MeasurementType == 'quick') && MeasurementType != null){
 		dataRead = dataRead.trim();
 		try {
 		  dataRead = JSON.parse(dataRead);
@@ -100,25 +94,9 @@ function onCharRead(readInfo) {
 				ResultString['location'] = [_geolocation.latitude, _geolocation.longitude];
 		}
 		
-		if(MeasurementType == 'console' || (MeasurementType == 'quick')){
+		if(MeasurementType == 'quick'){
 			$('#SaveMeasurementToFile').show();
 			SelectedProject = null;
-		}
-
-		if(MeasurementType == 'console'){
-			ResultString['ConsoleInput'] = $('#ConsoleProtocolContent').val().trim();
-			if(_consolemacros){
-				if(ResultString.sample !== undefined){
-					for(measurementID in ResultString.sample){
-						for(protocolID in ResultString.sample[measurementID]){
-							if(_consolemacros[protocolID] !== undefined){
-								ResultString.sample[measurementID][protocolID]['macro_id'] = _consolemacros[protocolID]
-							}
-						}
-					}
-				}
-				_consolemacros = false;
-			}
 		}
 
 		$('#PlotsContainer').empty();
@@ -282,6 +260,7 @@ onload = function() {
 		var modalID = $(this).attr('id');
 		var deviceID = $(e.relatedTarget).parent().parent().parent().parent().attr('data-device-id')
 		$('#'+modalID+' .modal-title small').text('Device #'+deviceID);
+		$('#'+modalID).attr('data-device-id',deviceID)
 	});
 
 	$('#FilterProtocolList').on('keyup', function(){
@@ -308,7 +287,17 @@ onload = function() {
 
 	$('#BtnApplyProtocol').on('click',function(){
 		var ProtocolID = $('#MeasurementProtocolList .active').attr('data-value');
-		
+		var deviceID = $('#ModalMeasurement').attr('data-device-id')
+		if(deviceID === "")
+			return;
+		_DevicesSetup[deviceID].Protocol = [];
+		_DevicesSetup[deviceID].Script = "";
+		$('tr[data-device-id="'+deviceID+'"] td:eq(2)').text('--');
+		if(ProtocolID !== undefined){
+			$('tr[data-device-id="'+deviceID+'"] td:eq(2)').text(_protocols[ProtocolID].name);
+			_DevicesSetup[deviceID].Protocol.push(ProtocolID);
+			_DevicesSetup[deviceID].Script = JSON.stringify(_protocols[ProtocolID].protocol_json);
+		}
 	});
 	
 	// Initial app settings
@@ -495,65 +484,6 @@ function TerminateMeasurement(){
 }
 
 // ===============================================================================================
-// 									Display Message on screen
-// ===============================================================================================
-function WriteMessage(text,type){
-	toastr.options = {
-	  "closeButton": false,
-	  "debug": false,
-	  "positionClass": "toast-top-right",
-	  "onclick": null,
-	  "showDuration": "300",
-	  "hideDuration": "1000",
-	  "timeOut": "2000",
-	  "extendedTimeOut": "1000",
-	  "showEasing": "swing",
-	  "hideEasing": "linear",
-	  "showMethod": "fadeIn",
-	  "hideMethod": "fadeOut"
-	}
-	if(!_muteMessages)
-		show = false;
-	
-	var notificationbtn = $('#NotificationHistory').prev().find('.fa-bell');
-	if(!notificationbtn.hasClass('fa-inverse'))
-		notificationbtn.addClass('fa-inverse');
-	
-	html = '<li style="padding:2px 15px 2px 15px">'
-	if(type == 'info'){
-		html += '<i class="fa fa-info-circle text-info" style="margin-right:10px;"></i>'
-		if(!_muteMessages)
-			toastr.info(text)
-	}
-	if(type == 'warning'){
-		html += '<i class="fa fa-exclamation-circle text-warning" style="margin-right:10px;"></i>'
-		toastr.warning(text)
-	}
-	if(type == 'danger'){
-		html += '<i class="fa fa-exclamation-triangle text-danger" style="margin-right:10px;"></i>'
-		if(!notificationbtn.next().hasClass('fa-circle'))
-			notificationbtn.parent().append('<i class="fa fa-circle text-danger" style="position:absolute; margin-left:-7px; margin-top:-2px"></i>');
-		toastr.error(text)
-	}
-	if(type == 'success'){
-		html += '<i class="fa fa-check-square text-success" style="margin-right:10px;"></i>'
-		if(!_muteMessages)
-			toastr.success(text)
-	}
-	html += '<span class="text-muted">'+text+'</span>'
-	html += '<small class="text-muted pull-right" style="" data-timestamp="'+ Date.now() +'">0 sec ago</small>'
-	html += '</li>'
-	html += '<li class="divider"></li>'
-	$('#NotificationHistory li ul').prepend(html);
-	$('.toast-top-right').css('top','55px');
-	
-	notificationbtn.addClass("faa-ring animated").delay(1000).queue(function(){
-		$(this).removeClass("faa-ring animated").dequeue();
-	});
-}
-
-
-// ===============================================================================================
 //						Display ProgressBar
 // ===============================================================================================
 function ProgressBar(step, total){
@@ -609,11 +539,11 @@ function AddDevice(){
 	html += '<span class="text-muted" style="margin-left:10px">Com 1</span>';
 	html += '</td>';
 	html += '<td>';
-	html += 'Phi2 Algae';
+	html += '--';
 	html += '</td>';
 	html += '<td style="width:200px">';
 	html += '<div class="progress" style="margin:0px">';
-	html += '<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">';
+	html += '<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">';
 	html += '<span class="sr-only">0% Complete</span>';
 	html += '</div>';
 	html += '</div>';
@@ -624,8 +554,8 @@ function AddDevice(){
 	html += '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalConnection"><i class="fa fa-cogs"></i></button>';
 	html += '</div>';
 	html += '<div class="btn-group btn-group-xs">';
-	html += '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalProject"><i class="fa fa-flask"></i></button>';
-	html += '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalMeasurement"><i class="fa fa-rocket"></i></button>';
+	html += '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalProject" value="'+nextID+'"><i class="fa fa-flask"></i></button>';
+	html += '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalMeasurement" value="'+nextID+'"><i class="fa fa-rocket"></i></button>';
 	html += '</div>';
 	html += '<div class="btn-group btn-group-xs">';
 	html += '<button type="button" class="btn btn-default"><i class="fa fa-play"></i></button>';
