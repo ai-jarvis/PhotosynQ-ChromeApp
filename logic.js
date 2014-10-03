@@ -23,6 +23,7 @@ var _given_answers = [];
 var _consolemacros = false;
 var _muteMessages = false;
 var _apiURL = "http://photosynq.venturit.net/api/v1/";
+var _appURL = "http://photosynq.venturit.net/";
 
 // =======================================================================================
 // Logic to read and process incoming data
@@ -138,6 +139,7 @@ function onCharRead(readInfo) {
 	if(_MeasurementType == 'MenuBarInfo'){
 			try{
 				var info = JSON.parse(_dataRead);
+				$('#ModalDialogMsg').empty();
 				for(key in info){
 					if(key == 'response')
 						$('#ModalDialogMsg').show().append(info[key]+'<br>');
@@ -429,32 +431,32 @@ onload = function() {
 		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('')
 	});
 
-
-	document.getElementById('BtnToggleAllGraphs').addEventListener('click', function(){
-		$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
-		if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-down'))
-			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('show');
+	document.getElementById('ToggleAllGraphsBtn').addEventListener('click', function(){
+		if($('#ToggleAllGraphsBtn').hasClass('active'))
+			$('#PlotsContainer [id^="plotRawDatabody"]').hide();
 		else
-			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
-		$('#BtnToggleAllGraphs').blur();
+			$('#PlotsContainer [id^="plotRawDatabody"]').show();
+		$('#ToggleAllGraphsBtn').toggleClass('active');
+		$('#PlotsContainer [id^="plotRawDatabody"]').toggleClass('in');
+		$('#ToggleAllGraphsBtn').blur();
 	});
 
-	document.getElementById('BtnToggleSimpleAdvanced').addEventListener('click', function(){
-		$('#PlotsContainer [id^="plotRawDataHeader"], #PlotsContainer [id^="plotRawDataTable"], #PlotsContainer [id^="plotRawDataFooter"]').toggle();
-		$('#BtnToggleSimpleAdvanced i').toggleClass('fa-toggle-left fa-toggle-right');
-	
-		if($('#BtnToggleSimpleAdvanced i').hasClass('fa-toggle-right')){
-			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('hide');
-			if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-down'))
-				$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
-		}
-		else{
-			$('#PlotsContainer [id^="plotRawDatabody"]').collapse('show');
-			if($('#BtnToggleAllGraphs i').hasClass('fa-chevron-up'))
-				$('#BtnToggleAllGraphs i').toggleClass('fa-chevron-down fa-chevron-up');
-		}
-		
-		$('#BtnToggleSimpleAdvanced').blur();
+	document.getElementById('ToggleAllMacrosBtn').addEventListener('click', function(){
+		if($('#ToggleAllMacrosBtn').hasClass('active'))
+			$('#PlotsContainer [id^="plotRawDataTable"] .macroout').hide();
+		else
+			$('#PlotsContainer [id^="plotRawDataTable"] .macroout').show();
+		$('#ToggleAllMacrosBtn').toggleClass('active');
+		$('#ToggleAllMacrosBtn').blur();
+	});
+
+	document.getElementById('ToggleAllMiscBtn').addEventListener('click', function(){
+		if($('#ToggleAllMiscBtn').hasClass('active'))
+			$('#PlotsContainer [id^="plotRawDataTable"] tr:not(".macroout")').hide();
+		else
+			$('#PlotsContainer [id^="plotRawDataTable"] tr:not(".macroout")').show();
+		$('#ToggleAllMiscBtn').toggleClass('active');
+		$('#ToggleAllMiscBtn').blur();
 	});
 
 	$('#ProjectList').on('click','a',function(){
@@ -548,6 +550,12 @@ onload = function() {
 		$(this).blur();
 		OpenProtocolCreator();
 	});
+	
+	// Add fixed linkes according to the used website
+	// ===============================================================================================
+	$('#ForgotPasswordBtn').attr('href', _appURL + 'users/password/new');
+	$('#JoinNewProjectsBtn').attr('href', _appURL + 'projects');
+	$('.navbar-inverse .navbar-brand').attr('href', _appURL);
 
 	// Events for sign in/off
 	// ===============================================================================================
@@ -761,18 +769,15 @@ onload = function() {
 	// Resizing app events
 	// ===============================================================================================
 	var bodyheight =$(window).height()-84
-	$("#MainDisplayContainer").height(bodyheight);
-	$("#MainDisplayContainer .panel-body").height(bodyheight-40);
+	$("#MainDisplayContainer,#SubDisplayContainer").height(bodyheight);
 	$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
 	$('#ConsoleProtocolContent').height(bodyheight-154);
 	ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
 	$(window).resize(function() {
 		bodyheight = $(window).height()-84;
-		$("#MainDisplayContainer").height(bodyheight);
-		$("#MainDisplayContainer > .panel-body").height(bodyheight-40);
-		if($("#MainDisplayContainer .panel-footer").is(":visible"))
-			$("#MainDisplayContainer > .panel-body").height(bodyheight-68);
-		$('[id^="plotRawDataFooter"] canvas').width($('[id^="plotRawDataFooter"]').parent().width())
+		$("#MainDisplayContainer,#SubDisplayContainer").height(bodyheight);
+		if($("#MeasurementMenu").is(":visible"))
+			$("#SubDisplayContainer").height(bodyheight-73);
 		$('#ProjectList, #QuickMeasurementProtocol, #ProjectMeasurementTab .panel-body').height(bodyheight-185);
 		$('#ConsoleProtocolContent').height(bodyheight-154);
 		ConsoleProtocolContent.setSize($('#ConsoleProtocolContent').width(), $('#ConsoleProtocolContent').height());
@@ -814,7 +819,14 @@ onload = function() {
 	// Initial app settings
 	// ===============================================================================================
 	LoadMuteNotificationFromStorage();
+	LoadMediaFromStorage();
+	GetProtocolsFromCache();
+	GetMacrosFromCache();
+	GetProjectsFromCache();
 	fetchPorts();
+	LoadPortNameFromStorage();
+	LoadAuthentificationFromStorage();
+	GetLocation();
 
 	// Check if internet connection exists
 	// ===============================================================================================
@@ -880,13 +892,6 @@ onload = function() {
 			}
 		}
 	}
-	
-	// Get updates from database/file, auto login
-	// ===============================================================================================
-	LoadPortNameFromStorage();
-	LoadMediaFromStorage()
-	LoadAuthentificationFromStorage();
-	GetLocation();
 
 	// Info message window test
 	// ===============================================================================================
@@ -982,8 +987,6 @@ onload = function() {
 			}
 		}
 	});
-	
-	GeneratePanelClasses(HighchartColors);
 };
 
 // ===============================================================================================
@@ -1240,8 +1243,8 @@ function ConsoleMeasurement() {
 	}
 	if($('#ConsoleProtocolRaw').is(':checked')){
 		DiscardMeasurement();
-		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
-		$('#MainDisplayContainer .panel-body').prop('contenteditable', true);
+		$('#MainDisplayContainer').css('background-image', 'none');
+		$('#SubDisplayContainer').prop('contenteditable', true);
 		_MeasurementType = 'consoleraw';
 		SendLongStrings(ConsoleProtocol+'!');
 		_dataRead = '';
@@ -1286,7 +1289,7 @@ function RunMeasurement(protocol,mtype){
 	// Reset variables, empty MainDisplayContainer, blur buttons
 	DiscardMeasurement();
 	$('#DatabaseMeasurement, #QuickMeasurement, #ConsoleProtocol').blur();
-	$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+	$('#MainDisplayContainer').css('background-image', 'none');
 	
 	// Check protocol and submit
 	setStatus('MultiSpeQ Busy','danger');
@@ -1328,7 +1331,9 @@ function TerminateMeasurement(){
 	_terminateMeasurement = true;
 	chrome.serial.send(connectionId, str2ab("-1+-1+"), function(){
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
+		setStatus('MultiSpeQ Ready','success');
 		EnableInputs();
+		chrome.power.releaseKeepAwake();
 	});
 }
 
@@ -1443,9 +1448,10 @@ function DiscardMeasurement(){
 	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB, #ToDeviceBtn').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
-	$('#MainDisplayContainer .panel-body').css('background-image', 'url(\'img/containerbackground.png\')');
+	$('#MainDisplayContainer').css('background-image', 'url(\'img/containerbackground.png\')');
 	if(connectionId != -1 && _deviceConnected)
 		$('#DeviceConnectionState').removeClass().addClass('fa fa-check text-success');
+	$('#ToggleAllGraphsBtn, #ToggleAllMacrosBtn, #ToggleAllMiscBtn').addClass('active');
 	ProgressBar(0, 0);
 	$(window).trigger('resize');
 	_MeasurementType = null;

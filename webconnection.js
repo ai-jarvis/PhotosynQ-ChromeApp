@@ -38,7 +38,7 @@ function DatabaseSignIn(){
 				$('#DatabaseSignedInUser').text(response['name'])
 				$('#DatabaseSignedInEmail').text(response['email'])
 				$('#DatabaseSignInForm').hide();
-				$('#DatabaseSignedInLink').attr('href',response.user.profile_url);
+				$('#DatabaseSignedInLink, #ViewMyProfileBtn').attr('href',response.user.profile_url);
 				DatabaseGetImage('avatar',response.user.thumb_url,function(img){
 					$('#LoginUserAvatar').attr('src',img.src);
 				});
@@ -79,6 +79,7 @@ function DatabaseSignOff(){
 			$('#DatabaseSignedIn').hide();
 			$('#DatabaseSignInState').toggleClass('text-muted fa-inverse').attr('title','Not signed in.');
 			$('#DatabaseSignedInUser, #DatabaseSignedInEmail').text('');
+			$('#DatabaseSignedInLink, #ViewMyProfileBtn').attr('href','');
 			$('#SignInEmail,#SignInPassword').val('');
 			$('#DatabaseSignInForm').show();
 		}

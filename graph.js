@@ -37,61 +37,10 @@ var ExcludeFromTransientPlot = [
 ]
 
 // ===============================================================================================
-// Generate classes for plot containers
-// ===============================================================================================
-function GeneratePanelClasses(HighchartColors){
-	var css= '';
-	for(i in HighchartColors){
-		var color = HighchartColors[i];
-		var color1 = 'rgba('+parseInt(color.substr(1,2), 16)+','+parseInt(color.substr(3,2), 16)+','+parseInt(color.substr(5,2), 16)+',0.80)'
-		var color2 = 'rgba('+parseInt(color.substr(1,2), 16)+','+parseInt(color.substr(3,2), 16)+','+parseInt(color.substr(5,2), 16)+',0.45)'
-		var color3 = '#101010'
-		css += '.panel-custom'+i+' { border-color: '+color+';}'
-	
-		css += '.panel-custom'+i+' > .panel-heading {'
-		css += 'color: '+color3+';'
-		css += 'background-color: '+color2+';'
-		css += 'border-color: '+color+';'
-		css += '}'
-
-		css += '.panel-custom'+i+' > .panel-footer {'
-		css += 'color: '+color3+';'
-		css += 'background-color: '+color2+';'
-		css += '}'
-	
-		css += '.panel-custom'+i+' > .panel-heading + .panel-collapse > .panel-body {'
-		css += 'border-color: '+color+';'
-		css += '}'
-	
-		css += '.panel-custom'+i+' > .panel-heading .badge {'
-		css += 'color: '+color3+';'
-		css += 'background-color: '+color2+';'
-		css += '}'
-	
-		css += '.panel-custom'+i+' > .panel-footer + .panel-collapse > .panel-body {'
-		css += 'border-bottom-color: '+color+';'
-		css += '}'
-
-		css += '.panel-custom'+i+' > .panel-heading {'
-		css += 'background-image: -webkit-linear-gradient(top, '+color2+' 0%, '+color+' 100%);'
-		css += 'background-image: -o-linear-gradient(top, '+color2+' 0%, '+color+' 100%);'
-		css += 'background-image: linear-gradient(to bottom, '+color2+' 0%, '+color+' 100%);'
-		css += 'background-repeat: repeat-x;'
-		css += '}'
-		
-		css += '.panel-custom'+i+' > .panel-footer {'
-		css += 'background-color: '+color1+';';
-		css += '}'		
-		
-	}
-	$('head style').append(css);
-}
-
-// ===============================================================================================
 // Plot Protocols after measurement
 // ===============================================================================================
 function plot(data){
-	$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+	$('#MainDisplayContainer').css('background-image', 'none');
 	if($('#TransientPlotsContainer').html() == ""){
 		$('#TransientPlotsContainer').css('min-height','0px');
 	}
@@ -159,11 +108,12 @@ function plot(data){
 			else
 				var container = '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">';
 			
-			container += '<div class="panel panel-custom'+protocolID+'">';
+			container += '<div class="panel panel-default">';
 			
 			if(protocolname !== ""){
 				container += '<div class="panel-heading" id="plotRawDataHeader'+repeat+''+protocolID+'">';
 				container += '<h3 class="panel-title">'
+				container += '<i class="fa fa-square" style="color:'+HighchartColors[protocolID]+'"></i> '
 				container += protocolname
 				container += '<a type="button" href="#plotRawDatabody'+repeat+''+protocolID+'" title="Show/hide graph" class="btn btn-default btn-xs pull-right" data-toggle="collapse" data-parent="#PlotsContainer"><i class="fa fa-chevron-down"></i></a>'
 				container += '</h3>';
@@ -200,15 +150,6 @@ function plot(data){
 			HTML += '</tr>'
 				
 			container += '<table class="table table-condensed table-bordered" id="plotRawDataTable'+repeat+''+protocolID+'">'+HTML+'</table>';
-
-			//build footer
-			container += '<div class="panel-footer" id="plotRawDataFooter'+repeat+''+protocolID+'" style="display:none;margin-top:-1px">';
-			container += '<div class="backgroundgraph" style="position:absolute;margin-left:-15px; margin-top:10px;"></div>';
-			container += '<div class="row" style="z-index:2;min-height:90px;">';
-			container += '<div class="col-md-12 text-right"><em>'+protocolname+'</em></div>';
-			container += '<div class="col-md-12 simplecontent"></div>';
-			container += '</div>';
-			container += '</div>';
 
 			//close panel container
 			container += '</div>';
@@ -257,21 +198,6 @@ function plot(data){
 				$('#plotRawData'+repeat+''+protocolID).highcharts().series[0].update({
 					 color: HighchartColors[protocolID]
 				});
-				
-				$('#plotRawDataFooter'+repeat+''+protocolID+' .backgroundgraph').sparkline(
-					plotoptionschromeextension.series[0].data, {
-						width: $('#plotRawDataHeader'+repeat+''+protocolID).parent().width()+'px',
-						height: '90px',
-						type: 'line',
-						lineColor: $('#plotRawDataHeader'+repeat+''+protocolID).css('border-color'),
-						lineWidth: 3,
-						fillColor: $('#plotRawDataHeader'+repeat+''+protocolID).css('background-color'),
-						minSpotColor: false,
-						maxSpotColor: false,
-						spotColor: false,
-						disableTooltips: true,
-						disableHighlight: true
-					});
 			}
 		}
 	}
@@ -702,7 +628,7 @@ window.addEventListener('message', function(event) {
 						if(col % 2 && col !== 1)
 							HTML += '</tr><tr class="macroout warning">';
 						HTML += '<td style="width:50%">';
-						HTML += '<em class="text-muted">';
+						HTML += '<strong><em class="text-muted">';
 						if(replacements[key] != undefined){
 							HTML += replacements[key]
 							simpleHTML += '<h4>'+replacements[key]+'</h4>'
@@ -711,7 +637,7 @@ window.addEventListener('message', function(event) {
 							HTML += key
 							simpleHTML += '<h4>'+key+'</h4>'
 						}
-						HTML += ':</em> ';
+						HTML += ':</em></strong> ';
 						HTML += '<span style="margin-left:10px;">'+MacroArray[repeat][protocolID][key]+'</span>';
 						simpleHTML +=MathROUND(MacroArray[repeat][protocolID][key],3)+'</div>';
 						HTML += '</td>';

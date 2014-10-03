@@ -40,7 +40,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="http://photosynq.org" target="_blank"><i class="fa fa-chevron-left"></i><i class="fa fa-ellipsis-h"></i><i class="fa fa-chevron-right"></i> PhotosynQ</a>
+      <a class="navbar-brand" href="" target="_blank"><i class="fa fa-chevron-left"></i><i class="fa fa-ellipsis-h"></i><i class="fa fa-chevron-right"></i> PhotosynQ</a>
     </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="PhotosynqNavBar">
@@ -117,22 +117,32 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-offset-3 col-sm-9 text-right">
+								<div class="col-sm-7" style="padding-top:7px">
+									<a href="" id="ForgotPasswordBtn" target="_blank" title="Forgot your password?"><small>Forgot your password?</small></a>
+								</div>
+								<div class="col-sm-5 text-right">
 									<button  type="submit" class="btn btn-default" id="DatabaseSignIn" title="Sign in to PhotosynQ"><i class="fa fa-sign-in"></i> Sign in</button>
 								</div>
 							</div>
 						</form>
 						<div id="DatabaseSignedIn" style="display:none;">
 							<div class="media">
-							  <a class="pull-left" id="DatabaseSignedInLink" href="#" target="_blank">
+							  <a class="pull-left" id="DatabaseSignedInLink" href="" target="_blank">
 								<img src="img/thumb_missing.png" class="media-object img-circle" id="LoginUserAvatar" style="width:64px; height:64px">
 							  </a>
 							  <div class="media-body">
 								<h4 class="media-heading" id="DatabaseSignedInUser">User</h4>
 								<small class="text-muted" id="DatabaseSignedInEmail">Email</small>
 							  </div>
-							</div>							
-							<div style="margin-top:5px;" class="text-right"><button class="btn btn-default" id="DatabaseSignOff" title="Sign out from PhotosynQ"><i class="fa fa-sign-out"></i> Sign out</button></div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-7" style="padding-top:7px">
+									<a href="" id="ViewMyProfileBtn" target="_blank" title="View your profile on PhotosynQ"><small>View My Profile</small></a>
+								</div>
+								<div class="col-sm-5 text-right">
+									<button class="btn btn-default" id="DatabaseSignOff" title="Sign out from PhotosynQ"><i class="fa fa-sign-out"></i> Sign out</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -202,7 +212,7 @@
 					<div class="list-group" style="height:300px; overflow-y:scroll" id="ProjectList">
 					</div>			
 					<div class="panel-footer text-right">
-						<a class="btn btn-xs btn-default" href="http://photosynq.venturit.net/projects" target="_blank" title="Join new projects"><i class="fa fa-plus"></i></a>
+						<a class="btn btn-xs btn-default" href="" id="JoinNewProjectsBtn" target="_blank" title="Join new projects"><i class="fa fa-plus"></i></a>
 					</div>
 				</div>	
 
@@ -266,8 +276,37 @@
 			
 			<!-- Container for Plots -->
 			<div class="col-md-8 col-lg-9">
-				<div class="" id="MainDisplayContainer" style="height:100%;">
-					<div class="panel-body" style="background-image:url('img/containerbackground.png');  padding-top:0px; background-size:50%; background-repeat:no-repeat; background-position:50% 50%;overflow-y:auto;">
+				<div class="" id="MainDisplayContainer" style="height:100%; background-image:url('img/containerbackground.png'); background-size:50%; background-repeat:no-repeat; background-position:50% 50%;">
+					
+					<div class="navbar navbar-default" style="padding:11px; display:none;" id="MeasurementMenu">
+					  <div class="btn-toolbar" role="toolbar">
+							<div class="btn-group btn-group-sm" style="padding:5px 5px 0px 15px;">
+								<strong>Measurement</strong>
+							</div>
+							<div class="btn-group btn-group-sm">
+								<button id="SaveMeasurementToDB" class="btn btn-success" style="display:none;" title="Submit measurement to website"><i class="fa fa-cloud-upload"></i> Keep</button>
+							</div>
+							<div class="btn-group btn-group-sm">
+								<button id="SaveMeasurementToFile" class="btn btn-success" style="display:none;" title="Save measurement as text-file"><i class="fa fa-hdd-o"></i> Save</button>					
+							</div>
+							<div class="btn-group btn-group-sm">
+								<button id="DiscardMeasurement" class="btn btn-danger" title="Discard measurement"><i class="fa fa-trash-o"></i> Discard</button>							
+							</div>
+							<div class="btn-group btn-group-sm" style="padding:5px 5px 0px 15px;">
+								<strong>Display</strong>
+							</div>
+							<div class="btn-group btn-group-sm">
+							  <button type="button" class="btn btn-default active" id="ToggleAllGraphsBtn"><i class="fa fa-line-chart"></i> Graph</button>
+							  <button type="button" class="btn btn-default active" id="ToggleAllMacrosBtn"><i class="fa fa-puzzle-piece"></i> Calculations</button>
+							  <button type="button" class="btn btn-default active" id="ToggleAllMiscBtn"><i class="fa fa-list-ul"></i> Misc. Data</button>
+							</div>
+							<div class="btn-group btn-group-sm">
+								<button id="ToDeviceBtn" class="btn btn-default" title="SendDataToDevice" style="display:none;"><i class="fa fa-send-o"></i></button>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-12" id="SubDisplayContainer" style="padding-top:0px; overflow-y:auto;">
 						<div id="TransientPlotsContainer" style="min-height:0px"></div>
 						<div class="row">
 							<div id="PlotsContainer" style="word-wrap:break-word;"></div>
@@ -285,14 +324,7 @@
 							<p><textarea id="RawOutputTextarea" class="form-control" style="display:none; height:150px"></textarea></p>
 						</div>
 					</div>
-					<div class="panel-footer" id="MeasurementMenu" style="display:none;">
-						<button id="SaveMeasurementToDB" class="btn btn-success" style="display:none;" title="Submit measurement to website"><i class="fa fa-cloud-upload"></i> Keep</button>
-						<button id="SaveMeasurementToFile" class="btn btn-success" style="display:none;" title="Save measurement as text-file"><i class="fa fa-hdd-o"></i> Save</button>
-						<button id="BtnToggleAllGraphs" class="btn btn-default" title="Toggle all graphs"><i class="fa fa-chevron-down"></i></button>
-						<button id="BtnToggleSimpleAdvanced" class="btn btn-default" title="Toggle simple and advanced view"><i class="fa fa-toggle-left"></i></button>
-						<button id="ToDeviceBtn" class="btn btn-default" title="SendDataToDevice" style="display:none;"><i class="fa fa-send-o"></i></button>
-						<button id="DiscardMeasurement" class="btn btn-danger pull-right" title="Discard measurement"><i class="fa fa-trash-o"></i> Discard</button>
-					</div>
+				
 				</div>
 			</div>
 		</div>

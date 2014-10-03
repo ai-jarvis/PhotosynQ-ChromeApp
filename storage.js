@@ -55,7 +55,7 @@ function LoadAuthentificationFromStorage() {
 			$('#DatabaseSignedInUser').text(_authentication.name)
 			$('#DatabaseSignedInEmail').text(_authentication.email)
 			$('#DatabaseSignInForm').hide();
-			$('#DatabaseSignedInLink').attr('href',_authentication.user.profile_url);
+			$('#DatabaseSignedInLink, #ViewMyProfileBtn').attr('href',_authentication.user.profile_url);
 			DatabaseGetImage('avatar',_authentication.user.thumb_url,function(img){
 				$('#LoginUserAvatar').attr('src',img.src);
 			});
@@ -143,7 +143,7 @@ function LoadPortNameFromStorage() {
 function SelectProject(id) {
 	DiscardMeasurement();
 	if(_projects[id] !== undefined){
-		$('#MainDisplayContainer .panel-body').css('background-image', 'none');
+		$('#MainDisplayContainer').css('background-image', 'none');
 		
 		/** Add project title **/
 		var html = '<div class="col-md-12"><legend>'+_projects[id].name+'</legend></div>';

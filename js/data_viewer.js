@@ -13,11 +13,6 @@ onload = function() {
 	_initialTime = 0;
 
 	// =====================================================================
-	// Build additional color schemes
-	// =====================================================================
-	GeneratePanelClasses(HighchartColors);
-
-	// =====================================================================
 	// Listen for the data from the file
 	// =====================================================================
 	window.addEventListener('message', function(event) {
