@@ -66,9 +66,6 @@ function LoadAuthentificationFromStorage() {
 		}
 		else{
 			_authentication = null;
-			GetMacrosFromCache();
-			GetProtocolsFromCache();
-			GetProjectsFromCache();
 		}
 	});
 }
