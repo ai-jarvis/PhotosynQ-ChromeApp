@@ -486,7 +486,7 @@ onload = function() {
 		$('#CheckBoxRememberAnswers').prop('checked', false); 
 	});
 
-	$('#MuteAllNotifications').on('click', function(){
+	$('#MuteAllNotifications').on('click', function(e){
 		var store = {}
 		if(!_muteMessages){
 			$('#MuteAllNotifications small').html('<i class="fa fa-toggle-off"></i> Show popup notifications');
@@ -500,6 +500,7 @@ onload = function() {
 			store['MuteNotifications'] = _muteMessages;
 			chrome.storage.local.set(store);
 		}
+		e.stopPropagation();
 	});
 
 	// Events for tours
@@ -516,8 +517,8 @@ onload = function() {
 
 	// Events when port is changed
 	// ===============================================================================================
-	$('.preventClose').click(function(event){
-		 event.stopPropagation();
+	$('.preventClose').click(function(e){
+		 e.stopPropagation();
 	 });
 	document.getElementById('refetchPorts').addEventListener('click', fetchPorts);
 	document.getElementById('ConnectBtn').addEventListener('click', function(e){
@@ -565,10 +566,12 @@ onload = function() {
 	document.getElementById('DiscardAllNotifications').addEventListener('click', function(e){
 		$('#NotificationHistory li ul li').remove();
 		$('#NotificationHistory').prev().find('.fa-bell').removeClass('fa-inverse');
+		e.stopPropagation();
 	});
 	
 	document.getElementById('BtnLocationUpdate').addEventListener('click', function(e){
 		GetLocation();
+		e.stopPropagation();
 	});
 	
 
@@ -621,7 +624,7 @@ onload = function() {
 					$('#CachedDataQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 				});	
        		});
-       		e.preventDefault();
+       		e.stopPropagation();
        		return;
     	} 
 		if(_authentication != null && navigator.onLine){
@@ -632,7 +635,7 @@ onload = function() {
 		}
 		else
 			WriteMessage('You have to be signed in and have an internet connection to update your projects and protocols.','warning');
-		e.preventDefault();
+		e.stopPropagation();
 	});
 
 
