@@ -45,10 +45,13 @@ window.addEventListener('message', function(event) {
 			}
 			// If Protocol_id exists look for macro_name
 			else if(protocol_id){
-				macro_name = 'macro_'+protocol_lookup[protocol_id].macro_id;
+				if(protocol_lookup[protocol_id].macro_id !== undefined)
+					macro_name = 'macro_'+protocol_lookup[protocol_id].macro_id;
 				// Overwrite settings if macro_id exists at this point
-				if(event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id !== undefined)
+				else if(event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id !== undefined)
 					macro_name = 'macro_'+event.data.sandbox.devicedata.sample[sampleID][measurementID].macro_id;
+				else
+					continue;
 			}
 			
 			// If macro_name is still false, continue

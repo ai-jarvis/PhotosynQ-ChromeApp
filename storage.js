@@ -186,12 +186,25 @@ function SelectProject(id) {
 			+'<hr>'
 			+'<div class="btn-group btn-group-justified">'
 			+'<div class="btn-group">'
-			+'<a class="btn btn-link" href="'+_projects[id].url+'/explore_data" target="_blank"><i class="fa fa-line-chart"></i> Explore data</a>'
+			+'<a class="btn btn-link" href="'+_projects[id].url+'/explore_data" target="_blank" title="View collected data on photosynq"><i class="fa fa-line-chart"></i> Explore data</a>'
 			+'</div>'
 			+'<div class="btn-group">'
-			+'<a class="btn btn-link text-left" href="'+_projects[id].url+'" target="_blank"><i class="fa fa-flask"></i> View project</a>'
+			+'<a class="btn btn-link text-left" href="'+_projects[id].url+'" target="_blank" title="View the project on photosynq"><i class="fa fa-flask"></i> View project</a>'
 			+'</div>'
 			+'</div>'
+
+			+'<div class="btn-group btn-group-justified">'
+			+'<div class="btn-group btn-group-lg">'
+			+'<a class="btn btn-link" href="https://twitter.com/intent/tweet?url='+_projects[id].url+'" target="_blank" title="Share this project on twitter"><i class="fa fa-twitter"></i></a>'
+			+'</div>'
+			+'<div class="btn-group btn-group-lg">'
+			+'<a class="btn btn-link text-left" href="https://plus.google.com/share?url='+_projects[id].url+'" target="_blank" title="Share this project on google+"><i class="fa fa-google-plus-square"></i></a>'
+			+'</div>'
+			+'<div class="btn-group btn-group-lg">'
+			+'<a class="btn btn-link text-left" href="http://www.facebook.com/sharer/sharer.php?u='+_projects[id].url+'" target="_blank" title="Share this project on facebook"><i class="fa fa-facebook-square"></i></a>'
+			+'</div>'
+			+'</div>'
+			
 			+'</div>'
 			+'<hr>'
 			
@@ -219,7 +232,9 @@ function SelectProject(id) {
 		
 		DatabaseGetImage('project',_projects[id].medium_image_url,function(img){
 			$('#ProjectAboutSection').prepend('<img src="'+img.src+'" class="pull-left img-rounded" style="margin-right:10px; width:40%">');
+			
 		});
+		
 		DatabaseGetImage('avatar',_projects[id].lead.thumb_url,function(img){
 			$('#LeadAvatar img').attr("src", img.src);
 		});
@@ -557,8 +572,11 @@ function loadFileEntry(chosenEntry) {
 									if(filedata.sample[i][ii].protocol_id !== undefined && filedata.sample[i][ii].protocol_id != ""){									
 										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined)
 											post['protocols'][filedata.sample[i][ii].protocol_id] = _protocols[filedata.sample[i][ii].protocol_id]
-										if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
-											post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+										
+										if(_macros[_protocols[filedata.sample[i][ii].protocol_id]] !== undefined){
+											if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
+												post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+										}
 									}
 
 									if(filedata.sample[i][ii].macro_id !== undefined && filedata.sample[i][ii].macro_id != ""){

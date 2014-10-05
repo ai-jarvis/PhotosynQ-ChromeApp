@@ -105,3 +105,7 @@ legend { color:#3094db; font-weight:bold }
 label { color:#494d57 }
 
 td {word-wrap: break-word;}
+
+.panel-default>.panel-heading .badge {background-color:#3094db}
+
+.badge {background-color:#3094db}
