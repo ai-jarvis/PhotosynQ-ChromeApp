@@ -230,7 +230,7 @@ function SelectProject(id) {
 		
 		$('#PlotsContainer').append(html);
 		
-		DatabaseGetImage('project',_projects[id].medium_image_url,function(img){
+		DatabaseGetImage('project',_projects[id].image_url,function(img){
 			$('#ProjectAboutSection').prepend('<img src="'+img.src+'" class="pull-left img-rounded" style="margin-right:10px; width:40%">');
 			
 		});

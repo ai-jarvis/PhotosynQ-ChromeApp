@@ -106,7 +106,7 @@ function GetProjectsFromCache(){
 			$('#ProjectList').empty();	
 			for(var i in _projects){
 				var html = '<a href="#" class="list-group-item" data-value="'+_projects[i].id+'" style="min-height:88px;">';
-				html += '<img class="media-object pull-left" data-url="'+_projects[i].medium_image_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
+				html += '<img class="media-object pull-left" data-url="'+_projects[i].thumb_url+'" src="/img/thumb_missing.png" style="width: 64px; height: 64px; margin-right:4px">'
 				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_projects[i].name+'</h5>';
 				if(_projects[i].description.length > 400)
 					html += '<small class="list-group-item-text">'+_projects[i].description.substring(0, 400)+' ...</small>';
@@ -115,11 +115,9 @@ function GetProjectsFromCache(){
 				html += '</a>';
 				$('#ProjectList').append(html);
 				
-				if(_projects[i].medium_image_url != '/images/medium/missing.png'){
-					DatabaseGetImage('project',_projects[i].medium_image_url,function(img){
-						$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', $(img.img).attr('src'))
-					});
-				}
+				DatabaseGetImage('project',_projects[i].thumb_url,function(img){
+					$('#ProjectList > a img[data-url="'+img.url+'"]').attr('src', img.src)
+				});
 			}
 
 			$('#ProjectTab .panel-heading .badge').text(
@@ -158,7 +156,8 @@ function GetProjectsFromDB(token,email){
 							'custom_fields': tmp[i].custom_fields,
 							'directions_to_collaborators': tmp[i].directions_to_collaborators,
 							'lead': JSON.parse(tmp[i].plead),
-							'medium_image_url': tmp[i].medium_image_url,
+							'image_url': tmp[i].photo.large.url,
+							'thumb_url': tmp[i].photo.thumb.url,
 							'description': tmp[i].description,
 							'protocols_ids': tmp[i].protocols_ids,
 							'url': tmp[i].purl,
@@ -202,37 +201,36 @@ function GetProtocolsFromCache(){
 			}
 			
 			$('#PhotosynQProtocolsList').empty();	
+			var html = "";
 			for(var i in _protocols){
-					var html = '<a href="#" class="list-group-item" data-value="'+i+'">';
-					html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_protocols[i].name+'</h5>';
-					html += '<small class="list-group-item-text">'+_protocols[i].description+'</small>';
-					html += '</a>';
-				$('#PhotosynQProtocolsList').append(html);
+				var pre_selected = _protocols[i].pre_selected ? 1 : 0;
+				html += '<a href="#" class="list-group-item" data-value="'+i+'" data-preselect="'+pre_selected+'">';
+				html += '<h5 class="list-group-item-heading" style="word-wrap:break-word;">'+_protocols[i].name+'</h5>';
+				html += '<small class="list-group-item-text">'+_protocols[i].description+'</small>';
+				html += '</a>';
 			}
+			$('#PhotosynQProtocolsList').append(html);
+
+			// Sort by preselect
+			var $sorta = $('#PhotosynQProtocolsList a');
+			$sorta.sort(function(a,b){
+				var an = a.getAttribute('data-preselect'),
+					bn = b.getAttribute('data-preselect');
+
+				if(an > bn)
+					return -1;
+				
+				if(an < bn)
+					return 1;
+				
+				return 0;
+			});
+
+			$sorta.detach().appendTo($('#PhotosynQProtocolsList'));
 
 		}
 		else{
 			WriteMessage('No Protocols cached. Connect to the internet to update your list.','warning')
-		}
-		
-		if(response['cached_userprotocols'] !== undefined){
-			try {
-				_userprotocols = JSON.parse(response['cached_userprotocols']);
-			} catch (e) {
-				RemoveFromStorage('cached_userprotocols');
-				WriteMessage('Cached user protocols have wrong format','danger');
-				return;
-			}
-
-			$('#UserProtocolsList').empty();	
-			for(var i in _protocols){
-					var html = '<a href="#" class="list-group-item" data-value="user_'+i+'">';
-					html += '<h4 class="list-group-item-heading" style="word-wrap:break-word;"><i class="fa fa-user text-muted"></i> '+_protocols[i].name+'</h4>';
-					html += '<p class="list-group-item-text">'+_protocols[i].description+'</p>';
-					html += '</a>';
-				$('#UserProtocolsList').append(html);
-			}
-			
 		}
 
 		$('#QuickMeasurementTab .panel-heading .badge').text(
@@ -267,6 +265,7 @@ function GetProtocolsFromDB(token,email){
 							'id':tmp[i].id,
 							'name':tmp[i].name,
 							'slug':tmp[i].slug,
+							'pre_selected':tmp[i].pre_selected,
 							'macro_id':tmp[i].macro_id,
 							'description':tmp[i].description,
 							'protocol_json':tmp[i].protocol_json2
