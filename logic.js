@@ -176,6 +176,7 @@ function onCharRead(readInfo) {
 	if(_dataRead.match(/({\"pwr_off":"HIGH\"}\r\n)/gi)){
 		_dataRead = '';
 		_MeasurementType = 'BackgroundBatteryCheck';
+		WriteMessage('Battery power switched off.','warning');
 		chrome.serial.send(connectionId, str2ab('1004+'), function(){});
 		return;
 	}
@@ -208,6 +209,17 @@ function onCharRead(readInfo) {
 			}
 			catch(e){}	
 		}
+	}
+
+	// Capture measurement interrupting events
+	// =======================================================================================	
+	if(_dataRead.match(/(note\":\"\s?)$/i)){
+		$('#ModalDialogUserLabel').html('Measurement Notes');
+		$('#ModalDialogUser .modal-body').html('<label>Take your notes</label><textarea class="form-control"></textarea>');
+		$('#ModalDialogUserCancel').val('');
+		$('#ModalDialogUserOK').val('+');
+		$('#ModalDialogUser').modal('show');
+		$('#ModalDialogUserOK, #ModalDialogUserCancel').prop('disabled', false);
 	}
 	
 	// Capture the end of the measurement
@@ -424,6 +436,8 @@ onload = function() {
 
 	$('#ModalDialogUserOK').on('click',function(){
 		var OKValue = $('#ModalDialogUserOK').val();
+		if($('#ModalDialogUser .modal-body textarea').length == 1)
+			OKValue = $('#ModalDialogUser .modal-body textarea').val() + '+';
 		if(OKValue != ""){
 			SendLongStrings(OKValue);
 			WriteMessage('Data submitted to device.','success');

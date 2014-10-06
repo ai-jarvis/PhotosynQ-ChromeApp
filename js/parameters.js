@@ -82,6 +82,19 @@ var parameters = [
 	'value':0,
 	'advanced':false
 	},
+	{
+	'name':'note',
+	'label':'Measurement notes',
+	'title':'Add notes to your current measurement, before or after it is done',
+	'type':'int',
+	'group':'',
+	'range': [0,1],
+	'input_type': 'radio',
+	'input_label': ['beginning','end'],
+	'input_title': ['before measurement','after measurement'],
+	'value':0,
+	'advanced':false
+	},
 	// MAIN GROUP
 	{	
 	'name':'pulsesize',
