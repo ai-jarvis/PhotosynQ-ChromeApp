@@ -1461,7 +1461,7 @@ function remove(arr, item) {
 function DiscardMeasurement(){
 	chrome.power.releaseKeepAwake();
 	EnableInputs();
-	$('#MainDisplayContainer .panel-body').prop('contenteditable', false);
+	$('#SubDisplayContainer').prop('contenteditable', false);
 	$('#MeasurementMenu, #SaveMeasurementToFile, #SaveMeasurementToDB, #ToDeviceBtn').hide();
 	$('#PlotsContainer,#TransientPlotsContainer').empty();
 	$('#TransientPlotsContainer').css('min-height','0px');
