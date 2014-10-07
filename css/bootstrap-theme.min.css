@@ -108,4 +108,11 @@ td {word-wrap: break-word;}
 
 .panel-default>.panel-heading .badge {background-color:#3094db}
 
-.badge {background-color:#3094db}
+.progress {
+	border-radius: 10px;
+}
+
+.progress-bar {
+	background-color: #f37351;
+	background-image: linear-gradient(to bottom, #f37351 0, #F75B32 100%);
+}
