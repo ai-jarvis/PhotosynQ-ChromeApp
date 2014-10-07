@@ -497,15 +497,17 @@ onload = function() {
 		// Total pulses
 		var pulses = 0
 		for(i in json){
-			pulses += MathMEAN(json[i].pulses);
+			if(json[i].pulses !== undefined)
+				pulses += MathMEAN(json[i].pulses);
 		}
-		
+
 		if(pulses > 10000)
 			return false;
 			
 		var series = []
 		var series_environment =[];
 		var series_plotbands = [];
+		var plot_title = false;
 		if(json.length > 0){
 			protocols_json = json;
 			var time = 0
@@ -525,7 +527,10 @@ onload = function() {
 			
 			/* Loop through the measurements */
 			for(m=0;m<measurements;m++){
-			
+				
+				if(pulses > 0 && m > 0)
+					continue;
+
 				/* Loop through the protocols in each measurement */
 				for(prot in protocols_json){
 					json = protocols_json[prot];
@@ -679,6 +684,19 @@ onload = function() {
 			}
 		}
 
+			if(pulses > 0){
+				if(measurements > 1){
+					plot_title = 'x' + measurements
+					if(time < 6e+7)
+						plot_title += ' (~' + MathROUND(( (time * measurements) / 1e+6) , 2) + ' s)'
+					else if(time <= 6e+7 && time < 3.6e+9)
+						plot_title += ' (~' + MathROUND(((time * measurements) / 6e+7), 2) + ' m)'
+					else if(time <= 3.6e+9 && time < 8.64e+10)
+						plot_title += ' (~' + MathROUND(((time * measurements) / 3.6e+9), 2) + ' h)'
+					else if(time <= 8.64e+10)
+						plot_title += ' (~' + MathROUND(((time * measurements) / 8.64e+10), 2) + ' h)'
+				}
+			}
 
 		/* Adding environmental parameters to the plot */
 		var series_final = [];
@@ -706,6 +724,9 @@ onload = function() {
 			},
 			title: {
 				text: false
+			},
+			subtitle: {
+				text: plot_title
 			},
 			xAxis: [{
 				labels: {
