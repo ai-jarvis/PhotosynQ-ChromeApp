@@ -619,7 +619,7 @@ onload = function() {
 	// Cache Update events
 	// ===============================================================================================
 	document.getElementById('AppSynqBtn').addEventListener('click', function(e){
-		if(e.shiftKey) {
+		if(e.altKey) {
        		chrome.storage.local.clear(function(){
  				DatabaseSignOff();
  				chrome.storage.local.getBytesInUse('cached_projects', function(response){
