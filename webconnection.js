@@ -127,6 +127,7 @@ function GetProjectsFromCache(){
 			chrome.storage.local.getBytesInUse('cached_projects', function(response){
 				$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 			});
+
 		}
 		else{
 			WriteMessage('No projects cached. Connect to the internet to update your list.','warning')
@@ -241,6 +242,12 @@ function GetProtocolsFromCache(){
 			$('#ProtocolStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 		});
 		
+		// Update Protocols in Protocolcreator
+		//----------------------------------------------------------------------------------------
+		var ProtocolWindow = chrome.app.window.get('protocolcreate');
+		if(ProtocolWindow !== null)
+			ProtocolWindow.contentWindow.postMessage({'db':_protocols,'macros':_macros}, '*');
+		
 	});
 	return false;
 }
@@ -310,6 +317,12 @@ function GetMacrosFromCache(){
 			chrome.storage.local.getBytesInUse('cached_macros', function(response){
 				$('#MacroStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 			});			
+
+			// Update Macros for Macro creation tool
+			//----------------------------------------------------------------------------------------
+			var MacroWindow = chrome.app.window.get('macro');
+			if(MacroWindow !== null)
+				MacroWindow.contentWindow.postMessage({'macros':_macros}, '*');
 			
 		}	
 		else{
@@ -350,7 +363,9 @@ function GetMacrosFromDB(token,email){
 				WriteMessage(tmp.error,'danger');
 				return;
 			}
-			SaveToStorage('cached_macros', _macros,function(){});
+			SaveToStorage('cached_macros', _macros,function(){
+				GetMacrosFromCache();
+			});
 			WriteMessage('Macro list updated','info');
 			$('#CurrentInternetConnectionIndicator').removeClass('fa-cloud-download').addClass('fa-cloud');
 		}
