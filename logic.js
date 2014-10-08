@@ -648,6 +648,9 @@ onload = function() {
 		if(e.altKey) {
        		chrome.storage.local.clear(function(){
  				DatabaseSignOff();
+
+				$('#MuteAllNotifications small').html('<i class="fa fa-toggle-on"></i> Show popup notifications');
+ 
  				chrome.storage.local.getBytesInUse('cached_projects', function(response){
 					$('#ProjectStorageQuota').text((response/Math.pow(2,20)).toFixed(2)+' MB')
 				});
