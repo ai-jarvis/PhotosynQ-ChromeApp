@@ -167,7 +167,7 @@ onload = function() {
 		$('#parameter_used li').each(function(i,k){
 			
 			// Environmental parameter control
-			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature'){
+			if($(k).attr('id') == 'light_intensity' || $(k).attr('id') == 'relative_humidity'|| $(k).attr('id') == 'co2' || $(k).attr('id') == 'temperature' || $(k).attr('id') == 'contactless_temperature' || $(k).attr('id') == 'note'){
 				if(json['environmental'] === undefined)
 					json['environmental'] = []
 				json['environmental'].push([$(k).find( "input:checked").attr('name'),parseInt($(k).find( "input:checked").attr('value'))]);
