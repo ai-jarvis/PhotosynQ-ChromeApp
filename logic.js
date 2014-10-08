@@ -193,7 +193,8 @@ function onCharRead(readInfo) {
 
 	// Add str to local memory
 	// =======================================================================================
-	SaveOutputToStorage(_dataRead);
+	if((_MeasurementType == 'database' || _MeasurementType == 'quick' || _MeasurementType == 'console') && _MeasurementType != null)
+		SaveOutputToStorage(_dataRead);
 		
 	$('#RawOutputTextarea').text(_dataRead);
 	
