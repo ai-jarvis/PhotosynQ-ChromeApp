@@ -26,7 +26,28 @@ function SaveOutputToStorage(data){
 // ===============================================================================================
 function GetOutputFROMStorage(){
 	chrome.storage.local.get('measurement_tmp', function(result){
-		console.log(result['measurement_tmp']);
+		
+		if(result['measurement_tmp'] === undefined)
+			WriteMessage('There is no measurement saved','warning')
+		else{
+			ResultString = "";
+	
+			try {
+			  ResultString = JSON.parse(result['measurement_tmp']);
+			} catch (e) {
+			  	DiscardMeasurement();
+			  	$('#SubNavigation a[href="#ProjectTab"]').tab('show');
+			  	$('#MainDisplayContainer').css('background-image', 'none');
+				$('#SubDisplayContainer').prop('contenteditable', true);
+				$('#PlotsContainer').append(result['measurement_tmp'].replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>$2'));
+				WriteMessage('Data was corrupted, please fix manually.','danger');
+				return;
+			}		
+			$('#PlotsContainer').empty();
+			$('#SaveMeasurementToFile').show();
+			$('#MeasurementMenu').show();
+			plot(ResultString);
+		}
 	});
 }
 

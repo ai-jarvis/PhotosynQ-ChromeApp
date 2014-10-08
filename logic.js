@@ -421,6 +421,8 @@ onload = function() {
 		$('#ModalDialogUser').modal('show');
 	});
 
+	document.getElementById('DataRecoverBtn').addEventListener('click', GetOutputFROMStorage );
+
 
 	// User input dialogs
 	// ===============================================================================================
@@ -1311,6 +1313,7 @@ function RunMeasurement(protocol,mtype){
 	// Check protocol and submit
 	setStatus('MultiSpeQ Busy','danger');
 	$('#DeviceConnectionState').removeClass().addClass('fa fa-refresh fa-spin text-success');
+	RemoveFromStorage('measurement_tmp');
 	ResultString = null;
 	MacroArray = null;
 	_MeasurementType = mtype;
@@ -1481,7 +1484,6 @@ function DiscardMeasurement(){
 	_dataRead = '';
 	_terminateMeasurement = false;
 	_initialTime = 0;
-	RemoveFromStorage('measurement_tmp');
 }
 
 
