@@ -570,15 +570,16 @@ function loadFileEntry(chosenEntry) {
 							for(i in filedata.sample){
 								for(ii in filedata.sample[i]){
 									if(filedata.sample[i][ii].protocol_id !== undefined && filedata.sample[i][ii].protocol_id != ""){									
-										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined)
+										if(_protocols[filedata.sample[i][ii].protocol_id] !== undefined){
 											post['protocols'][filedata.sample[i][ii].protocol_id] = _protocols[filedata.sample[i][ii].protocol_id]
-										
-										if(_macros[_protocols[filedata.sample[i][ii].protocol_id]] !== undefined){
-											if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
-												post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+
+											if(_protocols[filedata.sample[i][ii].protocol_id].macro_id !== undefined){
+												if(_macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id] !== undefined)
+													post['macros'][_protocols[filedata.sample[i][ii].protocol_id].macro_id] = _macros[_protocols[filedata.sample[i][ii].protocol_id].macro_id]
+											}									
 										}
 									}
-
+									
 									if(filedata.sample[i][ii].macro_id !== undefined && filedata.sample[i][ii].macro_id != ""){
 										if(_macros[filedata.sample[i][ii].macro_id].id !== undefined)
 											post['macros'][filedata.sample[i][ii].macro_id] = _macros[filedata.sample[i][ii].macro_id]
