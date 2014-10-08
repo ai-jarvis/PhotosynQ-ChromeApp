@@ -211,15 +211,38 @@ function onCharRead(readInfo) {
 		}
 	}
 
-	// Capture measurement interrupting events
+	// Capture interrupt for adding notes to your measurement
 	// =======================================================================================	
 	if(_dataRead.match(/(note\":\"\s?)$/i)){
-		$('#ModalDialogUserLabel').html('Measurement Notes');
-		$('#ModalDialogUser .modal-body').html('<label>Take your notes</label><textarea class="form-control"></textarea>');
-		$('#ModalDialogUserCancel').val('');
+		$('#ModalDialogUser .modal-body').html('<h4>Measurement Notes</h4><textarea class="form-control"></textarea>');
+		$('#ModalDialogUserCancel').val('+');
 		$('#ModalDialogUserOK').val('+');
 		$('#ModalDialogUser').modal('show');
-		$('#ModalDialogUserOK, #ModalDialogUserCancel').prop('disabled', false);
+		$('#ModalDialogUserOK, #ModalDialogUserCancel').prop('disabled', false).show();
+	}
+
+	// Capture interrupt for adding notes to your measurement
+	// =======================================================================================	
+	if(_dataRead.match(/\[\"(alert|prompt|confirm)\",\"([\d\w\s]*)\",\"?\s?$/i)){
+		var match = _dataRead.match(/\[\"(alert|prompt|confirm)\",\"([\d\w\s]*)\",\"?\s?$/i)
+		$('#ModalDialogUserOK, #ModalDialogUserCancel').hide()
+		if(match[2] !== undefined)
+			$('#ModalDialogUser .modal-body').html('<h4>' + match[2] + '</h4>');
+		else
+			$('#ModalDialogUser .modal-body').html('<h4>User Input</h4>');
+			
+		if(match[1] == "prompt" || match[1] == "confirm")
+			$('#ModalDialogUserCancel').val('1+').prop('disabled', false).show();
+		
+		if(match[1] == "alert" || match[1] == "confirm")
+			$('#ModalDialogUserOK').val('-1+').prop('disabled', false).show();
+
+		if(match[1] == "prompt"){
+			$('#ModalDialogUser .modal-body').append('<textarea class="form-control"></textarea>');
+			$('#ModalDialogUserOK').val('+').prop('disabled', false).show();
+		}
+	
+		$('#ModalDialogUser').modal('show');
 	}
 	
 	// Capture the end of the measurement
@@ -432,7 +455,7 @@ onload = function() {
 			chrome.serial.send(connectionId, str2ab(CancelValue), function(){});
 		}
 		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('')
-		$('#ModalDialogUserLabel, #ModalDialogUser .modal-body').empty();
+		$('#ModalDialogUser .modal-body').empty();
 		$('#ToDeviceBtn').hide();
 	});
 
@@ -444,7 +467,8 @@ onload = function() {
 			SendLongStrings(OKValue);
 			WriteMessage('Data submitted to device.','success');
 		}
-		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('')
+		$('#ModalDialogUserOK,#ModalDialogUserCancel').val('');
+		$('#ModalDialogUser .modal-body').empty();
 	});
 
 	document.getElementById('ToggleAllGraphsBtn').addEventListener('click', function(){
